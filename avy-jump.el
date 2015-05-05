@@ -129,16 +129,17 @@ When PRED is non-nil, it's a filter for matching point positions."
                      (window-list)
                    (list (selected-window))))
       (with-selected-window wnd
-        (let ((we (or end (window-end (selected-window) t))))
-          (save-excursion
-            (goto-char (or beg (window-start)))
-            (while (re-search-forward regex we t)
-              (unless (get-char-property (point) 'invisible)
-                (when (or (null pred)
-                          (funcall pred))
-                  (push (cons (cons (match-beginning 0)
-                                    (match-end 0))
-                              wnd) candidates))))))))
+        (unless (memq major-mode '(image-mode doc-view-mode))
+          (let ((we (or end (window-end (selected-window) t))))
+            (save-excursion
+              (goto-char (or beg (window-start)))
+              (while (re-search-forward regex we t)
+                (unless (get-char-property (point) 'invisible)
+                  (when (or (null pred)
+                            (funcall pred))
+                    (push (cons (cons (match-beginning 0)
+                                      (match-end 0))
+                                wnd) candidates)))))))))
     (nreverse candidates)))
 
 (defvar avy--overlay-offset 0
