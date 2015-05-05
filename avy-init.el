@@ -20,8 +20,7 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 (add-to-list 'load-path default-directory)
-(mapc #'byte-compile-file '("avy.el" "avy-jump.el" "ace-window.el"))
-(require 'ace-window)
+(mapc #'byte-compile-file '("avy.el" "avy-jump.el"))
 (require 'avy-jump)
-(global-set-key (kbd "C-c j") 'avi-goto-char)
-(global-set-key (kbd "C-'") 'avi-goto-char-2)
+(global-set-key (kbd "C-c j") 'avy-goto-char)
+(global-set-key (kbd "C-'") 'avy-goto-char-2)
