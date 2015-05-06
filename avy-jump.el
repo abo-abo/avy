@@ -39,24 +39,20 @@
 
 (defcustom avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
   "Keys for jumping.")
-(define-obsolete-variable-alias 'avi-keys 'avy-keys "0.1.0")
 
 (defcustom avy-background nil
   "When non-nil, a gray background will be added during the selection."
   :type 'boolean)
-(define-obsolete-variable-alias 'avi-background 'avy-background "0.1.0")
 
 (defcustom avy-word-punc-regexp "[!-/:-@[-`{-~]"
   "Regexp of punctuation characters that should be matched when calling
 `avy-goto-word-1' command. When nil, punctuation chars will not be matched.
 
 \"[!-/:-@[-`{-~]\" will match all printable punctuation chars.")
-(define-obsolete-variable-alias 'avi-word-punc-regexp 'avy-word-punc-regexp "0.1.0")
 
 (defface avy-lead-face
-    '((t (:foreground "white" :background "#e52b50")))
+  '((t (:foreground "white" :background "#e52b50")))
   "Face used for the leading chars.")
-(define-obsolete-face-alias 'avi-lead-face 'avy-lead-face "0.1.0")
 
 (defface avy-background-face
   '((t (:foreground "gray40")))
@@ -75,7 +71,6 @@ POS is either a position or (BEG . END)."
         (setq pt (car pt)))
       (unless (= pt (point)) (push-mark))
       (goto-char pt))))
-(define-obsolete-function-alias 'avi--goto 'avy--goto "0.1.0")
 
 (defun avy--process (candidates overlay-fn)
   "Select one of CANDIDATES using `avy-read'."
@@ -91,7 +86,6 @@ POS is either a position or (BEG . END)."
                     overlay-fn
                     #'avy--remove-leading-chars)))
     (avy--done)))
-(define-obsolete-function-alias 'avi--process 'avy--process "0.1.0")
 
 (defvar avy--overlays-back nil
   "Hold overlays for when `avy-background' is t.")
@@ -118,7 +112,6 @@ POS is either a position or (BEG . END)."
 (defcustom avy-all-windows t
   "When non-nil, loop though all windows for candidates."
   :type 'boolean)
-(define-obsolete-variable-alias 'avi-all-windows 'avy-all-windows "0.1.0")
 
 (defun avy--regex-candidates (regex &optional wnd beg end pred)
   "Return all elements that match REGEX in WND.
@@ -182,7 +175,6 @@ LEAF is ((BEG . END) . WND)."
    (if (consp leaf)
        (cdr leaf)
      (selected-window))))
-(define-obsolete-function-alias 'avi--overlay-pre 'avy--overlay-pre "0.1.0")
 
 (defun avy--overlay-at (path leaf)
   "Create an overlay with STR at LEAF.
@@ -205,7 +197,6 @@ LEAF is ((BEG . END) . WND)."
       (overlay-put ol 'window wnd)
       (overlay-put ol 'display str)
       (push ol avy--overlays-lead))))
-(define-obsolete-function-alias 'avi--overlay-at 'avy--overlay-at "0.1.0")
 
 (defun avy--overlay-post (path leaf)
   "Create an overlay with STR at LEAF.
@@ -223,7 +214,6 @@ LEAF is ((BEG . END) . WND)."
    (if (consp leaf)
        (cdr leaf)
      (selected-window))))
-(define-obsolete-function-alias 'avi--overlay-post 'avy--overlay-post "0.1.0")
 
 (defun avy--generic-jump (regex flip)
   "Jump to REGEX.
@@ -247,7 +237,6 @@ When ARG is non-nil, flip the window scope."
   (interactive "P")
   (avy--generic-jump
    (string (read-char "char: ")) arg))
-(define-obsolete-function-alias 'avi-goto-char 'avy-goto-char "0.1.0")
 
 ;;;###autoload
 (defun avy-goto-char-2 (&optional arg)
@@ -259,7 +248,6 @@ When ARG is non-nil, flip the window scope."
     (read-char "char 1: ")
     (read-char "char 2: "))
    arg))
-(define-obsolete-function-alias 'avi-goto-char-2 'avy-goto-char-2 "0.1.0")
 
 ;;;###autoload
 (defun avy-isearch ()
@@ -272,7 +260,6 @@ When ARG is non-nil, flip the window scope."
           (avy--process candidates #'avy--overlay-post)))
     (isearch-done)
     (avy--goto candidate)))
-(define-obsolete-function-alias 'avi-isearch 'avy-isearch "0.1.0")
 
 ;;;###autoload
 (defun avy-goto-word-0 (arg)
@@ -280,7 +267,6 @@ When ARG is non-nil, flip the window scope."
   (interactive "P")
   (let ((avy-keys (number-sequence ?a ?z)))
     (avy--generic-jump "\\b\\sw" arg)))
-(define-obsolete-function-alias 'avi-goto-word-0 'avy-goto-word-0 "0.1.0")
 
 ;;;###autoload
 (defun avy-goto-subword-0 (&optional arg)
@@ -298,7 +284,6 @@ When ARG is non-nil, flip the window scope."
         (cl-incf (caar x))))
     (avy--goto
      (avy--process candidates #'avy--overlay-pre))))
-(define-obsolete-function-alias 'avi-goto-subword-0 'avy-goto-subword-0 "0.1.0")
 
 ;;;###autoload
 (defun avy-goto-word-1 ()
@@ -315,7 +300,6 @@ Read one char with which the word should start."
                          str)))))
     (avy--goto
      (avy--process candidates #'avy--overlay-pre))))
-(define-obsolete-function-alias 'avi-goto-word-1 'avy-goto-word-1 "0.1.0")
 
 (defun avy--line (&optional arg)
   "Select line in current window."
@@ -347,7 +331,6 @@ Read one char with which the word should start."
   "Jump to a line start in current buffer."
   (interactive "P")
   (avy--goto (avy--line arg)))
-(define-obsolete-function-alias 'avi-goto-line 'avy-goto-line "0.1.0")
 
 ;;;###autoload
 (defun avy-copy-line (arg)
@@ -365,7 +348,6 @@ ARG lines can be used."
           (move-end-of-line arg)
           (point)))
        "\n"))))
-(define-obsolete-function-alias 'avi-copy-line 'avy-copy-line "0.1.0")
 
 ;;;###autoload
 (defun avy-move-line (arg)
@@ -382,7 +364,6 @@ ARG lines can be used."
       (insert
        (current-kill 0)
        "\n"))))
-(define-obsolete-function-alias 'avi-move-line 'avy-move-line "0.1.0")
 
 ;;;###autoload
 (defun avy-copy-region ()
@@ -400,7 +381,28 @@ ARG lines can be used."
           (goto-char end)
           (line-end-position)))
        pad))))
+
+(define-obsolete-variable-alias 'avi-keys 'avy-keys "0.1.0")
+(define-obsolete-variable-alias 'avi-background 'avy-background "0.1.0")
+(define-obsolete-variable-alias 'avi-word-punc-regexp 'avy-word-punc-regexp "0.1.0")
+(define-obsolete-face-alias 'avi-lead-face 'avy-lead-face "0.1.0")
+(define-obsolete-function-alias 'avi--goto 'avy--goto "0.1.0")
+(define-obsolete-function-alias 'avi--process 'avy--process "0.1.0")
+(define-obsolete-variable-alias 'avi-all-windows 'avy-all-windows "0.1.0")
+(define-obsolete-function-alias 'avi--overlay-pre 'avy--overlay-pre "0.1.0")
+(define-obsolete-function-alias 'avi--overlay-at 'avy--overlay-at "0.1.0")
+(define-obsolete-function-alias 'avi--overlay-post 'avy--overlay-post "0.1.0")
+(define-obsolete-function-alias 'avi-goto-char 'avy-goto-char "0.1.0")
+(define-obsolete-function-alias 'avi-goto-char-2 'avy-goto-char-2 "0.1.0")
+(define-obsolete-function-alias 'avi-isearch 'avy-isearch "0.1.0")
+(define-obsolete-function-alias 'avi-goto-word-0 'avy-goto-word-0 "0.1.0")
+(define-obsolete-function-alias 'avi-goto-subword-0 'avy-goto-subword-0 "0.1.0")
+(define-obsolete-function-alias 'avi-goto-word-1 'avy-goto-word-1 "0.1.0")
+(define-obsolete-function-alias 'avi-goto-line 'avy-goto-line "0.1.0")
+(define-obsolete-function-alias 'avi-copy-line 'avy-copy-line "0.1.0")
+(define-obsolete-function-alias 'avi-move-line 'avy-move-line "0.1.0")
 (define-obsolete-function-alias 'avi-copy-region 'avy-copy-region "0.1.0")
+(define-obsolete-function-alias 'avi--regex-candidates 'avy--regex-candidates "0.1.0")
 
 (provide 'avy-jump)
 
