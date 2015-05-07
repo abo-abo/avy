@@ -6,12 +6,73 @@
 
 ## Command overview
 
-You can bind some of these useful commands in your config:
+You can bind some of these useful commands in your config.
 
-- `avy-goto-char`: input one char, jump to it with a tree.
-- `avy-goto-char-2`: input two consecutive chars, jump to the first one with a tree.
-- `avy-goto-word-0`: input zero chars, jump to word start with a tree.
-- `avy-goto-word-1`: input one char at word start, jump to word start with a tree.
-- `avy-goto-line`: input zero chars, jump to line start with a tree.
+### `avy-goto-char`
+
+> Input one char, jump to it with a tree.
+
+```elisp
+(global-set-key (kbd "π") 'avy-goto-char)
+```
+
+After <kbd>πb</kbd>:
+
+![avy-goto-char](http://oremacs.com/download/avi-goto-char.png)
+
+### `avy-goto-char-2`
+
+> Input two consecutive chars, jump to the first one with a tree.
+
+The advantage over the previous one is less candidates for the tree search. And it's not too inconvenient to enter two consecutive chars instead of one.
+
+```elisp
+(global-set-key (kbd "C-'") 'avy-goto-char-2)
+```
+
+After <kbd>C-' bu</kbd>:
+
+![avy-goto-char-2](http://oremacs.com/download/avi-goto-char-2.png)
+
+### `avy-goto-line`
+
+> Input zero chars, jump to a line start with a tree.
+
+```elisp
+(global-set-key (kbd "M-g f") 'avy-goto-line)
+```
+
+After <kbd>M-g f</kbd>:
+
+![avy-goto-line](http://oremacs.com/download/avi-goto-line.png)
+
+### `avy-goto-word-1`
+
+> Input one char at word start, jump to a word start with a tree.
+
+```elisp
+(global-set-key (kbd "M-g w") 'avy-goto-word-1)
+```
+
+After <kbd>M-g wb</kbd>:
+
+![avy-goto-word-1](http://oremacs.com/download/avi-goto-word-1.png)
+
+### `avy-goto-word-0`
+
+> Input zero chars, jump to a word start with a tree.
+
+Compared to `avy-goto-word-1`, there are a lot more candidates. But at a least there's not need to input the initial char.
+
+```elisp
+(global-set-key (kbd "M-g e") 'avy-goto-word-0)
+```
+
+After <kbd>M-g e</kbd>:
+
+![avy-goto-word-0](http://oremacs.com/download/avi-goto-word-0.png)
+
+
+### Other commands
 
 There are some more commands which you can explore yourself by looking at the code.
