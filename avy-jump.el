@@ -339,17 +339,18 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                      (window-list)
                    (list (selected-window))))
       (with-selected-window wnd
-        (let ((ws (window-start)))
-          (save-excursion
-            (save-restriction
-              (narrow-to-region ws (window-end (selected-window) t))
-              (goto-char (point-min))
-              (while (< (point) (point-max))
-                (unless (get-char-property
-                         (max (1- (point)) ws) 'invisible)
-                  (push (cons (point) (selected-window))
-                        candidates))
-                (forward-line 1)))))))
+        (unless (memq major-mode '(image-mode doc-view-mode))
+          (let ((ws (window-start)))
+            (save-excursion
+              (save-restriction
+                (narrow-to-region ws (window-end (selected-window) t))
+                (goto-char (point-min))
+                (while (< (point) (point-max))
+                  (unless (get-char-property
+                           (max (1- (point)) ws) 'invisible)
+                    (push (cons (point) (selected-window))
+                          candidates))
+                  (forward-line 1))))))))
     (avy--process (nreverse candidates) #'avy--overlay-pre)))
 
 ;;;###autoload
