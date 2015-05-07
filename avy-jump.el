@@ -59,6 +59,23 @@
   "Face for whole window background during selection.")
 
 ;;* Internals
+(defcustom avy-all-windows t
+  "When non-nil, loop though all windows for candidates."
+  :type 'boolean)
+
+(defmacro avy-dowindows (flip &rest body)
+  "Depending on FLIP and `avy-all-windows' run BODY in each or selected window."
+  (declare (indent 1))
+  `(let ((avy-all-windows (if ,flip
+                              (not avy-all-windows)
+                            avy-all-windows)))
+     (dolist (wnd (if avy-all-windows
+                      (window-list)
+                    (list (selected-window))))
+       (with-selected-window wnd
+         (unless (memq major-mode '(image-mode doc-view-mode))
+           ,@body)))))
+
 (defun avy--goto (x)
   "Goto X.
 X is (POS . WND)
@@ -109,30 +126,22 @@ POS is either a position or (BEG . END)."
   (setq avy--overlays-back nil)
   (avy--remove-leading-chars))
 
-(defcustom avy-all-windows t
-  "When non-nil, loop though all windows for candidates."
-  :type 'boolean)
-
 (defun avy--regex-candidates (regex &optional wnd beg end pred)
   "Return all elements that match REGEX in WND.
 Each element of the list is ((BEG . END) . WND)
 When PRED is non-nil, it's a filter for matching point positions."
   (let (candidates)
-    (dolist (wnd (if avy-all-windows
-                     (window-list)
-                   (list (selected-window))))
-      (with-selected-window wnd
-        (unless (memq major-mode '(image-mode doc-view-mode))
-          (let ((we (or end (window-end (selected-window) t))))
-            (save-excursion
-              (goto-char (or beg (window-start)))
-              (while (re-search-forward regex we t)
-                (unless (get-char-property (point) 'invisible)
-                  (when (or (null pred)
-                            (funcall pred))
-                    (push (cons (cons (match-beginning 0)
-                                      (match-end 0))
-                                wnd) candidates)))))))))
+    (avy-dowindows nil
+      (let ((we (or end (window-end (selected-window) t))))
+        (save-excursion
+          (goto-char (or beg (window-start)))
+          (while (re-search-forward regex we t)
+            (unless (get-char-property (point) 'invisible)
+              (when (or (null pred)
+                        (funcall pred))
+                (push (cons (cons (match-beginning 0)
+                                  (match-end 0))
+                            wnd) candidates)))))))
     (nreverse candidates)))
 
 (defvar avy--overlay-offset 0
@@ -308,49 +317,43 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                    str))))
     (avy--generic-jump regex arg avy-goto-word-style)))
 
+(declare-function subword-backward "subword")
+
 ;;;###autoload
 (defun avy-goto-subword-0 (&optional arg)
   "Jump to a word or subword start.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
-  (let* ((avy-all-windows
-          (if arg
-              (not avy-all-windows)
-            avy-all-windows))
-         (avy-keys (number-sequence ?a ?z))
-         (case-fold-search nil)
-         (candidates (avy--regex-candidates
-                      "\\(\\b\\sw\\)\\|\\(?:[^A-Z]\\([A-Z]\\)\\)")))
-    (dolist (x candidates)
-      (when (> (- (cdar x) (caar x)) 1)
-        (cl-incf (caar x))))
+  (require 'subword)
+  (let ((avy-keys (number-sequence ?a ?z))
+        (case-fold-search nil)
+        candidates)
+    (avy-dowindows arg
+      (let ((ws (window-start)))
+        (save-excursion
+          (goto-char (window-end (selected-window) t))
+          (subword-backward)
+          (while (> (point) ws)
+            (push (cons (point) (selected-window)) candidates)
+            (subword-backward)))))
     (avy--goto
      (avy--process candidates (avy--style-fn avy-goto-word-style)))))
 
 (defun avy--line (&optional arg)
   "Select line in current window."
   (let ((avy-background nil)
-        (avy-all-windows
-         (if arg
-             (not avy-all-windows)
-           avy-all-windows))
         candidates)
-    (dolist (wnd (if avy-all-windows
-                     (window-list)
-                   (list (selected-window))))
-      (with-selected-window wnd
-        (unless (memq major-mode '(image-mode doc-view-mode))
-          (let ((ws (window-start)))
-            (save-excursion
-              (save-restriction
-                (narrow-to-region ws (window-end (selected-window) t))
-                (goto-char (point-min))
-                (while (< (point) (point-max))
-                  (unless (get-char-property
-                           (max (1- (point)) ws) 'invisible)
-                    (push (cons (point) (selected-window))
-                          candidates))
-                  (forward-line 1))))))))
+    (avy-dowindows arg
+      (let ((ws (window-start)))
+        (save-excursion
+          (save-restriction
+            (narrow-to-region ws (window-end (selected-window) t))
+            (goto-char (point-min))
+            (while (< (point) (point-max))
+              (unless (get-char-property
+                       (max (1- (point)) ws) 'invisible)
+                (push (cons (point) (selected-window)) candidates))
+              (forward-line 1))))))
     (avy--process (nreverse candidates) #'avy--overlay-pre)))
 
 ;;;###autoload
