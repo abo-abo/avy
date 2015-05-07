@@ -277,6 +277,7 @@ When ARG is non-nil, flip the window scope."
               (not avy-all-windows)
             avy-all-windows))
          (avy-keys (number-sequence ?a ?z))
+	 (case-fold-search nil)
          (candidates (avy--regex-candidates
                       "\\(\\b\\sw\\)\\|\\(?:[^A-Z]\\([A-Z]\\)\\)")))
     (dolist (x candidates)
