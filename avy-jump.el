@@ -315,12 +315,15 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (let* ((str (string (read-char "char: ")))
-         (regex (if (and avy-word-punc-regexp
-                         (string-match avy-word-punc-regexp str))
-                    str
-                  (concat
-                   "\\b"
-                   str))))
+         (regex (cond ((string= str ".")
+                       "\\.")
+                      ((and avy-word-punc-regexp
+                            (string-match avy-word-punc-regexp str))
+                       str)
+                      (t
+                       (concat
+                        "\\b"
+                        str)))))
     (avy--generic-jump regex arg avy-goto-word-style)))
 
 (declare-function subword-backward "subword")
