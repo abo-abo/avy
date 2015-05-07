@@ -215,39 +215,64 @@ LEAF is ((BEG . END) . WND)."
        (cdr leaf)
      (selected-window))))
 
-(defun avy--generic-jump (regex flip)
+(defun avy--style-fn (style)
+  "Transform STYLE symbol to a style function."
+  (cl-case style
+    (pre #'avy--overlay-pre)
+    (at #'avy--overlay-at)
+    (post #'avy--overlay-post)
+    (t (error "Unexpected style %S" style))))
+
+(defun avy--generic-jump (regex window-flip style)
   "Jump to REGEX.
-When FLIP is non-nil, flip `avy-all-windows'."
+When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
+STYLE determines the leading char overlay style."
   (let ((avy-all-windows
-         (if flip
+         (if window-flip
              (not avy-all-windows)
            avy-all-windows)))
     (avy--goto
      (avy--process
       (avy--regex-candidates
        regex)
-      #'avy--overlay-post))))
+      (avy--style-fn style)))))
+
+(defcustom avy-goto-char-style 'pre
+  "Method of displaying the overlays for `avy-goto-char' and `avy-goto-char-2'."
+  :type '(choice
+          (const :tag "Pre" pre)
+          (const :tag "At" at)
+          (const :tag "Post" post)))
+
+(defcustom avy-goto-word-style 'pre
+  "Method of displaying the overlays for `avy-goto-word-0' and `avy-goto-word-0'."
+  :type '(choice
+          (const :tag "Pre" pre)
+          (const :tag "At" at)
+          (const :tag "Post" post)))
 
 ;;* Commands
 ;;;###autoload
 (defun avy-goto-char (&optional arg)
   "Read one char and jump to it.
-The window scope is determined by `avy-all-windows'.
-When ARG is non-nil, flip the window scope."
+The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy--generic-jump
-   (regexp-quote (string (read-char "char: "))) arg))
+   (regexp-quote (string (read-char "char: ")))
+   arg
+   avy-goto-char-style))
 
 ;;;###autoload
 (defun avy-goto-char-2 (&optional arg)
-  "Read two chars and jump to them in current window.
-When ARG is non-nil, flip the window scope."
+  "Read two consecutive chars and jump to the first one.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy--generic-jump
    (regexp-quote (string
 		  (read-char "char 1: ")
 		  (read-char "char 2: ")))
-   arg))
+   arg
+   avy-goto-char-style))
 
 ;;;###autoload
 (defun avy-isearch ()
@@ -263,44 +288,44 @@ When ARG is non-nil, flip the window scope."
 
 ;;;###autoload
 (defun avy-goto-word-0 (arg)
-  "Jump to a word start."
+  "Jump to a word start.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (let ((avy-keys (number-sequence ?a ?z)))
-    (avy--generic-jump "\\b\\sw" arg)))
+    (avy--generic-jump "\\b\\sw" arg avy-goto-word-style)))
+
+;;;###autoload
+(defun avy-goto-word-1 (&optional arg)
+  "Read one char at word start and jump there.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
+  (interactive "P")
+  (let* ((str (string (read-char "char: ")))
+         (regex (if (and avy-word-punc-regexp
+                         (string-match avy-word-punc-regexp str))
+                    str
+                  (concat
+                   "\\b"
+                   str))))
+    (avy--generic-jump regex arg avy-goto-word-style)))
 
 ;;;###autoload
 (defun avy-goto-subword-0 (&optional arg)
-  "Jump to a word or subword start."
+  "Jump to a word or subword start.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (let* ((avy-all-windows
           (if arg
               (not avy-all-windows)
             avy-all-windows))
          (avy-keys (number-sequence ?a ?z))
-	 (case-fold-search nil)
+         (case-fold-search nil)
          (candidates (avy--regex-candidates
                       "\\(\\b\\sw\\)\\|\\(?:[^A-Z]\\([A-Z]\\)\\)")))
     (dolist (x candidates)
       (when (> (- (cdar x) (caar x)) 1)
         (cl-incf (caar x))))
     (avy--goto
-     (avy--process candidates #'avy--overlay-pre))))
-
-;;;###autoload
-(defun avy-goto-word-1 ()
-  "Jump to a word start in current window.
-Read one char with which the word should start."
-  (interactive)
-  (let* ((str (string (read-char "char: ")))
-         (candidates (avy--regex-candidates
-                      (if (and avy-word-punc-regexp
-                               (string-match avy-word-punc-regexp str))
-                          str
-                        (concat
-                         "\\b"
-                         str)))))
-    (avy--goto
-     (avy--process candidates #'avy--overlay-pre))))
+     (avy--process candidates (avy--style-fn avy-goto-word-style)))))
 
 (defun avy--line (&optional arg)
   "Select line in current window."
