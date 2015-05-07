@@ -92,16 +92,16 @@ POS is either a position or (BEG . END)."
 (defun avy--process (candidates overlay-fn)
   "Select one of CANDIDATES using `avy-read'."
   (unwind-protect
-       (cl-case (length candidates)
-         (0
-          nil)
-         (1
-          (car candidates))
-         (t
-          (avy--make-backgrounds (list (selected-window)))
-          (avy-read (avy-tree candidates avy-keys)
-                    overlay-fn
-                    #'avy--remove-leading-chars)))
+      (cl-case (length candidates)
+	(0
+	 nil)
+	(1
+	 (car candidates))
+	(t
+	 (avy--make-backgrounds (list (selected-window)))
+	 (avy-read (avy-tree candidates avy-keys)
+		   overlay-fn
+		   #'avy--remove-leading-chars)))
     (avy--done)))
 
 (defvar avy--overlays-back nil
@@ -157,16 +157,17 @@ When PRED is non-nil, it's a filter for matching point positions."
 
 (defun avy--overlay (str pt wnd)
   "Create an overlay with STR at PT in WND."
-  (let* ((pt (+ pt avy--overlay-offset))
-         (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
-         (old-str (with-selected-window wnd
-                    (buffer-substring pt (1+ pt)))))
-    (when avy-background
-      (setq old-str (propertize
-                     old-str 'face 'avy-background-face)))
-    (overlay-put ol 'window wnd)
-    (overlay-put ol 'display (concat str old-str))
-    (push ol avy--overlays-lead)))
+  (when (<= (1+ pt) (with-selected-window wnd (point-max)))
+    (let* ((pt (+ pt avy--overlay-offset))
+	   (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
+	   (old-str (with-selected-window wnd
+		      (buffer-substring pt (1+ pt)))))
+      (when avy-background
+	(setq old-str (propertize
+		       old-str 'face 'avy-background-face)))
+      (overlay-put ol 'window wnd)
+      (overlay-put ol 'display (concat str old-str))
+      (push ol avy--overlays-lead))))
 
 (defun avy--overlay-pre (path leaf)
   "Create an overlay with STR at LEAF.
@@ -204,7 +205,9 @@ LEAF is ((BEG . END) . WND)."
         (setq old-str (propertize
                        old-str 'face 'avy-background-face)))
       (overlay-put ol 'window wnd)
-      (overlay-put ol 'display str)
+      (overlay-put ol 'display (if (string= old-str "\n")
+				   (concat str "\n")
+				 str))
       (push ol avy--overlays-lead))))
 
 (defun avy--overlay-post (path leaf)
@@ -267,7 +270,10 @@ STYLE determines the leading char overlay style."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy--generic-jump
-   (regexp-quote (string (read-char "char: ")))
+   (let ((c (read-char "char: ")))
+     (if (= 13 c)
+	 "\n"
+       (regexp-quote (string c))))
    arg
    avy-goto-char-style))
 
