@@ -236,7 +236,7 @@ The window scope is determined by `avy-all-windows'.
 When ARG is non-nil, flip the window scope."
   (interactive "P")
   (avy--generic-jump
-   (string (read-char "char: ")) arg))
+   (regexp-quote (string (read-char "char: "))) arg))
 
 ;;;###autoload
 (defun avy-goto-char-2 (&optional arg)
@@ -244,9 +244,9 @@ When ARG is non-nil, flip the window scope."
 When ARG is non-nil, flip the window scope."
   (interactive "P")
   (avy--generic-jump
-   (string
-    (read-char "char 1: ")
-    (read-char "char 2: "))
+   (regexp-quote (string
+		  (read-char "char 1: ")
+		  (read-char "char 2: ")))
    arg))
 
 ;;;###autoload
