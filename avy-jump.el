@@ -338,7 +338,9 @@ When PREDICATE is non-nil it's a function of zero parameters that
 should return true."
   (interactive "P")
   (require 'subword)
-  (let ((avy-keys (number-sequence ?a ?z))
+  (let ((avy-keys (if predicate
+                      avy-keys
+                    (number-sequence ?a ?z)))
         (case-fold-search nil)
         candidates)
     (avy-dowindows arg
