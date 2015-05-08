@@ -442,6 +442,24 @@ ARG lines can be used."
   (eval-after-load 'isearch
     '(define-key isearch-mode-map (kbd "C-'") 'avy-isearch)))
 
+(defcustom avy-timeout-seconds 0.5
+  "How many seconds to wait for the second char.")
+
+;;;###autoload
+(defun avy-goto-char-timer (&optional arg)
+  "Read one or two consecutive chars and jump to the first one.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
+  (interactive "P")
+  (let ((c1 (read-char "char 1: "))
+        (c2 (read-char "char 2: " nil avy-timeout-seconds)))
+    (avy--generic-jump
+     (regexp-quote
+      (if c2
+          (string c1 c2)
+        (string c1)))
+     arg
+     avy-goto-char-style)))
+
 (define-obsolete-variable-alias 'avi-keys 'avy-keys "0.1.0")
 (define-obsolete-variable-alias 'avi-background 'avy-background "0.1.0")
 (define-obsolete-variable-alias 'avi-word-punc-regexp 'avy-word-punc-regexp "0.1.0")
