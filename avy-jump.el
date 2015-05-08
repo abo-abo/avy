@@ -3,9 +3,6 @@
 ;; Copyright (C) 2015  Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel
-;; URL: https://github.com/abo-abo/avy-jump
-;; Version: 0.1.0
-;; Keywords: point, location
 
 ;; This file is part of GNU Emacs.
 
