@@ -42,7 +42,7 @@
 ;; headache.
 
 ;;; Code:
-(require 'cl-macs)
+(require 'cl-lib)
 
 (defmacro avy-multipop (lst n)
   "Remove LST's first N elements and return them."
