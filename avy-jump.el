@@ -29,6 +29,7 @@
 
 ;;; Code:
 ;;* Requires
+(require 'cl-lib)
 (require 'avy)
 
 ;;* Customization
