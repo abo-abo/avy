@@ -70,7 +70,8 @@
                               (not avy-all-windows)
                             avy-all-windows)))
      (dolist (wnd (if avy-all-windows
-                      (window-list)
+                      (cons (selected-window)
+                            (delete (selected-window) (window-list)))
                     (list (selected-window))))
        (with-selected-window wnd
          (unless (memq major-mode '(image-mode doc-view-mode))
