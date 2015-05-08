@@ -126,8 +126,8 @@ POS is either a position or (BEG . END)."
   (setq avy--overlays-back nil)
   (avy--remove-leading-chars))
 
-(defun avy--regex-candidates (regex &optional wnd beg end pred)
-  "Return all elements that match REGEX in WND.
+(defun avy--regex-candidates (regex &optional beg end pred)
+  "Return all elements that match REGEX.
 Each element of the list is ((BEG . END) . WND)
 When PRED is non-nil, it's a filter for matching point positions."
   (let (candidates)
@@ -245,8 +245,7 @@ STYLE determines the leading char overlay style."
            avy-all-windows)))
     (avy--goto
      (avy--process
-      (avy--regex-candidates
-       regex)
+      (avy--regex-candidates regex)
       (avy--style-fn style)))))
 
 (defcustom avy-goto-char-style 'pre
