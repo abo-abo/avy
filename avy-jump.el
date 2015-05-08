@@ -1,4 +1,4 @@
-;;; avy-jump.el --- jump to things tree-style
+;;; avy-jump.el --- jump to things tree-style. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015  Free Software Foundation, Inc.
 
@@ -436,6 +436,12 @@ ARG lines can be used."
           (goto-char end)
           (line-end-position)))
        pad))))
+
+;;;###autoload
+(defun avy-setup-default ()
+  "Setup the default shortcuts."
+  (eval-after-load 'isearch
+    '(define-key isearch-mode-map (kbd "C-'") 'avy-isearch)))
 
 (define-obsolete-variable-alias 'avi-keys 'avy-keys "0.1.0")
 (define-obsolete-variable-alias 'avi-background 'avy-background "0.1.0")
