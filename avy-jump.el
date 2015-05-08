@@ -329,9 +329,13 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (declare-function subword-backward "subword")
 
 ;;;###autoload
-(defun avy-goto-subword-0 (&optional arg)
+(defun avy-goto-subword-0 (&optional arg predicate)
   "Jump to a word or subword start.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
+
+The window scope is determined by `avy-all-windows' (ARG negates it).
+
+When PREDICATE is non-nil it's a function of zero parameters that
+should return true."
   (interactive "P")
   (require 'subword)
   (let ((avy-keys (number-sequence ?a ?z))
@@ -343,10 +347,22 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
           (goto-char (window-end (selected-window) t))
           (subword-backward)
           (while (> (point) ws)
-            (push (cons (point) (selected-window)) candidates)
+            (when (or (null predicate)
+                      (and predicate (funcall predicate)))
+              (push (cons (point) (selected-window)) candidates))
             (subword-backward)))))
     (avy--goto
      (avy--process candidates (avy--style-fn avy-goto-word-style)))))
+
+;;;###autoload
+(defun avy-goto-subword-1 (&optional arg)
+  "Prompt for a subword start char and jump there.
+The window scope is determined by `avy-all-windows' (ARG negates it).
+The case is ignored."
+  (interactive "P")
+  (let ((char (downcase (read-char "char: "))))
+    (avy-goto-subword-0
+     arg (lambda () (eq (downcase (char-after)) char)))))
 
 (defun avy--line (&optional arg)
   "Select line in current window."
