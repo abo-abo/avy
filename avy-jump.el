@@ -49,7 +49,8 @@
   "Regexp of punctuation characters that should be matched when calling
 `avy-goto-word-1' command. When nil, punctuation chars will not be matched.
 
-\"[!-/:-@[-`{-~]\" will match all printable punctuation chars.")
+\"[!-/:-@[-`{-~]\" will match all printable punctuation chars."
+  :type 'regexp)
 
 (defface avy-lead-face
   '((t (:foreground "white" :background "#e52b50")))
