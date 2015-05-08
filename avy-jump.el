@@ -38,8 +38,7 @@
   :prefix "avy-")
 
 (defcustom avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-  "Keys for jumping."
-  :type '(repeat character))
+  "Keys for jumping.")
 
 (defcustom avy-background nil
   "When non-nil, a gray background will be added during the selection."
