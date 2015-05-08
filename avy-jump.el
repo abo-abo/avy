@@ -38,8 +38,7 @@
   :prefix "avy-")
 
 (defcustom avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-  "Keys for jumping."
-  :type '(repeat character))
+  "Keys for jumping.")
 
 (defcustom avy-background nil
   "When non-nil, a gray background will be added during the selection."
@@ -49,7 +48,8 @@
   "Regexp of punctuation characters that should be matched when calling
 `avy-goto-word-1' command. When nil, punctuation chars will not be matched.
 
-\"[!-/:-@[-`{-~]\" will match all printable punctuation chars.")
+\"[!-/:-@[-`{-~]\" will match all printable punctuation chars."
+  :type 'regexp)
 
 (defface avy-lead-face
   '((t (:foreground "white" :background "#e52b50")))
