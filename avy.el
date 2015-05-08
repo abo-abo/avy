@@ -21,12 +21,25 @@
 
 ;;; Commentary:
 ;;
-;; Given a LIST and KEYS, `avy-tree' will build a balanced tree of
-;; degree B, where B is the length of KEYS.
+;; This package provides a generic completion method based on building
+;; a balanced decision tree with each candidate being a leaf. To
+;; traverse the tree from the root to a desired leaf, typically a
+;; sequence of `read-char' can be used.
 ;;
-;; The corresponding member of KEYS is placed in each internal node of
-;; the tree.  The leafs are the members of LIST.  They can be obtained
-;; in the original order by traversing the tree depth-first.
+;; In order for `read-char' to make sense, the tree needs to be
+;; visualized appropriately, with a character at each branch node. So
+;; this completion method works only for things that you can see on
+;; your screen, all at once:
+;;
+;; * character positions
+;; * word or subword start positions
+;; * line beginning positions
+;; * link positions
+;; * window positions
+;;
+;; If you're familiar with the popular `ace-jump-mode' package, this
+;; package does all that and more, without the implementation
+;; headache.
 
 ;;; Code:
 (require 'cl-macs)
