@@ -125,8 +125,7 @@ Use OVERLAY-FN to visualize the decision overlay."
           (avy--make-backgrounds
            (if avy-all-windows
                (window-list)
-             (list (selected-window))
-             ))
+             (list (selected-window))))
           (avy-read (avy-tree candidates avy-keys)
                     overlay-fn
                     #'avy--remove-leading-chars)))
@@ -145,6 +144,7 @@ Use OVERLAY-FN to visualize the decision overlay."
                                (window-end w)
                                (window-buffer w))))
                       (overlay-put ol 'face 'avy-background-face)
+                      (overlay-put ol 'window w)
                       ol))
                   wnd-list))))
 
