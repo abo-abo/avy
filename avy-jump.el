@@ -26,7 +26,6 @@
 
 ;;; Code:
 ;;* Requires
-(require 'cl-lib)
 (require 'avy)
 
 ;;* Customization
@@ -40,7 +39,7 @@
   :type '(repeat :tag "Keys" character))
 
 (defcustom avy-keys-alist nil
-  "Alist of avy-jump commands to avy-keys overriding the default avy-keys."
+  "Alist of avy-jump commands to `avy-keys' overriding the default `avy-keys'."
   :type '(alist :key-type (choice :tag "Command"
                            (const avy-goto-char)
                            (const avy-goto-char-2)
@@ -56,6 +55,7 @@
           :value-type (repeat :tag "Keys" character)))
 
 (defmacro avy--with-avy-keys (command &rest body)
+  "Set `avy-keys' according to COMMAND and execute BODY."
   (declare (indent 1))
   `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
                        avy-keys)))
@@ -66,8 +66,8 @@
   :type 'boolean)
 
 (defcustom avy-word-punc-regexp "[!-/:-@[-`{-~]"
-  "Regexp of punctuation characters that should be matched when calling
-`avy-goto-word-1' command. When nil, punctuation chars will not be matched.
+  "Regexp of punctuation chars that count as word starts for `avy-goto-word-1.
+When nil, punctuation chars will not be matched.
 
 \"[!-/:-@[-`{-~]\" will match all printable punctuation chars."
   :type 'regexp)
@@ -113,7 +113,8 @@ POS is either a position or (BEG . END)."
       (goto-char pt))))
 
 (defun avy--process (candidates overlay-fn)
-  "Select one of CANDIDATES using `avy-read'."
+  "Select one of CANDIDATES using `avy-read'.
+Use OVERLAY-FN to visualize the decision overlay."
   (unwind-protect
        (cl-case (length candidates)
          (0
@@ -193,9 +194,9 @@ When PRED is non-nil, it's a filter for matching point positions."
       (push ol avy--overlays-lead))))
 
 (defun avy--overlay-pre (path leaf)
-  "Create an overlay with STR at LEAF.
+  "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
-LEAF is ((BEG . END) . WND)."
+LEAF is normally ((BEG . END) . WND)."
   (avy--overlay
    (propertize (apply #'string (reverse path))
                'face 'avy-lead-face)
@@ -210,9 +211,9 @@ LEAF is ((BEG . END) . WND)."
      (selected-window))))
 
 (defun avy--overlay-at (path leaf)
-  "Create an overlay with STR at LEAF.
+  "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
-LEAF is ((BEG . END) . WND)."
+LEAF is normally ((BEG . END) . WND)."
   (let ((str (propertize
               (string (car (last path)))
               'face 'avy-lead-face))
@@ -234,9 +235,9 @@ LEAF is ((BEG . END) . WND)."
       (push ol avy--overlays-lead))))
 
 (defun avy--overlay-post (path leaf)
-  "Create an overlay with STR at LEAF.
+  "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
-LEAF is ((BEG . END) . WND)."
+LEAF is normally ((BEG . END) . WND)."
   (avy--overlay
    (propertize (apply #'string (reverse path))
                'face 'avy-lead-face)
@@ -392,7 +393,8 @@ The case is ignored."
        arg (lambda () (eq (downcase (char-after)) char))))))
 
 (defun avy--line (&optional arg)
-  "Select line in current window."
+  "Select a line.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
   (let ((avy-background nil)
         candidates)
     (avy-dowindows arg
@@ -410,7 +412,8 @@ The case is ignored."
 
 ;;;###autoload
 (defun avy-goto-line (&optional arg)
-  "Jump to a line start in current buffer."
+  "Jump to a line start in current buffer.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy--with-avy-keys avy-goto-line
     (avy--goto (avy--line arg))))
