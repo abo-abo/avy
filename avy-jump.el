@@ -127,8 +127,7 @@ When nil, punctuation chars will not be matched.
                               (not avy-all-windows)
                             avy-all-windows)))
      (dolist (wnd (if avy-all-windows
-                      (cons (selected-window)
-                            (delete (selected-window) (window-list)))
+                      (window-list)
                     (list (selected-window))))
        (with-selected-window wnd
          (unless (memq major-mode '(image-mode doc-view-mode))
