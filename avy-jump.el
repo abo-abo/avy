@@ -122,7 +122,11 @@ Use OVERLAY-FN to visualize the decision overlay."
          (1
           (car candidates))
          (t
-          (avy--make-backgrounds (list (selected-window)))
+          (avy--make-backgrounds
+           (if avy-all-windows
+               (window-list)
+             (list (selected-window))
+             ))
           (avy-read (avy-tree candidates avy-keys)
                     overlay-fn
                     #'avy--remove-leading-chars)))
