@@ -368,15 +368,17 @@ should return true."
     (let ((case-fold-search nil)
           candidates)
       (avy-dowindows arg
-        (let ((ws (window-start)))
+        (let ((ws (window-start))
+              candidates-window)
           (save-excursion
             (goto-char (window-end (selected-window) t))
             (subword-backward)
             (while (> (point) ws)
               (when (or (null predicate)
                         (and predicate (funcall predicate)))
-                (push (cons (point) (selected-window)) candidates))
-              (subword-backward)))))
+                (push (cons (point) (selected-window)) candidates-window))
+              (subword-backward)))
+          (setq candidates (nconc candidates candidates-window))))
       (avy--goto
        (avy--process candidates (avy--style-fn avy-goto-word-style))))))
 
