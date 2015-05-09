@@ -430,7 +430,7 @@ should return true."
                 (push (cons (point) (selected-window)) candidates))
               (subword-backward)))))
       (avy--goto
-       (avy--process candidates (avy--style-fn avy-style))))))
+       (avy--process (nreverse candidates) (avy--style-fn avy-style))))))
 
 ;;;###autoload
 (defun avy-goto-subword-1 (&optional arg)
