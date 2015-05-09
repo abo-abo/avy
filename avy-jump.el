@@ -26,6 +26,7 @@
 
 ;;; Code:
 ;;* Requires
+(require 'cl-lib)
 (require 'avy)
 
 ;;* Customization
@@ -238,6 +239,31 @@ LEAF is normally ((BEG . END) . WND)."
                                  str))
       (push ol avy--overlays-lead))))
 
+(defun avy--overlay-at-full (path leaf)
+  "Create an overlay with PATH at LEAF.
+PATH is a list of keys from tree root to LEAF.
+LEAF is normally ((BEG . END) . WND)."
+  (let* ((str (propertize
+               (apply #'string (reverse path))
+               'face 'avy-lead-face))
+         (len (length path))
+         (pt (if (consp (car leaf))
+                 (caar leaf)
+               (car leaf)))
+         (wnd (cdr leaf)))
+    (let ((ol (make-overlay pt (+ pt len)
+                            (window-buffer wnd)))
+          (old-str (with-selected-window wnd
+                     (buffer-substring pt (1+ pt)))))
+      (when avy-background
+        (setq old-str (propertize
+                       old-str 'face 'avy-background-face)))
+      (overlay-put ol 'window wnd)
+      (overlay-put ol 'display (if (string= old-str "\n")
+                                   (concat str "\n")
+                                 str))
+      (push ol avy--overlays-lead))))
+
 (defun avy--overlay-post (path leaf)
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
@@ -260,6 +286,7 @@ LEAF is normally ((BEG . END) . WND)."
   (cl-case style
     (pre #'avy--overlay-pre)
     (at #'avy--overlay-at)
+    (at-full 'avy--overlay-at-full)
     (post #'avy--overlay-post)
     (t (error "Unexpected style %S" style))))
 
@@ -281,6 +308,7 @@ STYLE determines the leading char overlay style."
   :type '(choice
           (const :tag "Pre" pre)
           (const :tag "At" at)
+          (const :tag "At Full" at-full)
           (const :tag "Post" post)))
 
 (defcustom avy-goto-word-style 'pre
@@ -288,6 +316,7 @@ STYLE determines the leading char overlay style."
   :type '(choice
           (const :tag "Pre" pre)
           (const :tag "At" at)
+          (const :tag "At Full" at-full)
           (const :tag "Post" post)))
 
 ;;* Commands
