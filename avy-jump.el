@@ -137,14 +137,19 @@ When nil, punctuation chars will not be matched.
   "Goto X.
 X is (POS . WND)
 POS is either a position or (BEG . END)."
-  (if (null x)
-      (message "zero candidates")
-    (select-window (cdr x))
-    (let ((pt (car x)))
-      (when (consp pt)
-        (setq pt (car pt)))
-      (unless (= pt (point)) (push-mark))
-      (goto-char pt))))
+  (cond ((null x)
+         (message "zero candidates"))
+
+        ;; ignore exit from `avy-handler-function'
+        ((eq x 'exit))
+
+        (t
+         (select-window (cdr x))
+         (let ((pt (car x)))
+           (when (consp pt)
+             (setq pt (car pt)))
+           (unless (= pt (point)) (push-mark))
+           (goto-char pt)))))
 
 (defun avy--process (candidates overlay-fn)
   "Select one of CANDIDATES using `avy-read'.
@@ -474,7 +479,18 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy--with-avy-keys avy-goto-line
-    (avy--goto (avy--line arg))))
+    (let ((avy-handler-function
+           (lambda (char)
+             (if (or (< char ?0)
+                     (> char ?9))
+                 (avy-handler-default char)
+               (let ((line (read-from-minibuffer
+                            "Goto line: " (string char))))
+                 (when line
+                   (goto-char (point-min))
+                   (forward-line (1- (string-to-number line)))
+                   (throw 'done 'exit)))))))
+      (avy--goto (avy--line arg)))))
 
 ;;;###autoload
 (defun avy-copy-line (arg)

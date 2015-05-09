@@ -109,6 +109,14 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           (funcall walker key (cddr br))
         (avy-traverse (cdr br) walker key)))))
 
+(defun avy-handler-default (char)
+  "The default hander for a bad CHAR."
+  (signal 'user-error (list "No such candidate" char))
+  (throw 'done nil))
+
+(defvar avy-handler-function 'avy-handler-default
+  "A function to call for a bad `read-char' in `avy-read'.")
+
 (defun avy-read (tree display-fn cleanup-fn)
   "Select a leaf from TREE using consecutive `read-char'.
 
@@ -127,8 +135,7 @@ multiple DISPLAY-FN invokations."
         (if (setq branch (assoc char tree))
             (if (eq (car (setq tree (cdr branch))) 'leaf)
                 (throw 'done (cdr tree)))
-          (signal 'user-error (list "No such candidate" char))
-          (throw 'done nil))))))
+          (funcall avy-handler-function char))))))
 
 (provide 'avy)
 
