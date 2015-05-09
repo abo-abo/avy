@@ -280,22 +280,28 @@ LEAF is normally ((BEG . END) . WND)."
                (apply #'string (reverse path))
                'face 'avy-lead-face))
          (len (length path))
-         (pt (if (consp (car leaf))
-                 (caar leaf)
-               (car leaf)))
+         (beg (if (consp (car leaf))
+                  (caar leaf)
+                (car leaf)))
          (wnd (cdr leaf)))
-    (let ((ol (make-overlay pt (+ pt len)
-                            (window-buffer wnd)))
-          (old-str (with-selected-window wnd
-                     (buffer-substring pt (1+ pt)))))
-      (when avy-background
-        (setq old-str (propertize
-                       old-str 'face 'avy-background-face)))
-      (overlay-put ol 'window wnd)
-      (overlay-put ol 'display (if (string= old-str "\n")
-                                   (concat str "\n")
-                                 str))
-      (push ol avy--overlays-lead))))
+    (with-selected-window wnd
+      (save-excursion
+        (goto-char beg)
+        (let* ((end (if (= beg (line-end-position))
+                        (1+ beg)
+                      (min (+ beg len) (line-end-position))))
+               (ol (make-overlay
+                    beg end
+                    (current-buffer)))
+               (old-str (buffer-substring beg (1+ beg))))
+          (when avy-background
+            (setq old-str (propertize
+                           old-str 'face 'avy-background-face)))
+          (overlay-put ol 'window wnd)
+          (overlay-put ol 'display (if (string= old-str "\n")
+                                       (concat str "\n")
+                                     str))
+          (push ol avy--overlays-lead))))))
 
 (defun avy--overlay-post (path leaf)
   "Create an overlay with PATH at LEAF.
