@@ -41,25 +41,59 @@
 
 (defcustom avy-keys-alist nil
   "Alist of avy-jump commands to `avy-keys' overriding the default `avy-keys'."
-  :type '(alist :key-type (choice :tag "Command"
-                           (const avy-goto-char)
-                           (const avy-goto-char-2)
-                           (const avy-isearch)
-                           (const avy-goto-line)
-                           (const avy-goto-subword-0)
-                           (const avy-goto-subword-1)
-                           (const avy-goto-word-0)
-                           (const avy-goto-word-1)
-                           (const avy-copy-line)
-                           (const avy-copy-region)
-                           (const avy-move-line))
+  :type '(alist
+          :key-type (choice :tag "Command"
+                     (const avy-goto-char)
+                     (const avy-goto-char-2)
+                     (const avy-isearch)
+                     (const avy-goto-line)
+                     (const avy-goto-subword-0)
+                     (const avy-goto-subword-1)
+                     (const avy-goto-word-0)
+                     (const avy-goto-word-1)
+                     (const avy-copy-line)
+                     (const avy-copy-region)
+                     (const avy-move-line))
           :value-type (repeat :tag "Keys" character)))
+
+(defcustom avy-style 'pre
+  "The default method of displaying the overlays.
+Use `avy-styles-alist' to customize this per-command."
+  :type '(choice
+          (const :tag "Pre" pre)
+          (const :tag "At" at)
+          (const :tag "At Full" at-full)
+          (const :tag "Post" post)))
+
+(defcustom avy-styles-alist nil
+  "Alist of avy-jump commands to the style for each command.
+If the commands isn't on the list, `avy-style' is used."
+  :type '(alist
+          :key-type (choice :tag "Command"
+                     (const avy-goto-char)
+                     (const avy-goto-char-2)
+                     (const avy-isearch)
+                     (const avy-goto-line)
+                     (const avy-goto-subword-0)
+                     (const avy-goto-subword-1)
+                     (const avy-goto-word-0)
+                     (const avy-goto-word-1)
+                     (const avy-copy-line)
+                     (const avy-copy-region)
+                     (const avy-move-line))
+          :value-type (choice
+                       (const :tag "Pre" pre)
+                       (const :tag "At" at)
+                       (const :tag "At Full" at-full)
+                       (const :tag "Post" post))))
 
 (defmacro avy--with-avy-keys (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY."
   (declare (indent 1))
   `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
-                       avy-keys)))
+                       avy-keys))
+         (avy-style (or (cdr (assq ',command avy-styles-alist))
+                        avy-style)))
      ,@body))
 
 (defcustom avy-background nil
@@ -303,22 +337,6 @@ STYLE determines the leading char overlay style."
       (avy--regex-candidates regex)
       (avy--style-fn style)))))
 
-(defcustom avy-goto-char-style 'pre
-  "Method of displaying the overlays for `avy-goto-char' and `avy-goto-char-2'."
-  :type '(choice
-          (const :tag "Pre" pre)
-          (const :tag "At" at)
-          (const :tag "At Full" at-full)
-          (const :tag "Post" post)))
-
-(defcustom avy-goto-word-style 'pre
-  "Method of displaying the overlays for `avy-goto-word-0' and `avy-goto-word-0'."
-  :type '(choice
-          (const :tag "Pre" pre)
-          (const :tag "At" at)
-          (const :tag "At Full" at-full)
-          (const :tag "Post" post)))
-
 ;;* Commands
 ;;;###autoload
 (defun avy-goto-char (&optional arg)
@@ -332,7 +350,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
            "\n"
          (regexp-quote (string c))))
      arg
-     avy-goto-char-style)))
+     avy-style)))
 
 ;;;###autoload
 (defun avy-goto-char-2 (&optional arg)
@@ -345,7 +363,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                     (read-char "char 1: ")
                     (read-char "char 2: ")))
      arg
-     avy-goto-char-style)))
+     avy-style)))
 
 ;;;###autoload
 (defun avy-isearch ()
@@ -366,7 +384,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy--with-avy-keys avy-goto-word-0
-    (avy--generic-jump "\\b\\sw" arg avy-goto-word-style)))
+    (avy--generic-jump "\\b\\sw" arg avy-style)))
 
 ;;;###autoload
 (defun avy-goto-word-1 (&optional arg)
@@ -384,7 +402,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                          (concat
                           "\\b"
                           str)))))
-      (avy--generic-jump regex arg avy-goto-word-style))))
+      (avy--generic-jump regex arg avy-style))))
 
 (declare-function subword-backward "subword")
 
@@ -412,7 +430,7 @@ should return true."
                 (push (cons (point) (selected-window)) candidates))
               (subword-backward)))))
       (avy--goto
-       (avy--process candidates (avy--style-fn avy-goto-word-style))))))
+       (avy--process candidates (avy--style-fn avy-style))))))
 
 ;;;###autoload
 (defun avy-goto-subword-1 (&optional arg)
@@ -526,8 +544,14 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
           (string c1 c2)
         (string c1)))
      arg
-     avy-goto-char-style)))
+     avy-style)))
 
+(define-obsolete-variable-alias
+    'avy-goto-char-style 'avy-style "0.1.0"
+    "Use `avy-style' and `avy-styles-alist' instead.")
+(define-obsolete-variable-alias
+    'avy-goto-word-style 'avy-style "0.1.0"
+    "Use `avy-style' and `avy-styles-alist' instead.")
 (define-obsolete-variable-alias 'avi-keys 'avy-keys "0.1.0")
 (define-obsolete-variable-alias 'avi-background 'avy-background "0.1.0")
 (define-obsolete-variable-alias 'avi-word-punc-regexp 'avy-word-punc-regexp "0.1.0")

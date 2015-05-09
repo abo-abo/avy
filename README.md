@@ -86,3 +86,15 @@ You add this to your config to bind some stuff:
 ```
 
 It will bind, for example, `avy-isearch` to <kbd>C-'</kbd> in `isearch-mode-map`, so that you can select one of the currently visible `isearch` candidates using `avy`.
+
+### Style customization
+
+There are four styles of overlay functions to choose from. You can choose to use one style for all functions, or you can select a different style for each function.  Customize `avy-style` and `avy-styles-alist` respectively for this.
+The styles to choose from:
+
+- pre: the full path will be displayed before target, leaving all original text
+- at: the single character path will be displayed on target, obscuring the target
+- at-full: the full path will be displayed on target, obscuring the target and the text behind it
+- post: the full path will be displayed after target, leaving all original text
+
+At first it seems that `pre` and `post` are advantageous over `at` and `at-full`, since you can still see the original text with them.  However, they make the text shift a bit. If you don't like that, use either `at` or `at-full`.
