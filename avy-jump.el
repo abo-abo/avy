@@ -471,7 +471,7 @@ ARG lines can be used."
 ;;;###autoload
 (defun avy-setup-default ()
   "Setup the default shortcuts."
-  (eval-after-load 'isearch
+  (eval-after-load "isearch"
     '(define-key isearch-mode-map (kbd "C-'") 'avy-isearch)))
 
 (defcustom avy-timeout-seconds 0.5
