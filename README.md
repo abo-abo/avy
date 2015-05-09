@@ -46,6 +46,8 @@ After <kbd>M-g f</kbd>:
 
 ![avy-goto-line](http://oremacs.com/download/avi-goto-line.png)
 
+You can actually replace the <kbd>M-g g</kbd> binding of `goto-line`, since if you enter a digit for `avy-goto-line`, it will switch to `goto-line` with that digit already entered.
+
 ### `avy-goto-word-1`
 
 > Input one char at word start, jump to a word start with a tree.
