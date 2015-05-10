@@ -100,6 +100,14 @@ If the commands isn't on the list, `avy-style' is used."
   "When non-nil, a gray background will be added during the selection."
   :type 'boolean)
 
+(defcustom avy-all-windows t
+  "When non-nil, loop though all windows for candidates."
+  :type 'boolean)
+
+(defcustom avy-case-fold-search t
+  "Non-nil if searches should ignore case."
+  :type 'boolean)
+
 (defcustom avy-word-punc-regexp "[!-/:-@[-`{-~]"
   "Regexp of punctuation chars that count as word starts for `avy-goto-word-1.
 When nil, punctuation chars will not be matched.
@@ -116,10 +124,6 @@ When nil, punctuation chars will not be matched.
   "Face for whole window background during selection.")
 
 ;;* Internals
-(defcustom avy-all-windows t
-  "When non-nil, loop though all windows for candidates."
-  :type 'boolean)
-
 (defmacro avy-dowindows (flip &rest body)
   "Depending on FLIP and `avy-all-windows' run BODY in each or selected window."
   (declare (indent 1))
@@ -197,7 +201,8 @@ Use OVERLAY-FN to visualize the decision overlay."
   "Return all elements that match REGEX.
 Each element of the list is ((BEG . END) . WND)
 When PRED is non-nil, it's a filter for matching point positions."
-  (let (candidates)
+  (let ((case-fold-search avy-case-fold-search)
+        candidates)
     (avy-dowindows nil
       (let ((we (or end (window-end (selected-window) t))))
         (save-excursion
