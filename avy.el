@@ -313,10 +313,12 @@ Use OVERLAY-FN to visualize the decision overlay."
   (setq avy--overlays-back nil)
   (avy--remove-leading-chars))
 
-(defun avy--regex-candidates (regex &optional beg end pred)
+(defun avy--regex-candidates (regex &optional beg end pred group)
   "Return all elements that match REGEX.
 Each element of the list is ((BEG . END) . WND)
-When PRED is non-nil, it's a filter for matching point positions."
+When PRED is non-nil, it's a filter for matching point positions.
+When GROUP is non-nil, (BEG . END) should delimit that regex group."
+  (setq group (or group 0))
   (let ((case-fold-search avy-case-fold-search)
         candidates)
     (avy-dowindows nil
@@ -327,8 +329,8 @@ When PRED is non-nil, it's a filter for matching point positions."
             (unless (get-char-property (point) 'invisible)
               (when (or (null pred)
                         (funcall pred))
-                (push (cons (cons (match-beginning 0)
-                                  (match-end 0))
+                (push (cons (cons (match-beginning group)
+                                  (match-end group))
                             wnd) candidates)))))))
     (nreverse candidates)))
 
