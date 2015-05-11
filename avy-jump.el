@@ -466,6 +466,15 @@ The case is ignored."
       (avy-goto-subword-0
        arg (lambda () (eq (downcase (char-after)) char))))))
 
+(defun avy-goto-word-or-subword-1 (&optional arg)
+  "Jump to a word or subword start, depending on `subword-mode'.
+The window scope is determined by `avy-all-windows' (ARG negates it).
+The case is ignored."
+  (interactive "P")
+  (if (bound-and-true-p subword-mode)
+      (avy-goto-subword-1 arg)
+    (avy-goto-word-1 arg)))
+
 (defun avy--line (&optional arg)
   "Select a line.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
