@@ -219,7 +219,12 @@ CLEANUP-FN should take no arguments and remove the effects of
 multiple DISPLAY-FN invokations."
   (catch 'done
     (while tree
-      (avy-traverse tree display-fn)
+      (let ((avy--leafs nil))
+        (avy-traverse tree
+                      (lambda (path leaf)
+                        (push (cons path leaf) avy--leafs)))
+        (dolist (x avy--leafs)
+          (funcall display-fn (car x) (cdr x))))
       (let ((char (read-char))
             branch)
         (funcall cleanup-fn)
@@ -417,6 +422,11 @@ LEAF is normally ((BEG . END) . WND)."
     (with-selected-window wnd
       (save-excursion
         (goto-char beg)
+        (when (cl-some (lambda (o)
+                         (eq (overlay-get o 'category) 'avy))
+                       (overlays-at (1+ (point))))
+          (setq str (substring str 0 1))
+          (setq len 1))
         (let* ((end (if (= beg (line-end-position))
                         (1+ beg)
                       (min (+ beg len) (line-end-position))))
@@ -428,6 +438,7 @@ LEAF is normally ((BEG . END) . WND)."
             (setq old-str (propertize
                            old-str 'face 'avy-background-face)))
           (overlay-put ol 'window wnd)
+          (overlay-put ol 'category 'avy)
           (overlay-put ol 'display (if (string= old-str "\n")
                                        (concat str "\n")
                                      str))
