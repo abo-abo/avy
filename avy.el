@@ -49,7 +49,7 @@
 (require 'cl-lib)
 
 ;;* Customization
-(defgroup avy-jump nil
+(defgroup avy nil
   "Jump to things tree-style."
   :group 'convenience
   :prefix "avy-")
