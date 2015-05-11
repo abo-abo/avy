@@ -231,7 +231,8 @@ multiple DISPLAY-FN invokations."
 ;;** Rest
 (defmacro avy-dowindows (flip &rest body)
   "Depending on FLIP and `avy-all-windows' run BODY in each or selected window."
-  (declare (indent 1))
+  (declare (indent 1)
+           (debug (form body)))
   `(let ((avy-all-windows (if ,flip
                               (not avy-all-windows)
                             avy-all-windows)))
@@ -244,7 +245,8 @@ multiple DISPLAY-FN invokations."
 
 (defmacro avy--with-avy-keys (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY."
-  (declare (indent 1))
+  (declare (indent 1)
+           (debug (form body)))
   `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
                        avy-keys))
          (avy-style (or (cdr (assq ',command avy-styles-alist))
