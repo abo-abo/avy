@@ -115,6 +115,10 @@ When nil, punctuation chars will not be matched.
 \"[!-/:-@[-`{-~]\" will match all printable punctuation chars."
   :type 'regexp)
 
+(defface avy-lead-face-0
+  '((t (:foreground "white" :background "#4f57f9")))
+  "Face used for the leading chars.")
+
 (defface avy-lead-face
   '((t (:foreground "white" :background "#e52b50")))
   "Face used for the leading chars.")
@@ -294,6 +298,8 @@ LEAF is normally ((BEG . END) . WND)."
                   (caar leaf)
                 (car leaf)))
          (wnd (cdr leaf)))
+    (when (> (length str) 1)
+      (set-text-properties 0 1 '(face avy-lead-face-0) str))
     (with-selected-window wnd
       (save-excursion
         (goto-char beg)
