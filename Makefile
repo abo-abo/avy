@@ -11,10 +11,10 @@ test:
 	$(emacs) -batch $(LOAD) -f ert-run-tests-batch-and-exit
 
 compile:
-	$(emacs) -batch -l avy-init.el
+	$(emacs) -batch -l targets/avy-init.el
 
 run:
-	$(emacs) -Q -l avy-init.el
+	$(emacs) -Q -l targets/avy-init.el
 
 clean:
 	rm -f *.elc
