@@ -368,18 +368,21 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
-  (avy--overlay
-   (propertize (apply #'string (reverse path))
-               'face 'avy-lead-face)
-   (cond ((numberp leaf)
-          leaf)
-         ((consp (car leaf))
-          (caar leaf))
-         (t
-          (car leaf)))
-   (if (consp leaf)
-       (cdr leaf)
-     (selected-window))))
+  (let ((str (propertize (apply #'string (reverse path))
+                         'face 'avy-lead-face)))
+    (when (> (length str) 1)
+      (set-text-properties 0 1 '(face avy-lead-face-0) str))
+    (avy--overlay
+     str
+     (cond ((numberp leaf)
+            leaf)
+           ((consp (car leaf))
+            (caar leaf))
+           (t
+            (car leaf)))
+     (if (consp leaf)
+         (cdr leaf)
+       (selected-window)))))
 
 (defun avy--overlay-at (path leaf)
   "Create an overlay with PATH at LEAF.
@@ -449,18 +452,21 @@ LEAF is normally ((BEG . END) . WND)."
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
-  (avy--overlay
-   (propertize (apply #'string (reverse path))
-               'face 'avy-lead-face)
-   (cond ((numberp leaf)
-          leaf)
-         ((consp (car leaf))
-          (cdar leaf))
-         (t
-          (car leaf)))
-   (if (consp leaf)
-       (cdr leaf)
-     (selected-window))))
+  (let ((str (propertize (apply #'string (reverse path))
+                         'face 'avy-lead-face)))
+    (when (> (length str) 1)
+      (set-text-properties 0 1 '(face avy-lead-face-0) str))
+    (avy--overlay
+     str
+     (cond ((numberp leaf)
+            leaf)
+           ((consp (car leaf))
+            (cdar leaf))
+           (t
+            (car leaf)))
+     (if (consp leaf)
+         (cdr leaf)
+       (selected-window)))))
 
 (defun avy--style-fn (style)
   "Transform STYLE symbol to a style function."
