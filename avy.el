@@ -127,7 +127,11 @@ When nil, punctuation chars will not be matched.
 
 (defface avy-lead-face-0
   '((t (:foreground "white" :background "#4f57f9")))
-  "Face used for the leading chars.")
+  "Face used for first non-terminating leading chars.")
+
+(defface avy-lead-face-1
+    '((t (:foreground "white" :background "gray")))
+  "Face used for matched leading chars.")
 
 (defface avy-lead-face
   '((t (:foreground "white" :background "#e52b50")))
@@ -208,6 +212,9 @@ KEYS is the path from the root of `avy-tree' to LEAF."
 (defvar avy-handler-function 'avy-handler-default
   "A function to call for a bad `read-char' in `avy-read'.")
 
+(defvar avy-current-path ""
+  "Store the current incomplete path during `avy-read'.")
+
 (defun avy-read (tree display-fn cleanup-fn)
   "Select a leaf from TREE using consecutive `read-char'.
 
@@ -218,6 +225,7 @@ commonly done by adding a CHAR overlay at LEAF position.
 CLEANUP-FN should take no arguments and remove the effects of
 multiple DISPLAY-FN invokations."
   (catch 'done
+    (setq avy-current-path "")
     (while tree
       (let ((avy--leafs nil))
         (avy-traverse tree
@@ -230,7 +238,9 @@ multiple DISPLAY-FN invokations."
         (funcall cleanup-fn)
         (if (setq branch (assoc char tree))
             (if (eq (car (setq tree (cdr branch))) 'leaf)
-                (throw 'done (cdr tree)))
+                (throw 'done (cdr tree))
+              (setq avy-current-path
+                    (concat avy-current-path (string char))))
           (funcall avy-handler-function char))))))
 
 ;;** Rest
@@ -372,6 +382,10 @@ LEAF is normally ((BEG . END) . WND)."
                          'face 'avy-lead-face)))
     (when (> (length str) 1)
       (set-text-properties 0 1 '(face avy-lead-face-0) str))
+    (setq str (concat
+               (propertize avy-current-path
+                           'face 'avy-lead-face-1)
+               str))
     (avy--overlay
      str
      (cond ((numberp leaf)
@@ -456,6 +470,10 @@ LEAF is normally ((BEG . END) . WND)."
                          'face 'avy-lead-face)))
     (when (> (length str) 1)
       (set-text-properties 0 1 '(face avy-lead-face-0) str))
+    (setq str (concat
+               (propertize avy-current-path
+                           'face 'avy-lead-face-1)
+               str))
     (avy--overlay
      str
      (cond ((numberp leaf)
