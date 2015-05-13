@@ -405,9 +405,10 @@ LEAF is normally ((BEG . END) . WND)."
   (let ((str (propertize
               (string (car (last path)))
               'face 'avy-lead-face))
-        (pt (if (consp (car leaf))
-                (caar leaf)
-              (car leaf)))
+        (pt (+ (if (consp (car leaf))
+                   (caar leaf)
+                 (car leaf))
+               avy--overlay-offset))
         (wnd (cdr leaf)))
     (let ((ol (make-overlay pt (1+ pt)
                             (window-buffer wnd)))
