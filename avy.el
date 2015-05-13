@@ -640,9 +640,13 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
             (while (< (point) (point-max))
               (unless (get-char-property
                        (max (1- (point)) ws) 'invisible)
-                (push (cons (point) (selected-window)) candidates))
+                (push (cons
+                       (if (eq avy-style 'post)
+                           (line-end-position)
+                         (line-beginning-position))
+                       (selected-window)) candidates))
               (forward-line 1))))))
-    (avy--process (nreverse candidates) #'avy--overlay-pre)))
+    (avy--process (nreverse candidates) (avy--style-fn avy-style))))
 
 ;;;###autoload
 (defun avy-goto-line (&optional arg)
