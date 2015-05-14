@@ -696,11 +696,9 @@ ARG lines can be used."
       (save-excursion
         (save-excursion
           (goto-char start)
-          (move-end-of-line arg)
-          (kill-region start (point)))
+          (kill-whole-line))
         (insert
-         (current-kill 0)
-         "\n")))))
+         (current-kill 0))))))
 
 ;;;###autoload
 (defun avy-copy-region ()
