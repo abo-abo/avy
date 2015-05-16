@@ -696,7 +696,7 @@ ARG lines can be used."
       (save-excursion
         (save-excursion
           (goto-char start)
-          (kill-whole-line))
+          (kill-whole-line arg))
         (insert
          (current-kill 0))))))
 
