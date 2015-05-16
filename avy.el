@@ -374,13 +374,18 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
       (overlay-put ol 'display (concat str old-str))
       (push ol avy--overlays-lead))))
 
+(defcustom avy-highlight-first nil
+  "When non-nil highlight the first decision char with `avy-lead-face-0'.
+Do this even when the char is terminating."
+  :type 'boolean)
+
 (defun avy--overlay-pre (path leaf)
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
   (let ((str (propertize (apply #'string (reverse path))
                          'face 'avy-lead-face)))
-    (when (> (length str) 1)
+    (when (or avy-highlight-first (> (length str) 1))
       (set-text-properties 0 1 '(face avy-lead-face-0) str))
     (setq str (concat
                (propertize avy-current-path
@@ -435,7 +440,7 @@ LEAF is normally ((BEG . END) . WND)."
                   (caar leaf)
                 (car leaf)))
          (wnd (cdr leaf)))
-    (when (> (length str) 1)
+    (when (or avy-highlight-first (> (length str) 1))
       (set-text-properties 0 1 '(face avy-lead-face-0) str))
     (with-selected-window wnd
       (save-excursion
@@ -469,7 +474,7 @@ PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
   (let ((str (propertize (apply #'string (reverse path))
                          'face 'avy-lead-face)))
-    (when (> (length str) 1)
+    (when (or avy-highlight-first (> (length str) 1))
       (set-text-properties 0 1 '(face avy-lead-face-0) str))
     (setq str (concat
                (propertize avy-current-path
