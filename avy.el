@@ -453,7 +453,11 @@ LEAF is normally ((BEG . END) . WND)."
           (setq len 1))
         (let* ((end (if (= beg (line-end-position))
                         (1+ beg)
-                      (min (+ beg len) (line-end-position))))
+                      (min (+ beg
+                              (if (eq (char-after) ?\t)
+                                  1
+                                len))
+                           (line-end-position))))
                (ol (make-overlay
                     beg end
                     (current-buffer)))
@@ -463,9 +467,13 @@ LEAF is normally ((BEG . END) . WND)."
                            old-str 'face 'avy-background-face)))
           (overlay-put ol 'window wnd)
           (overlay-put ol 'category 'avy)
-          (overlay-put ol 'display (if (string= old-str "\n")
-                                       (concat str "\n")
-                                     str))
+          (overlay-put ol 'display
+                       (cond ((string= old-str "\n")
+                              (concat str "\n"))
+                             ((string= old-str "\t")
+                              (concat str (make-string (- tab-width len) ?\ )))
+                             (t
+                              str)))
           (push ol avy--overlays-lead))))))
 
 (defun avy--overlay-post (path leaf)
