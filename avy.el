@@ -26,12 +26,12 @@
 ;;; Commentary:
 ;;
 ;; This package provides a generic completion method based on building
-;; a balanced decision tree with each candidate being a leaf. To
+;; a balanced decision tree with each candidate being a leaf.  To
 ;; traverse the tree from the root to a desired leaf, typically a
 ;; sequence of `read-char' can be used.
 ;;
 ;; In order for `read-char' to make sense, the tree needs to be
-;; visualized appropriately, with a character at each branch node. So
+;; visualized appropriately, with a character at each branch node.  So
 ;; this completion method works only for things that you can see on
 ;; your screen, all at once:
 ;;
@@ -516,31 +516,29 @@ STYLE determines the leading char overlay style."
 
 ;;* Commands
 ;;;###autoload
-(defun avy-goto-char (arg char)
-  "Read one char and jump to it.
+(defun avy-goto-char (char &optional arg)
+  "Jump to the currently visible CHAR.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive (list current-prefix-arg
-		     (read-char "char: ")))
+  (interactive (list (read-char "char: ")
+                     current-prefix-arg))
   (avy--with-avy-keys avy-goto-char
     (avy--generic-jump
      (if (= 13 char)
-           "\n"
-         (regexp-quote (string char)))
+         "\n"
+       (regexp-quote (string char)))
      arg
      avy-style)))
 
 ;;;###autoload
-(defun avy-goto-char-2 (arg char1 char2)
-  "Read two consecutive chars and jump to the first one.
+(defun avy-goto-char-2 (char1 char2 &optional arg)
+  "Jump to the currently visible CHAR1 followed by CHAR2.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive (list current-prefix-arg
-		     (read-char "char 1: ")
-                     (read-char "char 2: ")))
+  (interactive (list (read-char "char 1: ")
+                     (read-char "char 2: ")
+                     current-prefix-arg))
   (avy--with-avy-keys avy-goto-char-2
     (avy--generic-jump
-     (regexp-quote (string
-                    char1
-                    char2))
+     (regexp-quote (string char1 char2))
      arg
      avy-style)))
 
@@ -566,11 +564,11 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
     (avy--generic-jump "\\b\\sw" arg avy-style)))
 
 ;;;###autoload
-(defun avy-goto-word-1 (arg char)
-  "Read one char at word start and jump there.
+(defun avy-goto-word-1 (char &optional arg)
+  "Jump to the currently visible CHAR at a word start.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive (list current-prefix-arg
-		     (read-char "char: ")))
+  (interactive (list (read-char "char: ")
+                     current-prefix-arg))
   (avy--with-avy-keys avy-goto-word-1
     (let* ((str (string char))
            (regex (cond ((string= str ".")
@@ -615,25 +613,24 @@ should return true."
        (avy--process candidates (avy--style-fn avy-style))))))
 
 ;;;###autoload
-(defun avy-goto-subword-1 (arg char)
-  "Prompt for a subword start char and jump there.
+(defun avy-goto-subword-1 (char arg)
+  "Jump to the currently visible CHAR at a subword start.
 The window scope is determined by `avy-all-windows' (ARG negates it).
-The case is ignored."
-  (interactive (list current-prefix-arg
-		     (read-char "char: ")))
+The case of CHAR is ignored."
+  (interactive (list (read-char "char: ")
+                     current-prefix-arg))
   (avy--with-avy-keys avy-goto-subword-1
     (let ((char (downcase char)))
       (avy-goto-subword-0
        arg (lambda () (eq (downcase (char-after)) char))))))
 
-(defun avy-goto-word-or-subword-1 (&optional arg)
-  "Jump to a word or subword start, depending on `subword-mode'.
-The window scope is determined by `avy-all-windows' (ARG negates it).
-The case is ignored."
-  (interactive "P")
+(defun avy-goto-word-or-subword-1 ()
+  "Forward to `avy-goto-subword-1' or `avy-goto-word-1'.
+Which one depends on variable `subword-mode'."
+  (interactive)
   (if (bound-and-true-p subword-mode)
-      (avy-goto-subword-1 arg)
-    (avy-goto-word-1 arg)))
+      (call-interactively #'avy-goto-subword-1)
+    (call-interactively #'avy-goto-word-1)))
 
 (defun avy--line (&optional arg)
   "Select a line.
