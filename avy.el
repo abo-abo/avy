@@ -516,29 +516,31 @@ STYLE determines the leading char overlay style."
 
 ;;* Commands
 ;;;###autoload
-(defun avy-goto-char (&optional arg)
+(defun avy-goto-char (arg char)
   "Read one char and jump to it.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive "P")
+  (interactive (list current-prefix-arg
+		     (read-char "char: ")))
   (avy--with-avy-keys avy-goto-char
     (avy--generic-jump
-     (let ((c (read-char "char: ")))
-       (if (= 13 c)
+     (if (= 13 char)
            "\n"
-         (regexp-quote (string c))))
+         (regexp-quote (string char)))
      arg
      avy-style)))
 
 ;;;###autoload
-(defun avy-goto-char-2 (&optional arg)
+(defun avy-goto-char-2 (arg char1 char2)
   "Read two consecutive chars and jump to the first one.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive "P")
+  (interactive (list current-prefix-arg
+		     (read-char "char 1: ")
+                     (read-char "char 2: ")))
   (avy--with-avy-keys avy-goto-char-2
     (avy--generic-jump
      (regexp-quote (string
-                    (read-char "char 1: ")
-                    (read-char "char 2: ")))
+                    char1
+                    char2))
      arg
      avy-style)))
 
@@ -564,12 +566,13 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
     (avy--generic-jump "\\b\\sw" arg avy-style)))
 
 ;;;###autoload
-(defun avy-goto-word-1 (&optional arg)
+(defun avy-goto-word-1 (arg char)
   "Read one char at word start and jump there.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive "P")
+  (interactive (list current-prefix-arg
+		     (read-char "char: ")))
   (avy--with-avy-keys avy-goto-word-1
-    (let* ((str (string (read-char "char: ")))
+    (let* ((str (string char))
            (regex (cond ((string= str ".")
                          "\\.")
                         ((and avy-word-punc-regexp
@@ -612,13 +615,14 @@ should return true."
        (avy--process candidates (avy--style-fn avy-style))))))
 
 ;;;###autoload
-(defun avy-goto-subword-1 (&optional arg)
+(defun avy-goto-subword-1 (arg char)
   "Prompt for a subword start char and jump there.
 The window scope is determined by `avy-all-windows' (ARG negates it).
 The case is ignored."
-  (interactive "P")
+  (interactive (list current-prefix-arg
+		     (read-char "char: ")))
   (avy--with-avy-keys avy-goto-subword-1
-    (let ((char (downcase (read-char "char: "))))
+    (let ((char (downcase char)))
       (avy-goto-subword-0
        arg (lambda () (eq (downcase (char-after)) char))))))
 
