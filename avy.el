@@ -250,13 +250,17 @@ multiple DISPLAY-FN invokations."
 ;;** Rest
 (defun avy-window-list ()
   "Return a list of windows depending on `avy-all-windows'."
-  (cl-case avy-all-windows
-    (all-frames
-     (cl-mapcan #'window-list (frame-list)))
-    (this-frame
-     (window-list))
-    (t
-     (list (selected-window)))))
+  (cond ((eq avy-all-windows 'all-frames)
+         (cl-mapcan #'window-list (frame-list)))
+
+        ((eq avy-all-windows t)
+         (window-list))
+
+        ((null avy-all-windows)
+         (list (selected-window)))
+
+        (t
+         (error "Unrecognized option: %S" avy-all-windows))))
 
 (defmacro avy-dowindows (flip &rest body)
   "Depending on FLIP and `avy-all-windows' run BODY in each or selected window."
