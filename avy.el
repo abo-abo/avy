@@ -111,8 +111,12 @@ If the commands isn't on the list, `avy-style' is used."
   :type 'boolean)
 
 (defcustom avy-all-windows t
-  "When non-nil, loop though all windows for candidates."
-  :type 'boolean)
+  "Determine the list of windows to consider in search of candidates."
+  :type
+  '(choice
+    (const :tag "All Frames" all-frames)
+    (const :tag "This Frame" t)
+    (const :tag "This Window" nil)))
 
 (defcustom avy-case-fold-search t
   "Non-nil if searches should ignore case."
@@ -244,6 +248,16 @@ multiple DISPLAY-FN invokations."
           (funcall avy-handler-function char))))))
 
 ;;** Rest
+(defun avy-window-list ()
+  "Return a list of windows depending on `avy-all-windows'."
+  (cl-case avy-all-windows
+    (all-frames
+     (cl-mapcan #'window-list (frame-list)))
+    (this-frame
+     (window-list))
+    (t
+     (list (selected-window)))))
+
 (defmacro avy-dowindows (flip &rest body)
   "Depending on FLIP and `avy-all-windows' run BODY in each or selected window."
   (declare (indent 1)
@@ -251,9 +265,7 @@ multiple DISPLAY-FN invokations."
   `(let ((avy-all-windows (if ,flip
                               (not avy-all-windows)
                             avy-all-windows)))
-     (dolist (wnd (if avy-all-windows
-                      (window-list)
-                    (list (selected-window))))
+     (dolist (wnd (avy-window-list))
        (with-selected-window wnd
          (unless (memq major-mode '(image-mode doc-view-mode))
            ,@body)))))
@@ -297,9 +309,7 @@ Use OVERLAY-FN to visualize the decision overlay."
           (car candidates))
          (t
           (avy--make-backgrounds
-           (if avy-all-windows
-               (window-list)
-             (list (selected-window))))
+           (avy-window-list))
           (avy-read (avy-tree candidates avy-keys)
                     overlay-fn
                     #'avy--remove-leading-chars)))
