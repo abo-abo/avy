@@ -466,6 +466,21 @@ LEAF is normally ((BEG . END) . WND)."
                                                  (line-end-position))))
           (setq str (substring str 0 1))
           (setq len 1))
+        (let ((other-ov (cl-find-if
+                         (lambda (o)
+                           (and (eq (overlay-get o 'category) 'avy)
+                                (eq (overlay-start o) beg)
+                                (not (eq (overlay-get o 'window) wnd))))
+                         (overlays-in (point) (min (+ (point) len)
+                                                   (line-end-position))))))
+          (when (and other-ov
+                     (> (overlay-end other-ov)
+                        (+ beg len)))
+            (setq str (concat str (buffer-substring
+                                   (+ beg len)
+                                   (overlay-end other-ov))))
+            (setq len (- (overlay-end other-ov)
+                         beg))))
         (let* ((end (if (= beg (line-end-position))
                         (1+ beg)
                       (min (+ beg
