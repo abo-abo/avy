@@ -22,5 +22,8 @@
 (add-to-list 'load-path default-directory)
 (mapc #'byte-compile-file '("avy.el"))
 (require 'avy)
+(require 'checkdoc)
+(with-current-buffer (find-file "avy.el")
+  (checkdoc-current-buffer t))
 (global-set-key (kbd "C-c j") 'avy-goto-char)
 (global-set-key (kbd "C-'") 'avy-goto-char-2)
