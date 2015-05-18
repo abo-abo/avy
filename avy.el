@@ -460,7 +460,8 @@ LEAF is normally ((BEG . END) . WND)."
       (save-excursion
         (goto-char beg)
         (when (cl-some (lambda (o)
-                         (eq (overlay-get o 'category) 'avy))
+                         (and (eq (overlay-get o 'category) 'avy)
+                              (eq (overlay-get o 'window) wnd)))
                        (overlays-in (point) (min (+ (point) len)
                                                  (line-end-position))))
           (setq str (substring str 0 1))
