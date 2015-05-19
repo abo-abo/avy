@@ -5,7 +5,7 @@ LOAD = -l avy.el -l avy-test.el
 
 .PHONY: all test clean
 
-all: test
+all: compile test
 
 test:
 	$(emacs) -batch $(LOAD) -f ert-run-tests-batch-and-exit
