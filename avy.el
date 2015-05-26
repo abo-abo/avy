@@ -223,41 +223,6 @@ SEQ-LEN is how many elements of KEYS it takes to identify a match."
                   lst (cdr lst))))))
     (nreverse path-alist)))
 
-(defun avy-read-de-bruijn (lst keys)
-  "Select from LST dispatching on KEYS."
-  ;; In theory, the De Bruijn sequence B(k,n) has k^n subsequences of length n
-  ;; (the path length) usable as paths, thus that's the lower bound.  Due to
-  ;; partially overlapping matches, not all subsequences may be usable, so it's
-  ;; possible that the path-len must be incremented, e.g., if we're matching
-  ;; for x and a buffer contains xaxbxcx only every second subsequence is
-  ;; usable for the four matches.
-  (let* ((path-len (ceiling (log (length lst) (length keys))))
-         (alist (avy--path-alist-1 lst path-len keys)))
-    (while (not alist)
-      (cl-incf path-len)
-      (setq alist (avy--path-alist-1 lst path-len keys)))
-    (let* ((len (length (caar alist)))
-           (i 0))
-      (setq avy-current-path "")
-      (while (< i len)
-        (dolist (x (reverse alist))
-          (avy--overlay-at-full (reverse (car x)) (cdr x)))
-        (let ((char (read-char))
-              branch)
-          (avy--remove-leading-chars)
-          (setq alist
-                (delq nil
-                      (mapcar (lambda (x)
-                                (when (eq (caar x) char)
-                                  (cons (cdr (car x)) (cdr x))))
-                              alist)))
-          (setq avy-current-path
-                (concat avy-current-path (string char)))
-          (cl-incf i)
-          (unless alist
-            (funcall avy-handler-function char))))
-      (cdar alist))))
-
 (defun avy-tree (lst keys)
   "Coerce LST into a balanced tree.
 The degree of the tree is the length of KEYS.
@@ -347,6 +312,40 @@ multiple DISPLAY-FN invokations."
               (setq avy-current-path
                     (concat avy-current-path (string char))))
           (funcall avy-handler-function char))))))
+
+(defun avy-read-de-bruijn (lst keys)
+  "Select from LST dispatching on KEYS."
+  ;; In theory, the De Bruijn sequence B(k,n) has k^n subsequences of length n
+  ;; (the path length) usable as paths, thus that's the lower bound.  Due to
+  ;; partially overlapping matches, not all subsequences may be usable, so it's
+  ;; possible that the path-len must be incremented, e.g., if we're matching
+  ;; for x and a buffer contains xaxbxcx only every second subsequence is
+  ;; usable for the four matches.
+  (let* ((path-len (ceiling (log (length lst) (length keys))))
+         (alist (avy--path-alist-1 lst path-len keys)))
+    (while (not alist)
+      (cl-incf path-len)
+      (setq alist (avy--path-alist-1 lst path-len keys)))
+    (let* ((len (length (caar alist)))
+           (i 0))
+      (setq avy-current-path "")
+      (while (< i len)
+        (dolist (x (reverse alist))
+          (avy--overlay-at-full (reverse (car x)) (cdr x)))
+        (let ((char (read-char)))
+          (avy--remove-leading-chars)
+          (setq alist
+                (delq nil
+                      (mapcar (lambda (x)
+                                (when (eq (caar x) char)
+                                  (cons (cdr (car x)) (cdr x))))
+                              alist)))
+          (setq avy-current-path
+                (concat avy-current-path (string char)))
+          (cl-incf i)
+          (unless alist
+            (funcall avy-handler-function char))))
+      (cdar alist))))
 
 ;;** Rest
 (defun avy-window-list ()
