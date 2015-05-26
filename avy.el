@@ -82,7 +82,8 @@ Use `avy-styles-alist' to customize this per-command."
           (const :tag "Pre" pre)
           (const :tag "At" at)
           (const :tag "At Full" at-full)
-          (const :tag "Post" post)))
+          (const :tag "Post" post)
+          (const :tag "De Bruijn" de-bruijn)))
 
 (defcustom avy-styles-alist nil
   "Alist of avy-jump commands to the style for each command.
@@ -156,6 +157,118 @@ When nil, punctuation chars will not be matched.
        (setcdr
         (nthcdr (1- ,n) (prog1 ,lst (setq ,lst (nthcdr ,n ,lst))))
         nil))))
+
+(defun avy--de-bruijn (keys n)
+  "De Bruijn sequence for alphabet KEYS and subsequences of length N."
+  (let* ((k (length keys))
+         (a (make-list (* n k) 0))
+         sequence)
+    (cl-labels ((db (T p)
+                  (if (> T n)
+                      (if (eq (% n p) 0)
+                          (setq sequence
+                                (append sequence
+                                        (cl-subseq a 1 (1+ p)))))
+                    (setf (nth T a) (nth (- T p) a))
+                    (db (1+ T) p)
+                    (cl-loop for j from (1+ (nth (- T p) a)) to (1- k) do
+                             (setf (nth T a) j)
+                             (db (1+ T) T)))))
+      (db 1 1)
+      (mapcar (lambda (n)
+                (nth n keys))
+              sequence))))
+
+(defun avy--path-alist-1 (lst seq-len keys)
+  "Build a De Bruin sequence from LST.
+SEQ-LEN is how many elements of KEYS it takes to identify a match."
+  (let ((db-seq (avy--de-bruijn keys seq-len))
+        prev-pos prev-seq prev-win path-alist)
+    ;; The De Bruijn seq is cyclic, so append the seq-len - 1 first chars to
+    ;; the end.
+    (setq db-seq (nconc db-seq (cl-subseq db-seq 0 (1- seq-len))))
+    (cl-labels ((subseq-and-pop ()
+                  (when (nth (1- seq-len) db-seq)
+                    (prog1 (cl-subseq db-seq 0 seq-len)
+                      (pop db-seq)))))
+      (while lst
+        (let* ((cur (car lst))
+               (pos (cond
+                      ;; ace-window has matches of the form (pos . wnd)
+                      ((integerp (car cur)) (car cur))
+                      ;; avy-jump have form ((start . end) . wnd)
+                      ((consp (car cur)) (caar cur))
+                      (t (error "Unexpected match representation: %s" cur))))
+               (win (cdr cur))
+               (path (if prev-pos
+                         (let ((diff (if (eq win prev-win)
+                                         (- pos prev-pos)
+                                       0)))
+                           (when (and (> diff 0) (< diff seq-len))
+                             (while (and (nth (1- seq-len) db-seq)
+                                         (not
+                                          (eq 0 (cl-search
+                                                 (cl-subseq prev-seq diff)
+                                                 (cl-subseq db-seq 0 seq-len)))))
+                               (pop db-seq)))
+                           (subseq-and-pop))
+                       (subseq-and-pop))))
+          (if (not path)
+              (setq lst nil
+                    path-alist nil)
+            (push (cons path (car lst)) path-alist)
+            (setq prev-pos pos
+                  prev-seq path
+                  prev-win win
+                  lst (cdr lst))))))
+    (nreverse path-alist)))
+
+(defun avy--group-by (fn seq)
+  "Apply FN to each element of SEQ.
+Separate the elements of SEQ into an alist using the results as
+keys.  Keys are compared using `equal'."
+  (let (alist)
+    (while seq
+      (let* ((el (pop seq))
+             (r (funcall fn el))
+             (entry (assoc r alist)))
+        (if entry
+            (setcdr entry (cons el (cdr entry)))
+          (push (list r el) alist))))
+    alist))
+
+(defun avy--path-alist-to-tree (p-alist)
+  "Convert P-ALIST to the format of `avy-tree'."
+  (if (> (length (caar p-alist)) 1)
+      (mapcar (lambda (x)
+                (setcdr x (avy--path-alist-to-tree
+                           (mapcar (lambda (c)
+                                     (cons (cdar c) (cdr c)))
+                                   (cdr x))))
+                x)
+              (avy--group-by #'caar p-alist))
+    (mapcar (lambda (x)
+              (cons (caar x)
+                    (cons 'leaf (cdr x))))
+            p-alist)))
+
+(defun avy-tree-de-bruijn (lst keys)
+  "Coerse LST into a tree.
+The degree of the tree is the length of KEYS.
+KEYS are placed on the internal nodes according to De Bruijn sequences.
+LST elements should be of the form ((BEG . END) WND)."
+  ;; In theory, the De Bruijn sequence B(k,n) has k^n subsequences of length n
+  ;; (the path length) usable as paths, thus that's the lower bound.  Due to
+  ;; partially overlapping matches, not all subsequences may be usable, so it's
+  ;; possible that the path-len must be incremented, e.g., if we're matching
+  ;; for x and a buffer contains xaxbxcx only every second subsequence is
+  ;; usable for the four matches.
+  (let* ((path-len (ceiling (log (length lst) (length keys))))
+         (path-alist (avy--path-alist-1 lst path-len keys)))
+    (while (not path-alist)
+      (cl-incf path-len)
+      (setq path-alist (avy--path-alist-1 lst path-len keys)))
+    (avy--path-alist-to-tree path-alist)))
 
 (defun avy-tree (lst keys)
   "Coerce LST into a balanced tree.
@@ -314,7 +427,9 @@ Use OVERLAY-FN to visualize the decision overlay."
          (t
           (avy--make-backgrounds
            (avy-window-list))
-          (avy-read (avy-tree candidates avy-keys)
+          (avy-read (if (eq avy-style 'de-bruijn)
+                        (avy-tree-de-bruijn candidates avy-keys)
+                      (avy-tree candidates avy-keys))
                     overlay-fn
                     #'avy--remove-leading-chars)))
     (avy--done)))
@@ -537,6 +652,7 @@ LEAF is normally ((BEG . END) . WND)."
     (at #'avy--overlay-at)
     (at-full 'avy--overlay-at-full)
     (post #'avy--overlay-post)
+    (de-bruijn #'avy--overlay-at-full)
     (t (error "Unexpected style %S" style))))
 
 (defun avy--generic-jump (regex window-flip style)
