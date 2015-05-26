@@ -82,7 +82,8 @@ Use `avy-styles-alist' to customize this per-command."
           (const :tag "Pre" pre)
           (const :tag "At" at)
           (const :tag "At Full" at-full)
-          (const :tag "Post" post)))
+          (const :tag "Post" post)
+          (const :tag "De Bruijn" de-bruijn)))
 
 (defcustom avy-styles-alist nil
   "Alist of avy-jump commands to the style for each command.
@@ -157,6 +158,119 @@ When nil, punctuation chars will not be matched.
         (nthcdr (1- ,n) (prog1 ,lst (setq ,lst (nthcdr ,n ,lst))))
         nil))))
 
+(defun avy--de-bruijn (keys n)
+  "DeBruijn seq for alphabet `keys' and subseqs of length `n'."
+  (let* ((k (length keys))
+         (a (make-list (* n k) 0))
+         sequence)
+    (cl-labels ((db (T p)
+                    (if (> T n)
+                        (if (eq (% n p) 0)
+                            (setq sequence
+                                  (append sequence
+                                          (cl-subseq a 1 (1+ p)))))
+                      (setf (nth T a) (nth (- T p) a))
+                      (db (1+ T) p)
+                      (cl-loop for j from (1+ (nth (- T p) a)) to (1- k) do
+                               (setf (nth T a) j)
+                               (db (1+ T) T)))))
+      (db 1 1)
+      (mapcar (lambda (n)
+                (nth n keys))
+              sequence))))
+
+(defun avy--starts-with-p (list prefix)
+  "Return true iff LIST starts with PREFIX."
+  (if prefix
+      (catch 'found
+        (while (= (car list) (car prefix))
+          (setq list (cdr list)
+                prefix (cdr prefix))
+          (unless prefix
+            (throw 'found t)))
+        (throw 'found nil))
+    t))
+
+(defun avy--path-alist-1 (matches seq-len keys)
+  (let ((db-seq (avy--de-bruijn keys seq-len))
+        prev-pos prev-seq prev-win path-alist)
+    ;; The De Bruijn seq is cyclic, so append the seq-len - 1 first chars to
+    ;; the end.
+    (setq db-seq (nconc db-seq (cl-subseq db-seq 0 (1- seq-len))))
+    (cl-labels ((subseq-and-pop ()
+                                (when (nth (1- seq-len) db-seq)
+                                  (prog1 (cl-subseq db-seq 0 seq-len)
+                                    (pop db-seq)))))
+      (while matches
+        (let* ((cur (car matches))
+               (pos (caar cur))
+               (win (cdr cur))
+               (path (if prev-pos
+                         (let ((diff (if (eq win prev-win)
+                                         (- pos prev-pos)
+                                       0)))
+                           (when (and (> diff 0) (< diff seq-len))
+                             (while (and (nth (1- seq-len) db-seq)
+                                         (not (avy--starts-with-p
+                                               (cl-subseq db-seq 0 seq-len)
+                                               (cl-subseq prev-seq diff))))
+                               (pop db-seq)))
+                           (subseq-and-pop))
+                       (subseq-and-pop))))
+          (if (not path)
+              (setq matches nil
+                    path-alist nil)
+            (push (cons path (car matches)) path-alist)
+            (setq prev-pos  pos
+                  prev-seq path
+                  prev-win win
+                  matches (cdr matches))))))
+    (nreverse path-alist)))
+
+(defun avy--group-by (fn seq)
+  "Apply FUNCTION to each element of SEQ.
+Separate the elements of SEQ into an alist using the results as
+keys.  Keys are compared using `equal'."
+  (let (alist)
+    (while seq
+      (let* ((el (pop seq))
+             (r (funcall fn el))
+             (entry (assoc r alist)))
+        (if entry
+            (setcdr entry (cons el (cdr entry)))
+          (push (list r el) alist))))
+    alist))
+
+(defun avy--path-alist-to-tree (p-alist)
+  (if (> (length (caar p-alist)) 1)
+      (mapcar (lambda (x)
+                (setcdr x (avy--path-alist-to-tree
+                           (mapcar (lambda (c)
+                                     (cons (cdar c) (cdr c)))
+                                   (cdr x))))
+                x)
+              (avy--group-by #'caar p-alist))
+    (mapcar (lambda (x)
+              (cons (caar x)
+                    (cons 'leaf (cdr x))))
+            p-alist)))
+
+(defun avy-tree-de-bruijn (matches keys)
+  "An alternative to `avy-tree' which uses De Bruijn sequences
+for paths."
+  ;; In theory, the De Bruijn sequence B(k,n) has k^n subsequences of length n
+  ;; (the path length) usable as paths, thus that's the lower bound.  Due to
+  ;; partially overlapping matches, not all subsequences may be usable, so it's
+  ;; possible that the path-len must be incremented, e.g., if we're matching
+  ;; for x and a buffer contains xaxbxcx only every second subsequence is
+  ;; usable for the four matches.
+  (let* ((path-len (ceiling (log (length matches) (length keys))))
+         (path-alist (avy--path-alist-1 matches path-len keys)))
+    (while (not path-alist)
+      (cl-incf path-len)
+      (setq path-alist (avy--path-alist-1 matches path-len keys)))
+    (avy--path-alist-to-tree path-alist)))
+
 (defun avy-tree (lst keys)
   "Coerce LST into a balanced tree.
 The degree of the tree is the length of KEYS.
@@ -164,19 +278,19 @@ KEYS are placed appropriately on internal nodes."
   (let ((len (length keys)))
     (cl-labels
         ((rd (ls)
-           (let ((ln (length ls)))
-             (if (< ln len)
-                 (cl-pairlis keys
-                             (mapcar (lambda (x) (cons 'leaf x)) ls))
-               (let ((ks (copy-sequence keys))
-                     res)
-                 (dolist (s (avy-subdiv ln len))
-                   (push (cons (pop ks)
-                               (if (eq s 1)
-                                   (cons 'leaf (pop ls))
-                                 (rd (avy-multipop ls s))))
-                         res))
-                 (nreverse res))))))
+             (let ((ln (length ls)))
+               (if (< ln len)
+                   (cl-pairlis keys
+                               (mapcar (lambda (x) (cons 'leaf x)) ls))
+                 (let ((ks (copy-sequence keys))
+                       res)
+                   (dolist (s (avy-subdiv ln len))
+                     (push (cons (pop ks)
+                                 (if (eq s 1)
+                                     (cons 'leaf (pop ls))
+                                   (rd (avy-multipop ls s))))
+                           res))
+                   (nreverse res))))))
       (rd lst))))
 
 (defun avy-subdiv (n b)
@@ -302,21 +416,21 @@ POS is either a position or (BEG . END)."
            (unless (= pt (point)) (push-mark))
            (goto-char pt)))))
 
-(defun avy--process (candidates overlay-fn)
+(defun avy--process (candidates overlay-fn tree-fn)
   "Select one of CANDIDATES using `avy-read'.
 Use OVERLAY-FN to visualize the decision overlay."
   (unwind-protect
-       (cl-case (length candidates)
-         (0
-          nil)
-         (1
-          (car candidates))
-         (t
-          (avy--make-backgrounds
-           (avy-window-list))
-          (avy-read (avy-tree candidates avy-keys)
-                    overlay-fn
-                    #'avy--remove-leading-chars)))
+      (cl-case (length candidates)
+        (0
+         nil)
+        (1
+         (car candidates))
+        (t
+         (avy--make-backgrounds
+          (avy-window-list))
+         (avy-read (funcall tree-fn candidates avy-keys)
+                   overlay-fn
+                   #'avy--remove-leading-chars)))
     (avy--done)))
 
 (defvar avy--overlays-back nil
@@ -530,6 +644,38 @@ LEAF is normally ((BEG . END) . WND)."
          (cdr leaf)
        (selected-window)))))
 
+(defun avy--overlay-de-bruijn (path leaf)
+  "Create an overlay with PATH at LEAF.
+PATH is a list of keys from tree root to LEAF.
+LEAF is normally ((BEG . END) . WND)."
+  (let* ((str (propertize
+               (apply #'string (reverse path))
+               'face 'avy-lead-face))
+         (len (length path))
+         (beg (if (consp (car leaf))
+                  (caar leaf)
+                (car leaf)))
+         (wnd (cdr leaf)))
+    (when (> (length str) 1)
+      (set-text-properties 0 1 '(face avy-lead-face-0) str))
+    (with-selected-window wnd
+      (save-excursion
+        (goto-char beg)
+        (let* ((end (min (+ beg len) (line-end-position)))
+               (ol (make-overlay
+                    beg end
+                    (current-buffer)))
+               (old-str (buffer-substring beg (1+ beg))))
+          (when avy-background
+            (setq old-str (propertize
+                           old-str 'face 'avy-background-face)))
+          (overlay-put ol 'window wnd)
+          (overlay-put ol 'category 'avy)
+          (overlay-put ol 'display (if (string= old-str "\n")
+                                       (concat str "\n")
+                                     str))
+          (push ol avy--overlays-lead))))))
+
 (defun avy--style-fn (style)
   "Transform STYLE symbol to a style function."
   (cl-case style
@@ -537,6 +683,14 @@ LEAF is normally ((BEG . END) . WND)."
     (at #'avy--overlay-at)
     (at-full 'avy--overlay-at-full)
     (post #'avy--overlay-post)
+    (de-bruijn #'avy--overlay-de-bruijn)
+    (t (error "Unexpected style %S" style))))
+
+(defun avy--tree-fn (style)
+  "Transform STYLE symbol to a avy-tree function."
+  (cl-case style
+    ((pre at at-full post) #'avy-tree)
+    (de-bruijn #'avy-tree-de-bruijn)
     (t (error "Unexpected style %S" style))))
 
 (defun avy--generic-jump (regex window-flip style)
@@ -550,7 +704,8 @@ STYLE determines the leading char overlay style."
     (avy--goto
      (avy--process
       (avy--regex-candidates regex)
-      (avy--style-fn style)))))
+      (avy--style-fn style)
+      (avy--tree-fn style)))))
 
 ;;* Commands
 ;;;###autoload
@@ -584,7 +739,8 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
           (narrow-to-region (line-beginning-position)
                             (line-end-position))
           (avy--regex-candidates (string char)))
-        (avy--style-fn avy-style))))))
+        (avy--style-fn avy-style)
+        (avy--tree-fn avy-style))))))
 
 ;;;###autoload
 (defun avy-goto-char-2 (char1 char2 &optional arg)
@@ -608,7 +764,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
             (avy--regex-candidates isearch-string))
            (avy-background nil)
            (candidate
-            (avy--process candidates #'avy--overlay-post)))
+            (avy--process candidates #'avy--overlay-post #'avy-tree)))
       (isearch-done)
       (avy--goto candidate))))
 
@@ -667,7 +823,9 @@ should return true."
               (subword-backward)))
           (setq candidates (nconc candidates window-cands))))
       (avy--goto
-       (avy--process candidates (avy--style-fn avy-style))))))
+       (avy--process candidates
+                     (avy--style-fn avy-style)
+                     (avy--tree-fn avy-style))))))
 
 ;;;###autoload
 (defun avy-goto-subword-1 (char arg)
@@ -709,7 +867,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                          (line-beginning-position))
                        (selected-window)) candidates))
               (forward-line 1))))))
-    (avy--process (nreverse candidates) (avy--style-fn avy-style))))
+    (avy--process (nreverse candidates)
+                  (avy--style-fn avy-style)
+                  (avy--tree-fn avy-style))))
 
 ;;;###autoload
 (defun avy-goto-line (&optional arg)
