@@ -203,7 +203,13 @@ When nil, punctuation chars will not be matched.
                                     (pop db-seq)))))
       (while matches
         (let* ((cur (car matches))
-               (pos (caar cur))
+               (pos (cond
+                     ;; ace-window has matches of the form (pos . window)
+                     ((integerp (car cur)) (car cur))
+                     ;; avy jump functions have matches of the form ((start
+                     ;; . end) . window)
+                     ((consp (car cur))    (caar cur))
+                     (t (error "Unexpected match representation: %s" cur))))
                (win (cdr cur))
                (path (if prev-pos
                          (let ((diff (if (eq win prev-win)
