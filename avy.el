@@ -223,40 +223,8 @@ SEQ-LEN is how many elements of KEYS it takes to identify a match."
                   lst (cdr lst))))))
     (nreverse path-alist)))
 
-(defun avy--group-by (fn seq)
-  "Apply FN to each element of SEQ.
-Separate the elements of SEQ into an alist using the results as
-keys.  Keys are compared using `equal'."
-  (let (alist)
-    (while seq
-      (let* ((el (pop seq))
-             (r (funcall fn el))
-             (entry (assoc r alist)))
-        (if entry
-            (setcdr entry (cons el (cdr entry)))
-          (push (list r el) alist))))
-    alist))
-
-(defun avy--path-alist-to-tree (p-alist)
-  "Convert P-ALIST to the format of `avy-tree'."
-  (if (> (length (caar p-alist)) 1)
-      (mapcar (lambda (x)
-                (setcdr x (avy--path-alist-to-tree
-                           (mapcar (lambda (c)
-                                     (cons (cdar c) (cdr c)))
-                                   (cdr x))))
-                x)
-              (avy--group-by #'caar p-alist))
-    (mapcar (lambda (x)
-              (cons (caar x)
-                    (cons 'leaf (cdr x))))
-            p-alist)))
-
-(defun avy-tree-de-bruijn (lst keys)
-  "Coerse LST into a tree.
-The degree of the tree is the length of KEYS.
-KEYS are placed on the internal nodes according to De Bruijn sequences.
-LST elements should be of the form ((BEG . END) WND)."
+(defun avy-read-de-bruijn (lst keys)
+  "Select from LST dispatching on KEYS."
   ;; In theory, the De Bruijn sequence B(k,n) has k^n subsequences of length n
   ;; (the path length) usable as paths, thus that's the lower bound.  Due to
   ;; partially overlapping matches, not all subsequences may be usable, so it's
@@ -264,11 +232,31 @@ LST elements should be of the form ((BEG . END) WND)."
   ;; for x and a buffer contains xaxbxcx only every second subsequence is
   ;; usable for the four matches.
   (let* ((path-len (ceiling (log (length lst) (length keys))))
-         (path-alist (avy--path-alist-1 lst path-len keys)))
-    (while (not path-alist)
+         (alist (avy--path-alist-1 lst path-len keys)))
+    (while (not alist)
       (cl-incf path-len)
-      (setq path-alist (avy--path-alist-1 lst path-len keys)))
-    (avy--path-alist-to-tree path-alist)))
+      (setq alist (avy--path-alist-1 lst path-len keys)))
+    (let* ((len (length (caar alist)))
+           (i 0))
+      (setq avy-current-path "")
+      (while (< i len)
+        (dolist (x (reverse alist))
+          (avy--overlay-at-full (reverse (car x)) (cdr x)))
+        (let ((char (read-char))
+              branch)
+          (avy--remove-leading-chars)
+          (setq alist
+                (delq nil
+                      (mapcar (lambda (x)
+                                (when (eq (caar x) char)
+                                  (cons (cdr (car x)) (cdr x))))
+                              alist)))
+          (setq avy-current-path
+                (concat avy-current-path (string char)))
+          (cl-incf i)
+          (unless alist
+            (funcall avy-handler-function char))))
+      (cdar alist))))
 
 (defun avy-tree (lst keys)
   "Coerce LST into a balanced tree.
@@ -427,11 +415,12 @@ Use OVERLAY-FN to visualize the decision overlay."
          (t
           (avy--make-backgrounds
            (avy-window-list))
-          (avy-read (if (eq avy-style 'de-bruijn)
-                        (avy-tree-de-bruijn candidates avy-keys)
-                      (avy-tree candidates avy-keys))
-                    overlay-fn
-                    #'avy--remove-leading-chars)))
+          (if (eq avy-style 'de-bruijn)
+              (avy-read-de-bruijn
+               candidates avy-keys)
+            (avy-read (avy-tree candidates avy-keys)
+                      overlay-fn
+                      #'avy--remove-leading-chars))))
     (avy--done)))
 
 (defvar avy--overlays-back nil
