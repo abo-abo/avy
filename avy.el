@@ -395,7 +395,11 @@ POS is either a position or (BEG . END)."
         ((eq x 'exit))
 
         (t
-         (select-window (cdr x))
+         (let* ((window (cdr x))
+                (frame (window-frame window)))
+           (unless (equal frame (selected-frame))
+             (select-frame-set-input-focus frame))
+           (select-window window))
          (let ((pt (car x)))
            (when (consp pt)
              (setq pt (car pt)))
