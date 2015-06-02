@@ -371,7 +371,7 @@ multiple DISPLAY-FN invokations."
                             avy-all-windows)))
      (dolist (wnd (avy-window-list))
        (with-selected-window wnd
-         (unless (memq major-mode '(image-mode doc-view-mode))
+         (unless (memq major-mode '(image-mode doc-view-mode pdf-view-mode))
            ,@body)))))
 
 (defmacro avy--with-avy-keys (command &rest body)
