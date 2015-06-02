@@ -692,7 +692,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
         (save-restriction
           (narrow-to-region (line-beginning-position)
                             (line-end-position))
-          (avy--regex-candidates (string char)))
+          (avy--regex-candidates (regexp-quote (string char))))
         (avy--style-fn avy-style))))))
 
 ;;;###autoload
