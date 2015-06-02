@@ -130,6 +130,10 @@ When nil, punctuation chars will not be matched.
 \"[!-/:-@[-`{-~]\" will match all printable punctuation chars."
   :type 'regexp)
 
+(defcustom avy-ignored-modes '(image-mode doc-view-mode pdf-view-mode)
+  "List of modes to ignore when searching for candidates.
+Typically, these modes don't use the text representation.")
+
 (defface avy-lead-face-0
   '((t (:foreground "white" :background "#4f57f9")))
   "Face used for first non-terminating leading chars.")
@@ -371,7 +375,7 @@ multiple DISPLAY-FN invokations."
                             avy-all-windows)))
      (dolist (wnd (avy-window-list))
        (with-selected-window wnd
-         (unless (memq major-mode '(image-mode doc-view-mode pdf-view-mode))
+         (unless (memq major-mode avy-ignored-modes)
            ,@body)))))
 
 (defmacro avy--with-avy-keys (command &rest body)
