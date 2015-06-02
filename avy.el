@@ -681,15 +681,10 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
      avy-style)))
 
 ;;;###autoload
-(defun avy-goto-char-in-line (char &optional arg)
-  "Jump to the currently visible CHAR in the current line.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive (list (read-char "char: ")
-                     current-prefix-arg))
-  (let ((avy-all-windows
-         (if arg
-             (not avy-all-windows)
-           avy-all-windows)))
+(defun avy-goto-char-in-line (char)
+  "Jump to the currently visible CHAR in the current line."
+  (interactive (list (read-char "char: ")))
+  (let ((avy-all-windows nil))
     (avy--with-avy-keys avy-goto-char
       (avy--goto
        (avy--process
