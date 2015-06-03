@@ -93,6 +93,8 @@ It will bind, for example, `avy-isearch` to <kbd>C-'</kbd> in `isearch-mode-map`
 
 See the comprehensive custom variable list on [the defcustom wiki page](https://github.com/abo-abo/avy/wiki/defcustom).
 
+See how to write your own avy commands on [the custom-commands wiki page](https://github.com/abo-abo/avy/wiki/custom-commands).
+
 ## Contributing
 
 ### Copyright Assignment
