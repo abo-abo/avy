@@ -134,6 +134,17 @@ When nil, punctuation chars will not be matched.
   "List of modes to ignore when searching for candidates.
 Typically, these modes don't use the text representation.")
 
+(defvar avy-translate-char-function #'identity
+  "Function to translate user input key. This can be useful for
+adding mirror key. E.g. one can make SPACE an alternative of 'a',
+by adding:
+
+\(setq avy-translate-char-function
+      (lambda (c) (if (= c 32) ?a c)))
+
+to allow typing SPACE instead of character 'a' to jump to the location
+highlighted by 'a'.")
+
 (defface avy-lead-face-0
   '((t (:foreground "white" :background "#4f57f9")))
   "Face used for first non-terminating leading chars.")
@@ -319,7 +330,7 @@ multiple DISPLAY-FN invokations."
                         (push (cons path leaf) avy--leafs)))
         (dolist (x avy--leafs)
           (funcall display-fn (car x) (cdr x))))
-      (let ((char (read-char))
+      (let ((char (funcall avy-translate-char-function (read-char)))
             branch)
         (funcall cleanup-fn)
         (if (setq branch (assoc char tree))
@@ -348,7 +359,7 @@ multiple DISPLAY-FN invokations."
       (while (< i len)
         (dolist (x (reverse alist))
           (avy--overlay-at-full (reverse (car x)) (cdr x)))
-        (let ((char (read-char)))
+        (let ((char (funcall avy-translate-char-function (read-char))))
           (avy--remove-leading-chars)
           (setq alist
                 (delq nil
