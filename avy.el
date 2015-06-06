@@ -747,7 +747,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
             (avy--regex-candidates isearch-string))
            (avy-background nil)
            (candidate
-            (avy--process candidates #'avy--overlay-post)))
+            (avy--process candidates (avy--style-fn avy-style))))
       (isearch-done)
       (avy--goto candidate))))
 
