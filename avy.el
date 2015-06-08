@@ -135,15 +135,9 @@ When nil, punctuation chars will not be matched.
 Typically, these modes don't use the text representation.")
 
 (defvar avy-translate-char-function #'identity
-  "Function to translate user input key. This can be useful for
-adding mirror key. E.g. one can make SPACE an alternative of 'a',
-by adding:
-
-\(setq avy-translate-char-function
-      (lambda (c) (if (= c 32) ?a c)))
-
-to allow typing SPACE instead of character 'a' to jump to the location
-highlighted by 'a'.")
+  "Function to translate user input key into another key.
+For example, to make SPC do the same as ?a, use
+\(lambda (c) (if (= c 32) ?a c)).")
 
 (defface avy-lead-face-0
   '((t (:foreground "white" :background "#4f57f9")))
