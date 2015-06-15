@@ -596,12 +596,16 @@ LEAF is normally ((BEG . END) . WND)."
     (with-selected-window wnd
       (save-excursion
         (goto-char beg)
-        (when (setq oov (cl-find-if (lambda (o)
-                                      (and (eq (overlay-get o 'category) 'avy)
-                                           (eq (overlay-get o 'window) wnd)))
-                                    (overlays-in (point) (min (+ (point) len)
-                                                              (line-end-position)))))
-          (setq len (- (overlay-start oov) beg))
+        (when (setq oov
+                    (delq nil
+                          (mapcar
+                           (lambda (o)
+                             (and (eq (overlay-get o 'category) 'avy)
+                                  (eq (overlay-get o 'window) wnd)
+                                  (overlay-start o)))
+                           (overlays-in (point) (min (+ (point) len)
+                                                     (line-end-position))))))
+          (setq len (- (apply #'min oov) beg))
           (setq str (substring str 0 len)))
         (let ((other-ov (cl-find-if
                          (lambda (o)
