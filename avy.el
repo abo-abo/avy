@@ -769,7 +769,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                          "\\.")
                         ((and avy-word-punc-regexp
                               (string-match avy-word-punc-regexp str))
-                         str)
+                         (regexp-quote str))
                         (t
                          (concat
                           "\\b"
