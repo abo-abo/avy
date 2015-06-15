@@ -75,7 +75,7 @@
                      (const avy-move-line))
           :value-type (repeat :tag "Keys" character)))
 
-(defcustom avy-style 'pre
+(defcustom avy-style 'at-full
   "The default method of displaying the overlays.
 Use `avy-styles-alist' to customize this per-command."
   :type '(choice
