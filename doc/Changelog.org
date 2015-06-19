@@ -1,0 +1,207 @@
+* 0.3.0
+** Fixes
+*** Candidate window reversal
+See [[https://github.com/abo-abo/avy/issues/27][#27]].
+
+*** Jumping to newlines with =at-full= style
+See [[https://github.com/abo-abo/avy/issues/5][#5]].
+
+*** Stop =at-full= style from shifting text sometimes
+See [[https://github.com/abo-abo/avy/issues/5][#5]].
+
+*** Fix =at-full= interaction with tabs
+When at a tab, visualize it using =tab-width= spaces.
+
+See [[https://github.com/abo-abo/avy/issues/43][#43]].
+
+*** Fix overlay issue when the same buffer is in two windows
+
+See [[https://github.com/abo-abo/avy/issues/47][#47]] and http://debbugs.gnu.org/cgi/bugreport.cgi?bug=20607.
+
+*** Quote punctuation chars
+
+See [[https://github.com/abo-abo/avy/issues/63][#63]].
+
+*** Update screenshot for =avy-goto-char= in README.md
+Use ~C-:~ as the new suggested binding instead of the pi char.
+
+See [[https://github.com/abo-abo/avy/issues/64][#64]].
+
+** New Features
+*** =avy-goto-line= can now break into =goto-line=
+Just enter a digit and you'll be transferred into =goto-line= prompt
+with that digit already entered.  This means that you can just bind
+~M-g g~ to =avy-goto-line= without losing anything.
+
+See [[https://github.com/abo-abo/avy/issues/29][#29]].
+
+*** =avy-goto-line= now works with all kinds of overlay styles
+Any of the following do something different now:
+
+#+begin_src elisp
+(setq avy-styles-alist
+      '((avy-goto-line . post)))
+(setq avy-styles-alist
+      '((avy-goto-line . at)))
+(setq avy-styles-alist
+      '((avy-goto-line . at-full)))
+(setq avy-styles-alist
+      '((avy-goto-line . pre)))
+#+end_src
+
+See [[https://github.com/abo-abo/ace-link/issues/17][#17]].
+
+*** New defcustom =avy-case-fold-search=
+Non-nil when searches should ignore case, so e.g. =avy-goto-char= "b"
+will match both "b" and "B". On by default. Use this to turn off this
+behavior:
+
+#+begin_src elisp
+(setq avy-case-fold-search nil)
+#+end_src
+
+See [[https://github.com/abo-abo/avy/issues/34][#34]].
+
+*** New command =avy-goto-word-or-subword-1=
+
+Enter one char, and select a visible word or subword that starts with
+it, depending on =subword-mode=. Move the point there.
+
+See [[https://github.com/abo-abo/avy/issues/33][#33]].
+
+*** =avy-move-line= should remove empty line after original one is moved
+
+See [[https://github.com/abo-abo/avy/issues/40][#40]].
+
+*** =avy-move-line= now takes a prefix arg
+Use e.g. ~M-3~ before =avy-move-line= to move 3 lines at once.
+
+*** Most commands can be used non-interactively
+Example:
+#+begin_src elisp
+(defun avy-goto-lp ()
+  (interactive)
+  (avy-goto-char ?\())
+#+end_src
+
+This command only goes to the "(" character. This is actually very
+similar to [[http://oremacs.com/lispy/#lispy-ace-paren][=lispy-ace-paren=]], except the implementation is only one
+line.
+
+See [[https://github.com/abo-abo/avy/issues/44][#44]].
+
+*** (almost) all defcustoms are explained on the wiki
+
+See [[https://github.com/abo-abo/avy/wiki/defcustom][the defcustom wiki page]].
+
+*** Allow all operations to work across frames
+
+You have to customize =avy-all-windows= for this. By default, it's set
+to work on all windows on the current frame.
+
+To make it work only on the current window, use:
+#+begin_src elisp
+(setq avy-all-windows nil)
+#+end_src
+
+To make it work on all frames, use:
+#+begin_src elisp
+(setq avy-all-windows 'all-frames)
+#+end_src
+
+*** New command =avy-goto-char-in-line=
+
+This is =avy-goto-char= reduced only to the current line. Few
+candidates means very short decision chars path.
+
+See [[https://github.com/abo-abo/avy/issues/49][#49]].
+
+*** New overlay style =de-bruijn=
+
+How to use it:
+
+#+begin_src elisp
+(setq avy-style 'de-bruijn)
+#+end_src
+
+What it does: when your leading chars are clumped up together, it's
+impossible to overlay the decision path without shifting the buffer
+text a bit. For example, with the word "buffer", you =avy-goto-char= "b", and:
+
+- the path for the first "f" is "aj"
+- the path for the second "f" is "ak"
+
+It's not possible to overlay 4 characters over "ff" in "buffer". But
+to with =de-bruijn= style, which results in the path being "aj" and
+"jk". It's possible to overlay "ajk" just fine.
+
+Pros and cons of =de-bruijn= over other styles:
+
+- a pro is that it's possible to display the full decision path for
+  clumped up chars, which is truncated for other styles
+- a con is that the decision path is of the same length (e.g. 2 or 3)
+  for all candidates, while with other styles it's possible to have a
+  few candidets with a shorter path.
+
+See [[https://github.com/abo-abo/avy/issues/51][#51]] and [[https://github.com/abo-abo/avy/issues/5][#5]].
+
+*** New defcustom =avy-ignored-modes=
+
+This is meant for visual modes like =doc-view-mode= or =image-mode=
+that can have a huge number of chars in a single window. Which results
+in a huge number of candidates even in other windows.
+
+Current setting:
+
+#+begin_src elisp
+(setq avy-ignored-modes '(image-mode doc-view-mode pdf-view-mode))
+#+end_src
+
+See [[https://github.com/abo-abo/avy/issues/57][#57]].
+
+*** New tutorial on writing custom commands
+
+See the [[https://github.com/abo-abo/avy/wiki/custom-commands][the custom-commands wiki page]] and [[https://github.com/abo-abo/avy/issues/55][#55]].
+
+*** New face setup
+
+New variable =avy-lead-faces= will determine the faces used to color the current decision depth you're in.
+For example, if to select a particular candidate you need to press "abc":
+
+- "a" will be highlighted with a face that corresponds to depth 3
+- "b" will be highlighted with a face that corresponds to depth 2
+- "c" will be highlighted with a face that corresponds to depth 1
+
+But if another candidate needs "ef":
+
+- "e" will be highlighted with a face that corresponds to depth 2
+- "f" will be highlighted with a face that corresponds to depth 1
+
+See [[https://github.com/abo-abo/avy/issues/53][#53]].
+
+*** New variable =avy-translate-char-function=
+
+You can use this, for example, to interpret one character as another in =avy-keys=.
+
+Example:
+#+begin_src elisp
+(setq avy-translate-char-function
+          (lambda (c) (if (= c 32) ?a c)))
+#+end_src
+
+This will translate ~SPC~ (32) into ~a~. So you can press either ~a~ or ~SPC~ to mean "a".
+
+*** =avy-isearch= works for different styles
+
+See [[https://github.com/abo-abo/avy/issues/61][#61]].
+
+*** Switch the default style from =pre= to =at-full=
+
+I've come to like =at-full= more than =pre= over time. The difference
+is that =pre= hides no chars in your buffer, while =at-full= doesn't
+shift text.
+
+Use this to restore the previous default behavior:
+#+begin_src elisp
+(setq avy-style 'pre)
+#+end_src
