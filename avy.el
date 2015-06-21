@@ -934,13 +934,14 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (let ((c1 (read-char "char 1: "))
         (c2 (read-char "char 2: " nil avy-timeout-seconds)))
-    (avy--generic-jump
-     (regexp-quote
-      (if c2
-          (string c1 c2)
-        (string c1)))
-     arg
-     avy-style)))
+    (avy--with-avy-keys avy-goto-char-timer
+      (avy--generic-jump
+       (regexp-quote
+        (if c2
+            (string c1 c2)
+          (string c1)))
+       arg
+       avy-style))))
 
 (define-obsolete-variable-alias
     'avy-goto-char-style 'avy-style "0.1.0"

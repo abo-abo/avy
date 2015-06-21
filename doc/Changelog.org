@@ -164,9 +164,9 @@ See [[https://github.com/abo-abo/avy/issues/57][#57]].
 See the [[https://github.com/abo-abo/avy/wiki/custom-commands][the custom-commands wiki page]] and [[https://github.com/abo-abo/avy/issues/55][#55]].
 
 *** New face setup
-
-New variable =avy-lead-faces= will determine the faces used to color the current decision depth you're in.
-For example, if to select a particular candidate you need to press "abc":
+New variable =avy-lead-faces= will determine the faces used to color
+the current decision depth you're in.  For example, if to select a
+particular candidate you need to press "abc":
 
 - "a" will be highlighted with a face that corresponds to depth 3
 - "b" will be highlighted with a face that corresponds to depth 2
@@ -205,3 +205,7 @@ Use this to restore the previous default behavior:
 #+begin_src elisp
 (setq avy-style 'pre)
 #+end_src
+
+* trunk
+** Fixes
+*** =avy-goto-char-timer= obeys =avy-styles-alist=
