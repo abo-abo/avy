@@ -863,6 +863,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                (let ((line (read-from-minibuffer
                             "Goto line: " (string char))))
                  (when line
+                   (push-mark)
                    (goto-char (point-min))
                    (forward-line (1- (string-to-number line)))
                    (throw 'done 'exit)))))))
