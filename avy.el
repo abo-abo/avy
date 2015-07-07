@@ -700,7 +700,7 @@ STYLE determines the leading char overlay style."
 (defun avy-goto-char (char &optional arg)
   "Jump to the currently visible CHAR.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive (list (read-char "char: ")
+  (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy--with-avy-keys avy-goto-char
     (avy--generic-jump
@@ -713,7 +713,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 ;;;###autoload
 (defun avy-goto-char-in-line (char)
   "Jump to the currently visible CHAR in the current line."
-  (interactive (list (read-char "char: ")))
+  (interactive (list (read-char "char: " t)))
   (let ((avy-all-windows nil))
     (avy--with-avy-keys avy-goto-char
       (avy--goto
@@ -728,8 +728,8 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-goto-char-2 (char1 char2 &optional arg)
   "Jump to the currently visible CHAR1 followed by CHAR2.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive (list (read-char "char 1: ")
-                     (read-char "char 2: ")
+  (interactive (list (read-char "char 1: " t)
+                     (read-char "char 2: " t)
                      current-prefix-arg))
   (avy--with-avy-keys avy-goto-char-2
     (avy--generic-jump
@@ -762,7 +762,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-goto-word-1 (char &optional arg)
   "Jump to the currently visible CHAR at a word start.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive (list (read-char "char: ")
+  (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy--with-avy-keys avy-goto-word-1
     (let* ((str (string char))
@@ -812,7 +812,7 @@ should return true."
   "Jump to the currently visible CHAR at a subword start.
 The window scope is determined by `avy-all-windows' (ARG negates it).
 The case of CHAR is ignored."
-  (interactive (list (read-char "char: ")
+  (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy--with-avy-keys avy-goto-subword-1
     (let ((char (downcase char)))
@@ -934,8 +934,8 @@ ARG lines can be used."
   "Read one or two consecutive chars and jump to the first one.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
-  (let ((c1 (read-char "char 1: "))
-        (c2 (read-char "char 2: " nil avy-timeout-seconds)))
+  (let ((c1 (read-char "char 1: " t))
+        (c2 (read-char "char 2: " t avy-timeout-seconds)))
     (avy--with-avy-keys avy-goto-char-timer
       (avy--generic-jump
        (regexp-quote
