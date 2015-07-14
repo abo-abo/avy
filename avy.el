@@ -28,9 +28,9 @@
 ;; This package provides a generic completion method based on building
 ;; a balanced decision tree with each candidate being a leaf.  To
 ;; traverse the tree from the root to a desired leaf, typically a
-;; sequence of `read-char' can be used.
+;; sequence of `read-key' can be used.
 ;;
-;; In order for `read-char' to make sense, the tree needs to be
+;; In order for `read-key' to make sense, the tree needs to be
 ;; visualized appropriately, with a character at each branch node.  So
 ;; this completion method works only for things that you can see on
 ;; your screen, all at once:
@@ -55,8 +55,15 @@
   :prefix "avy-")
 
 (defcustom avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-  "Default keys for jumping."
-  :type '(repeat :tag "Keys" character))
+  "Default keys for jumping.
+Any key is either a character representing a self-inserting
+key (a-z, A-Z, 0-9, punctuation, etc.) or a symbol denoting a
+non-printing key like an arrow key (left, right, up, down).  For
+non-printing keys, a corresponding entry in
+`avy-key-to-char-alist' must exists in order to visualize the key
+in the avy overlays."
+  :type '(repeat :tag "Keys" (choice (character :tag "char")
+                                     (symbol :tag "non-printing key"))))
 
 (defcustom avy-keys-alist nil
   "Alist of avy-jump commands to `avy-keys' overriding the default `avy-keys'."
@@ -168,6 +175,17 @@ For example, to make SPC do the same as ?a, use
                            avy-lead-face-2)
   "Face sequence for `avy--overlay-at-full'.")
 
+(defvar avy-key-to-char-alist '((left . ?◀)
+                                (right . ?▶)
+                                (up . ?▲)
+                                (down . ?▼)
+                                (prior . ?△)
+                                (next . ?▽))
+  "An alist from non-character keys to chars used to represent
+them in the avy overlays.  This alist must contain all keys used
+in `avy-keys' which are no self-inserting keys and thus aren't
+read as characters.")
+
 ;;* Internals
 ;;** Tree
 (defmacro avy-multipop (lst n)
@@ -186,16 +204,16 @@ For example, to make SPC do the same as ?a, use
          (a (make-list (* n k) 0))
          sequence)
     (cl-labels ((db (T p)
-                  (if (> T n)
-                      (if (eq (% n p) 0)
-                          (setq sequence
-                                (append sequence
-                                        (cl-subseq a 1 (1+ p)))))
-                    (setf (nth T a) (nth (- T p) a))
-                    (db (1+ T) p)
-                    (cl-loop for j from (1+ (nth (- T p) a)) to (1- k) do
-                             (setf (nth T a) j)
-                             (db (1+ T) T)))))
+                    (if (> T n)
+                        (if (eq (% n p) 0)
+                            (setq sequence
+                                  (append sequence
+                                          (cl-subseq a 1 (1+ p)))))
+                      (setf (nth T a) (nth (- T p) a))
+                      (db (1+ T) p)
+                      (cl-loop for j from (1+ (nth (- T p) a)) to (1- k) do
+                               (setf (nth T a) j)
+                               (db (1+ T) T)))))
       (db 1 1)
       (mapcar (lambda (n)
                 (nth n keys))
@@ -302,7 +320,7 @@ KEYS is the path from the root of `avy-tree' to LEAF."
   (throw 'done nil))
 
 (defvar avy-handler-function 'avy-handler-default
-  "A function to call for a bad `read-char' in `avy-read'.")
+  "A function to call for a bad `read-key' in `avy-read'.")
 
 (defvar avy-current-path ""
   "Store the current incomplete path during `avy-read'.")
@@ -325,14 +343,14 @@ multiple DISPLAY-FN invokations."
                         (push (cons path leaf) avy--leafs)))
         (dolist (x avy--leafs)
           (funcall display-fn (car x) (cdr x))))
-      (let ((char (funcall avy-translate-char-function (read-char)))
+      (let ((char (funcall avy-translate-char-function (read-key)))
             branch)
         (funcall cleanup-fn)
         (if (setq branch (assoc char tree))
             (if (eq (car (setq tree (cdr branch))) 'leaf)
                 (throw 'done (cdr tree))
               (setq avy-current-path
-                    (concat avy-current-path (string char))))
+                    (concat avy-current-path (string (avy--key-to-char char)))))
           (funcall avy-handler-function char))))))
 
 (defun avy-read-de-bruijn (lst keys)
@@ -354,7 +372,7 @@ multiple DISPLAY-FN invokations."
       (while (< i len)
         (dolist (x (reverse alist))
           (avy--overlay-at-full (reverse (car x)) (cdr x)))
-        (let ((char (funcall avy-translate-char-function (read-char))))
+        (let ((char (funcall avy-translate-char-function (read-key))))
           (avy--remove-leading-chars)
           (setq alist
                 (delq nil
@@ -363,7 +381,7 @@ multiple DISPLAY-FN invokations."
                                   (cons (cdr (car x)) (cdr x))))
                               alist)))
           (setq avy-current-path
-                (concat avy-current-path (string char)))
+                (concat avy-current-path (string (avy--key-to-char char))))
           (cl-incf i)
           (unless alist
             (funcall avy-handler-function char))))
@@ -522,12 +540,20 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
 Do this even when the char is terminating."
   :type 'boolean)
 
+(defun avy--key-to-char (c)
+  "If C is no character, translate it using `avy-key-to-char-alist'."
+  (if (characterp c)
+      c
+    (or (cdr (assoc c avy-key-to-char-alist))
+        (error "Unknown key %s" c))))
+
 (defun avy--overlay-pre (path leaf)
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
-  (let ((str (propertize (apply #'string (reverse path))
-                         'face 'avy-lead-face)))
+  (let* ((path (mapcar #'avy--key-to-char path))
+         (str (propertize (apply #'string (reverse path))
+                          'face 'avy-lead-face)))
     (when (or avy-highlight-first (> (length str) 1))
       (set-text-properties 0 1 '(face avy-lead-face-0) str))
     (setq str (concat
@@ -550,32 +576,34 @@ LEAF is normally ((BEG . END) . WND)."
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
-  (let ((str (propertize
-              (string (car (last path)))
-              'face 'avy-lead-face))
-        (pt (+ (if (consp (car leaf))
-                   (caar leaf)
-                 (car leaf))
-               avy--overlay-offset))
-        (wnd (cdr leaf)))
-    (let ((ol (make-overlay pt (1+ pt)
-                            (window-buffer wnd)))
-          (old-str (with-selected-window wnd
-                     (buffer-substring pt (1+ pt)))))
-      (when avy-background
-        (setq old-str (propertize
-                       old-str 'face 'avy-background-face)))
-      (overlay-put ol 'window wnd)
-      (overlay-put ol 'display (if (string= old-str "\n")
-                                   (concat str "\n")
-                                 str))
-      (push ol avy--overlays-lead))))
+  (let* ((path (mapcar #'avy--key-to-char path))
+         (str (propertize
+               (string (car (last path)))
+               'face 'avy-lead-face))
+         (pt (+ (if (consp (car leaf))
+                    (caar leaf)
+                  (car leaf))
+                avy--overlay-offset))
+         (wnd (cdr leaf))
+         (ol (make-overlay pt (1+ pt)
+                           (window-buffer wnd)))
+         (old-str (with-selected-window wnd
+                    (buffer-substring pt (1+ pt)))))
+    (when avy-background
+      (setq old-str (propertize
+                     old-str 'face 'avy-background-face)))
+    (overlay-put ol 'window wnd)
+    (overlay-put ol 'display (if (string= old-str "\n")
+                                 (concat str "\n")
+                               str))
+    (push ol avy--overlays-lead)))
 
 (defun avy--overlay-at-full (path leaf)
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
-  (let* ((str (propertize
+  (let* ((path (mapcar #'avy--key-to-char path))
+         (str (propertize
                (apply #'string (reverse path))
                'face 'avy-lead-face))
          (len (length path))
@@ -652,8 +680,9 @@ LEAF is normally ((BEG . END) . WND)."
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
-  (let ((str (propertize (apply #'string (reverse path))
-                         'face 'avy-lead-face)))
+  (let* ((path (mapcar #'avy--key-to-char path))
+         (str (propertize (apply #'string (reverse path))
+                          'face 'avy-lead-face)))
     (when (or avy-highlight-first (> (length str) 1))
       (set-text-properties 0 1 '(face avy-lead-face-0) str))
     (setq str (concat
