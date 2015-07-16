@@ -431,8 +431,9 @@ multiple DISPLAY-FN invokations."
          (unless (memq major-mode avy-ignored-modes)
            ,@body)))))
 
-(defmacro avy--with-avy-keys (command &rest body)
-  "Set `avy-keys' according to COMMAND and execute BODY."
+(defmacro avy-with (command &rest body)
+  "Set `avy-keys' according to COMMAND and execute BODY.
+Set `avy-style' according to COMMMAND as well."
   (declare (indent 1)
            (debug (form body)))
   `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
@@ -469,11 +470,6 @@ multiple DISPLAY-FN invokations."
   (forward-sexp)
   (kill-region pt (point))
   (message "Killed: %s" (current-kill 0)))
-
-(define-obsolete-function-alias
-    'avy--goto 'identity "0.3.0"
-    "Don't use this function any more.
-`avy--process' will do the jump all by itself.")
 
 (defun avy--process (candidates overlay-fn)
   "Select one of CANDIDATES using `avy-read'.
@@ -779,7 +775,7 @@ STYLE determines the leading char overlay style."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
-  (avy--with-avy-keys avy-goto-char
+  (avy-with avy-goto-char
     (avy--generic-jump
      (if (= 13 char)
          "\n"
@@ -792,7 +788,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   "Jump to the currently visible CHAR in the current line."
   (interactive (list (read-char "char: " t)))
   (let ((avy-all-windows nil))
-    (avy--with-avy-keys avy-goto-char
+    (avy-with avy-goto-char
       (avy--process
        (save-restriction
          (narrow-to-region (line-beginning-position)
@@ -807,7 +803,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
-  (avy--with-avy-keys avy-goto-char-2
+  (avy-with avy-goto-char-2
     (avy--generic-jump
      (regexp-quote (string char1 char2))
      arg
@@ -817,7 +813,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-isearch ()
   "Jump to one of the current isearch candidates."
   (interactive)
-  (avy--with-avy-keys avy-isearch
+  (avy-with avy-isearch
     (let ((avy-background nil))
       (avy--process
        (avy--regex-candidates isearch-string)
@@ -829,7 +825,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   "Jump to a word start.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
-  (avy--with-avy-keys avy-goto-word-0
+  (avy-with avy-goto-word-0
     (avy--generic-jump "\\b\\sw" arg avy-style)))
 
 ;;;###autoload
@@ -838,7 +834,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
-  (avy--with-avy-keys avy-goto-word-1
+  (avy-with avy-goto-word-1
     (let* ((str (string char))
            (regex (cond ((string= str ".")
                          "\\.")
@@ -863,7 +859,7 @@ When PREDICATE is non-nil it's a function of zero parameters that
 should return true."
   (interactive "P")
   (require 'subword)
-  (avy--with-avy-keys avy-goto-subword-0
+  (avy-with avy-goto-subword-0
     (let ((case-fold-search nil)
           candidates)
       (avy-dowindows arg
@@ -887,7 +883,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it).
 The case of CHAR is ignored."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
-  (avy--with-avy-keys avy-goto-subword-1
+  (avy-with avy-goto-subword-1
     (let ((char (downcase char)))
       (avy-goto-subword-0
        arg (lambda () (eq (downcase (char-after)) char))))))
@@ -928,7 +924,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   "Jump to a line start in current buffer.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
-  (avy--with-avy-keys avy-goto-line
+  (avy-with avy-goto-line
     (let ((avy-handler-function
            (lambda (char)
              (if (or (< char ?0)
@@ -949,7 +945,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   "Copy a selected line above the current line.
 ARG lines can be used."
   (interactive "p")
-  (avy--with-avy-keys avy-copy-line
+  (avy-with avy-copy-line
     (let ((start (avy--line)))
       (move-beginning-of-line nil)
       (save-excursion
@@ -967,7 +963,7 @@ ARG lines can be used."
   "Move a selected line above the current line.
 ARG lines can be used."
   (interactive "p")
-  (avy--with-avy-keys avy-move-line
+  (avy-with avy-move-line
     (let ((start (avy--line)))
       (move-beginning-of-line nil)
       (save-excursion
@@ -981,7 +977,7 @@ ARG lines can be used."
 (defun avy-copy-region ()
   "Select two lines and copy the text between them here."
   (interactive)
-  (avy--with-avy-keys avy-copy-region
+  (avy-with avy-copy-region
     (let ((beg (avy--line))
           (end (avy--line))
           (pad (if (bolp) "" "\n")))
@@ -1011,7 +1007,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (let ((c1 (read-char "char 1: " t))
         (c2 (read-char "char 2: " t avy-timeout-seconds)))
-    (avy--with-avy-keys avy-goto-char-timer
+    (avy-with avy-goto-char-timer
       (avy--generic-jump
        (regexp-quote
         (if c2
@@ -1019,6 +1015,13 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
           (string c1)))
        arg
        avy-style))))
+
+(define-obsolete-function-alias
+    'avy--goto 'identity "0.3.0"
+    "Don't use this function any more.
+`avy--process' will do the jump all by itself.")
+
+(define-obsolete-function-alias 'avy--with-avy-keys 'avy-with "0.3.0")
 
 (provide 'avy)
 
