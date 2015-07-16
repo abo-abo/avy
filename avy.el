@@ -974,34 +974,6 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
        arg
        avy-style))))
 
-(define-obsolete-variable-alias
-    'avy-goto-char-style 'avy-style "0.1.0"
-    "Use `avy-style' and `avy-styles-alist' instead.")
-(define-obsolete-variable-alias
-    'avy-goto-word-style 'avy-style "0.1.0"
-    "Use `avy-style' and `avy-styles-alist' instead.")
-(define-obsolete-variable-alias 'avi-keys 'avy-keys "0.1.0")
-(define-obsolete-variable-alias 'avi-background 'avy-background "0.1.0")
-(define-obsolete-variable-alias 'avi-word-punc-regexp 'avy-word-punc-regexp "0.1.0")
-(define-obsolete-face-alias 'avi-lead-face 'avy-lead-face "0.1.0")
-(define-obsolete-function-alias 'avi--goto 'avy--goto "0.1.0")
-(define-obsolete-function-alias 'avi--process 'avy--process "0.1.0")
-(define-obsolete-variable-alias 'avi-all-windows 'avy-all-windows "0.1.0")
-(define-obsolete-function-alias 'avi--overlay-pre 'avy--overlay-pre "0.1.0")
-(define-obsolete-function-alias 'avi--overlay-at 'avy--overlay-at "0.1.0")
-(define-obsolete-function-alias 'avi--overlay-post 'avy--overlay-post "0.1.0")
-(define-obsolete-function-alias 'avi-goto-char 'avy-goto-char "0.1.0")
-(define-obsolete-function-alias 'avi-goto-char-2 'avy-goto-char-2 "0.1.0")
-(define-obsolete-function-alias 'avi-isearch 'avy-isearch "0.1.0")
-(define-obsolete-function-alias 'avi-goto-word-0 'avy-goto-word-0 "0.1.0")
-(define-obsolete-function-alias 'avi-goto-subword-0 'avy-goto-subword-0 "0.1.0")
-(define-obsolete-function-alias 'avi-goto-word-1 'avy-goto-word-1 "0.1.0")
-(define-obsolete-function-alias 'avi-goto-line 'avy-goto-line "0.1.0")
-(define-obsolete-function-alias 'avi-copy-line 'avy-copy-line "0.1.0")
-(define-obsolete-function-alias 'avi-move-line 'avy-move-line "0.1.0")
-(define-obsolete-function-alias 'avi-copy-region 'avy-copy-region "0.1.0")
-(define-obsolete-function-alias 'avi--regex-candidates 'avy--regex-candidates "0.1.0")
-
 (provide 'avy)
 
 ;;; avy.el ends here
