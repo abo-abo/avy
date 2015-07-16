@@ -57,13 +57,13 @@
 (defcustom avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
   "Default keys for jumping.
 Any key is either a character representing a self-inserting
-key (a-z, A-Z, 0-9, punctuation, etc.) or a symbol denoting a
+key (letters, digits, punctuation, etc.) or a symbol denoting a
 non-printing key like an arrow key (left, right, up, down).  For
 non-printing keys, a corresponding entry in
-`avy-key-to-char-alist' must exists in order to visualize the key
+`avy-key-to-char-alist' must exist in order to visualize the key
 in the avy overlays."
   :type '(repeat :tag "Keys" (choice (character :tag "char")
-                                     (symbol :tag "non-printing key"))))
+                              (symbol :tag "non-printing key"))))
 
 (defcustom avy-keys-alist nil
   "Alist of avy-jump commands to `avy-keys' overriding the default `avy-keys'."
@@ -181,10 +181,9 @@ For example, to make SPC do the same as ?a, use
                                 (down . ?▼)
                                 (prior . ?△)
                                 (next . ?▽))
-  "An alist from non-character keys to chars used to represent
-them in the avy overlays.  This alist must contain all keys used
-in `avy-keys' which are no self-inserting keys and thus aren't
-read as characters.")
+  "An alist from non-character keys to printable chars used in avy overlays.
+This alist must contain all keys used in `avy-keys' which are not
+self-inserting keys and thus aren't read as characters.")
 
 ;;* Internals
 ;;** Tree
