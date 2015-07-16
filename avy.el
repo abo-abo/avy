@@ -932,20 +932,21 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy-with avy-goto-line
-    (let ((avy-handler-function
-           (lambda (char)
-             (if (or (< char ?0)
-                     (> char ?9))
-                 (avy-handler-default char)
-               (let ((line (read-from-minibuffer
-                            "Goto line: " (string char))))
-                 (when line
-                   (push-mark)
-                   (goto-char (point-min))
-                   (forward-line (1- (string-to-number line)))
-                   (throw 'done 'exit)))))))
-      (avy-action-goto
-       (avy--line arg)))))
+    (let* ((avy-handler-function
+            (lambda (char)
+              (if (or (< char ?0)
+                      (> char ?9))
+                  (avy-handler-default char)
+                (let ((line (read-from-minibuffer
+                             "Goto line: " (string char))))
+                  (when line
+                    (push-mark)
+                    (goto-char (point-min))
+                    (forward-line (1- (string-to-number line)))
+                    (throw 'done 'exit))))))
+           (r (avy--line arg)))
+      (unless (eq r t)
+        (avy-action-goto r)))))
 
 ;;;###autoload
 (defun avy-copy-line (arg)
