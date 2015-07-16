@@ -115,6 +115,23 @@ If the commands isn't on the list, `avy-style' is used."
                        (const :tag "Post" post)
                        (const :tag "De Bruijn" de-bruijn))))
 
+(defcustom avy-dispatch-alist
+  '((?x . avy-action-kill)
+    (?m . avy-action-mark)
+    (?n . avy-action-copy))
+  "List of actions for `avy-handler-default'.
+
+Each item is (KEY . ACTION).  When KEY not on `avy-keys' is
+pressed during the dispatch, ACTION is set to replace the default
+`avy-action-goto' once a candidate is finally selected."
+  :type
+  '(alist
+    :key-type (choice (character :tag "Char"))
+    :value-type (choice
+                 (const :tag "Mark" avy-action-mark)
+                 (const :tag "Copy" avy-action-copy)
+                 (const :tag "Kill" avy-action-kill))))
+
 (defcustom avy-background nil
   "When non-nil, a gray background will be added during the selection."
   :type 'boolean)
@@ -316,22 +333,12 @@ KEYS is the path from the root of `avy-tree' to LEAF."
 (defvar avy-action nil
   "Function to call at the end of select.")
 
-(defvar avy-dispatch-alist
-  '((?x avy-action-kill)
-    (?m avy-action-mark)
-    (?n avy-action-copy))
-  "List of actions for `avy-handler-default'.
-
-Each item is (KEY ACTION). When KEY that is not on `avy-keys' is
-pressed during the dispatch, ACTION is set to replace the default
-`avy-action-goto' once a candidate is finally selected.")
-
 (defun avy-handler-default (char)
   "The default handler for a bad CHAR."
   (let (dispatch)
     (if (setq dispatch (assoc char avy-dispatch-alist))
         (progn
-          (setq avy-action (cadr dispatch))
+          (setq avy-action (cdr dispatch))
           (throw 'done 'restart))
       (signal 'user-error (list "No such candidate" char))
       (throw 'done nil))))
