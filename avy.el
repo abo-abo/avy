@@ -1024,6 +1024,11 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
        arg
        avy-style))))
 
+(defun avy-pop-mark ()
+  "Jump back to the last location of `push-mark'."
+  (interactive)
+  (set-mark-command 4))
+
 (define-obsolete-function-alias
     'avy--goto 'identity "0.3.0"
     "Don't use this function any more.
