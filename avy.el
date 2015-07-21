@@ -884,7 +884,7 @@ should return true."
       (avy--process candidates (avy--style-fn avy-style)))))
 
 ;;;###autoload
-(defun avy-goto-subword-1 (char arg)
+(defun avy-goto-subword-1 (char &optional arg)
   "Jump to the currently visible CHAR at a subword start.
 The window scope is determined by `avy-all-windows' (ARG negates it).
 The case of CHAR is ignored."
