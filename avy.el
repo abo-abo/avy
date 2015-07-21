@@ -895,6 +895,7 @@ The case of CHAR is ignored."
       (avy-goto-subword-0
        arg (lambda () (eq (downcase (char-after)) char))))))
 
+;;;###autoload
 (defun avy-goto-word-or-subword-1 ()
   "Forward to `avy-goto-subword-1' or `avy-goto-word-1'.
 Which one depends on variable `subword-mode'."
