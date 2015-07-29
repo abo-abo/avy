@@ -452,7 +452,9 @@ Set `avy-style' according to COMMMAND as well."
 
 (defun avy-action-goto (pt)
   "Goto PT."
-  (unless (= pt (point)) (push-mark))
+  (unless (or (= pt (point))
+              (region-active-p))
+    (push-mark))
   (goto-char pt))
 
 (defun avy-action-mark (pt)
