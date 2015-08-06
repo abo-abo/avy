@@ -549,7 +549,8 @@ Each element of the list is ((BEG . END) . WND)
 When PRED is non-nil, it's a filter for matching point positions.
 When GROUP is non-nil, (BEG . END) should delimit that regex group."
   (setq group (or group 0))
-  (let ((case-fold-search avy-case-fold-search)
+  (let ((case-fold-search (or avy-case-fold-search
+                              (not (string= regex (upcase regex)))))
         candidates)
     (avy-dowindows nil
       (let ((we (or end (window-end (selected-window) t))))
