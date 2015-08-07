@@ -47,6 +47,7 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'ring)
 
 ;;* Customization
 (defgroup avy nil
@@ -452,9 +453,6 @@ Set `avy-style' according to COMMMAND as well."
 
 (defun avy-action-goto (pt)
   "Goto PT."
-  (unless (or (= pt (point))
-              (region-active-p))
-    (push-mark))
   (goto-char pt))
 
 (defun avy-action-mark (pt)
@@ -506,6 +504,7 @@ Use OVERLAY-FN to visualize the decision overlay."
             ;; ignore exit from `avy-handler-function'
             ((eq res 'exit))
             (t
+             (avy-push-mark)
              (when (and (consp res)
                         (windowp (cdr res)))
                (let* ((window (cdr res))
@@ -944,7 +943,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                 (let ((line (read-from-minibuffer
                              "Goto line: " (string char))))
                   (when line
-                    (push-mark)
+                    (avy-push-mark)
                     (goto-char (point-min))
                     (forward-line (1- (string-to-number line)))
                     (throw 'done 'exit))))))
@@ -1028,10 +1027,26 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
        arg
        avy-style))))
 
+(defvar avy-ring (make-ring 20)
+  "Hold the window and point history.")
+
+(defun avy-push-mark ()
+  "Store the current point and window."
+  (ring-insert avy-ring
+               (cons (point) (selected-window))))
+
 (defun avy-pop-mark ()
-  "Jump back to the last location of `push-mark'."
+  "Jump back to the last location of `avy-push-mark'."
   (interactive)
-  (set-mark-command 4))
+  (let (res)
+    (condition-case nil
+        (progn
+          (while (not (window-live-p
+                       (cdr (setq res (ring-remove avy-ring 0))))))
+          (select-window (cdr res))
+          (goto-char (car res)))
+      (error
+       (set-mark-command 4)))))
 
 (define-obsolete-function-alias
     'avy--goto 'identity "0.3.0"
