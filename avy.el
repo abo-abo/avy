@@ -765,16 +765,17 @@ LEAF is normally ((BEG . END) . WND)."
     (de-bruijn #'avy--overlay-at-full)
     (t (error "Unexpected style %S" style))))
 
-(defun avy--generic-jump (regex window-flip style)
+(defun avy--generic-jump (regex window-flip style &optional beg end)
   "Jump to REGEX.
 When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
-STYLE determines the leading char overlay style."
+STYLE determines the leading char overlay style.
+BEG and END delimit the area where candidates are searched."
   (let ((avy-all-windows
          (if window-flip
              (not avy-all-windows)
            avy-all-windows)))
     (avy--process
-     (avy--regex-candidates regex)
+     (avy--regex-candidates regex beg end)
      (avy--style-fn style))))
 
 ;;* Commands
@@ -796,14 +797,13 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-goto-char-in-line (char)
   "Jump to the currently visible CHAR in the current line."
   (interactive (list (read-char "char: " t)))
-  (let ((avy-all-windows nil))
-    (avy-with avy-goto-char
-      (avy--process
-       (save-restriction
-         (narrow-to-region (line-beginning-position)
-                           (line-end-position))
-         (avy--regex-candidates (regexp-quote (string char))))
-       (avy--style-fn avy-style)))))
+  (avy-with avy-goto-char
+    (avy--generic-jump
+     (regexp-quote (string char))
+     avy-all-windows
+     avy-style
+     (line-beginning-position)
+     (line-end-position))))
 
 ;;;###autoload
 (defun avy-goto-char-2 (char1 char2 &optional arg)
