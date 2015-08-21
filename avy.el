@@ -857,6 +857,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
       (avy--generic-jump regex arg avy-style))))
 
 (declare-function subword-backward "subword")
+(defvar subword-bacward-regexp)
 
 ;;;###autoload
 (defun avy-goto-subword-0 (&optional arg predicate)
@@ -870,6 +871,8 @@ should return true."
   (require 'subword)
   (avy-with avy-goto-subword-0
     (let ((case-fold-search nil)
+          (subword-backward-regexp
+           "\\(\\(\\W\\|[[:lower:][:digit:]]\\)\\([!-/:@`~[:upper:]]+\\W*\\)\\|\\W\\w+\\)")
           candidates)
       (avy-dowindows arg
         (let ((ws (window-start))
