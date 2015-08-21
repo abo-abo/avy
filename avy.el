@@ -909,6 +909,8 @@ Which one depends on variable `subword-mode'."
       (call-interactively #'avy-goto-subword-1)
     (call-interactively #'avy-goto-word-1)))
 
+(defvar visual-line-mode)
+
 (defun avy--line (&optional arg)
   "Select a line.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
@@ -926,9 +928,11 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                 (push (cons
                        (if (eq avy-style 'post)
                            (line-end-position)
-                         (line-beginning-position))
+                         (point))
                        (selected-window)) candidates))
-              (forward-line 1))))))
+              (if visual-line-mode
+                  (line-move 1)
+                (forward-line 1)))))))
     (setq avy-action #'identity)
     (avy--process (nreverse candidates) (avy--style-fn avy-style))))
 
