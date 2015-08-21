@@ -857,7 +857,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
       (avy--generic-jump regex arg avy-style))))
 
 (declare-function subword-backward "subword")
-(defvar subword-bacward-regexp)
+(defvar subword-backward-regexp)
 
 ;;;###autoload
 (defun avy-goto-subword-0 (&optional arg predicate)
