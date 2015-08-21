@@ -932,7 +932,8 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                          (point))
                        (selected-window)) candidates))
               (if visual-line-mode
-                  (line-move 1)
+                  (ignore-errors
+                    (line-move 1))
                 (forward-line 1)))))))
     (setq avy-action #'identity)
     (avy--process (nreverse candidates) (avy--style-fn avy-style))))
