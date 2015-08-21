@@ -935,24 +935,35 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 ;;;###autoload
 (defun avy-goto-line (&optional arg)
   "Jump to a line start in current buffer.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (interactive "P")
-  (avy-with avy-goto-line
-    (let* ((avy-handler-function
-            (lambda (char)
-              (if (or (< char ?0)
-                      (> char ?9))
-                  (avy-handler-default char)
-                (let ((line (read-from-minibuffer
-                             "Goto line: " (string char))))
-                  (when line
-                    (avy-push-mark)
-                    (goto-char (point-min))
-                    (forward-line (1- (string-to-number line)))
-                    (throw 'done 'exit))))))
-           (r (avy--line arg)))
-      (unless (eq r t)
-        (avy-action-goto r)))))
+
+When ARG is 1, jump to lines currently visible, with the option
+to cancel to `goto-line' by entering a number.
+
+When ARG is 4, negate the window scope determined by
+`avy-all-windows'.
+
+Otherwise, forward to `goto-line' with ARG."
+  (interactive "p")
+  (if (not (memq arg '(1 4)))
+      (progn
+        (goto-char (point-min))
+        (forward-line arg))
+    (avy-with avy-goto-line
+      (let* ((avy-handler-function
+              (lambda (char)
+                (if (or (< char ?0)
+                        (> char ?9))
+                    (avy-handler-default char)
+                  (let ((line (read-from-minibuffer
+                               "Goto line: " (string char))))
+                    (when line
+                      (avy-push-mark)
+                      (goto-char (point-min))
+                      (forward-line (1- (string-to-number line)))
+                      (throw 'done 'exit))))))
+             (r (avy--line (eq arg 4))))
+        (unless (eq r t)
+          (avy-action-goto r))))))
 
 ;;;###autoload
 (defun avy-copy-line (arg)
