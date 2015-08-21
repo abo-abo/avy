@@ -1053,7 +1053,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-push-mark ()
   "Store the current point and window."
   (ring-insert avy-ring
-               (cons (point) (selected-window))))
+               (cons (point) (selected-window)))
+  (unless (region-active-p)
+    (push-mark)))
 
 (defun avy-pop-mark ()
   "Jump back to the last location of `avy-push-mark'."
