@@ -915,8 +915,7 @@ Which one depends on variable `subword-mode'."
 (defun avy--line (&optional arg)
   "Select a line.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
-  (let ((avy-background nil)
-        candidates)
+  (let (candidates)
     (avy-dowindows arg
       (let ((ws (window-start)))
         (save-excursion
