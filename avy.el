@@ -649,7 +649,10 @@ LEAF is normally ((BEG . END) . WND)."
     (overlay-put ol 'window wnd)
     (overlay-put ol 'display (if (string= old-str "\n")
                                  (concat str "\n")
-                               str))
+                               ;; add padding for wide-width character
+                               (if (eq (string-width old-str) 2)
+                                   (concat str " ")
+                                 str)))
     (push ol avy--overlays-lead)))
 
 (defun avy--overlay-at-full (path leaf)
@@ -727,7 +730,10 @@ LEAF is normally ((BEG . END) . WND)."
                              ((string= old-str "\t")
                               (concat str (make-string (- tab-width len) ?\ )))
                              (t
-                              str)))
+                              ;; add padding for wide-width character
+                              (if (eq (string-width old-str) 2)
+                                  (concat str " ")
+                                str))))
           (push ol avy--overlays-lead))))))
 
 (defun avy--overlay-post (path leaf)
