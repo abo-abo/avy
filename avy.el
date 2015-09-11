@@ -958,7 +958,7 @@ Otherwise, forward to `goto-line' with ARG."
   (if (not (memq arg '(1 4)))
       (progn
         (goto-char (point-min))
-        (forward-line arg))
+        (forward-line (1- arg)))
     (avy-with avy-goto-line
       (let* ((avy-handler-function
               (lambda (char)
