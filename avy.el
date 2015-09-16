@@ -1039,17 +1039,48 @@ ARG lines can be used."
 (defun avy--read-string-timer ()
   "Read as many chars as possible and return them as string.
 At least one char must be read, and then repeatedly one next char
-may be read if it is entered before `avy-timeout-seconds'."
-  (let ((str "") char)
-    (while (setq char (read-char (format "char%s: "
-                                         (if (string= str "")
-                                             str
-                                           (format " (%s)" str)))
-                                 t
-                                 (and (not (string= str ""))
-                                      avy-timeout-seconds)))
-      (setq str (concat str (list char))))
-    str))
+may be read if it is entered before `avy-timeout-seconds'.  `DEL'
+deletes the last char entered, and `RET' exits with the currently
+read string immediately instead of waiting for another char for
+`avy-timeout-seconds'."
+  (let ((str "") char break overlays)
+    (unwind-protect
+        (progn
+          (while (and (not break)
+                      (setq char (read-char (format "char%s: "
+                                                    (if (string= str "")
+                                                        str
+                                                      (format " (%s)" str)))
+                                            t
+                                            (and (not (string= str ""))
+                                                 avy-timeout-seconds))))
+            ;; Unhighlight
+            (dolist (ov overlays)
+              (delete-overlay ov))
+            (setq overlays nil)
+            (cond
+             ;; Handle RET
+             ((= char 13)
+              (setq break t))
+             ;; Handle DEL
+             ((= char 127)
+              (let ((l (length str)))
+                (when (>= l 1)
+                  (setq str (substring str 0 (1- l))))))
+             (t
+              (setq str (concat str (list char)))))
+            ;; Highlight
+            (when (>= (length str) 1)
+              (save-excursion
+                (goto-char (window-start))
+                (while (re-search-forward (regexp-quote str) (window-end) t)
+                  (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+                    (push ov overlays)
+                    (overlay-put ov 'window (selected-window))
+                    (overlay-put ov 'face 'avy-lead-face))))))
+          str)
+      (dolist (ov overlays)
+        (delete-overlay ov)))))
 
 ;;;###autoload
 (defun avy-goto-char-timer (&optional arg)
