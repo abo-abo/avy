@@ -185,6 +185,10 @@ For example, to make SPC do the same as ?a, use
   '((t (:foreground "gray40")))
   "Face for whole window background during selection.")
 
+(defface avy-goto-char-timer-face
+  '((t (:inherit highlight)))
+  "Face for matches during reading chars using `avy-goto-char-timer'.")
+
 (defconst avy-lead-faces '(avy-lead-face
                            avy-lead-face-0
                            avy-lead-face-2
@@ -1077,7 +1081,7 @@ read string immediately instead of waiting for another char for
                   (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
                     (push ov overlays)
                     (overlay-put ov 'window (selected-window))
-                    (overlay-put ov 'face 'avy-lead-face))))))
+                    (overlay-put ov 'face 'avy-goto-char-timer-face))))))
           str)
       (dolist (ov overlays)
         (delete-overlay ov)))))
