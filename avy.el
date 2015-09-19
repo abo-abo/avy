@@ -1047,7 +1047,7 @@ may be read if it is entered before `avy-timeout-seconds'.  `DEL'
 deletes the last char entered, and `RET' exits with the currently
 read string immediately instead of waiting for another char for
 `avy-timeout-seconds'."
-  (let ((str "") char break overlays)
+  (let ((str "") char break overlays regex)
     (unwind-protect
         (progn
           (while (and (not break)
@@ -1077,11 +1077,13 @@ read string immediately instead of waiting for another char for
             (when (>= (length str) 1)
               (save-excursion
                 (goto-char (window-start))
-                (while (re-search-forward (regexp-quote str) (window-end) t)
-                  (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
-                    (push ov overlays)
-                    (overlay-put ov 'window (selected-window))
-                    (overlay-put ov 'face 'avy-goto-char-timer-face))))))
+                (setq regex (regexp-quote str))
+                (while (re-search-forward regex (window-end) t)
+                  (unless (get-char-property (point) 'invisible)
+                    (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+                      (push ov overlays)
+                      (overlay-put ov 'window (selected-window))
+                      (overlay-put ov 'face 'avy-goto-char-timer-face)))))))
           str)
       (dolist (ov overlays)
         (delete-overlay ov)))))
