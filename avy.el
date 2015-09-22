@@ -732,7 +732,7 @@ LEAF is normally ((BEG . END) . WND)."
                        (cond ((string= old-str "\n")
                               (concat str "\n"))
                              ((string= old-str "\t")
-                              (concat str (make-string (- tab-width len) ?\ )))
+                              (concat str (make-string (max (- tab-width len) 0) ?\ )))
                              (t
                               ;; add padding for wide-width character
                               (if (eq (string-width old-str) 2)
