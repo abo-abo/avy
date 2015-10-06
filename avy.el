@@ -1075,15 +1075,19 @@ read string immediately instead of waiting for another char for
               (setq str (concat str (list char)))))
             ;; Highlight
             (when (>= (length str) 1)
-              (save-excursion
-                (goto-char (window-start))
-                (setq regex (regexp-quote str))
-                (while (re-search-forward regex (window-end) t)
-                  (unless (get-char-property (point) 'invisible)
-                    (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
-                      (push ov overlays)
-                      (overlay-put ov 'window (selected-window))
-                      (overlay-put ov 'face 'avy-goto-char-timer-face)))))))
+              (dolist (win (if avy-all-windows
+                               (window-list)
+                             (list (selected-window))))
+                (with-selected-window win
+                  (save-excursion
+                    (goto-char (window-start))
+                    (setq regex (regexp-quote str))
+                    (while (re-search-forward regex (window-end) t)
+                      (unless (get-char-property (point) 'invisible)
+                        (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+                          (push ov overlays)
+                          (overlay-put ov 'window (selected-window))
+                          (overlay-put ov 'face 'avy-goto-char-timer-face)))))))))
           str)
       (dolist (ov overlays)
         (delete-overlay ov)))))
