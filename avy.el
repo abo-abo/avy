@@ -546,6 +546,33 @@ Use OVERLAY-FN to visualize the decision overlay."
   (setq avy--overlays-back nil)
   (avy--remove-leading-chars))
 
+(defun avy--next-visible-point ()
+  "Return the next closest point without 'invisible property."
+  (let ((s (point)))
+    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
+                (get-char-property s 'invisible)))
+    s))
+
+(defun avy--next-invisible-point ()
+  "Return the next closest point with 'invisible property."
+  (let ((s (point)))
+    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
+                (not (get-char-property s 'invisible))))
+    s))
+
+(defun avy--find-visible-regions (rbeg rend)
+  "Return a list of all visible regions between RBEG and REND."
+  (let (visibles beg)
+    (save-excursion
+      (save-restriction
+        (narrow-to-region rbeg rend)
+        (setq beg (goto-char (point-min)))
+        (while (not (= (point) (point-max)))
+          (goto-char (avy--next-invisible-point))
+          (push (cons beg (point)) visibles)
+          (setq beg (goto-char (avy--next-visible-point))))
+        (nreverse visibles)))))
+
 (defun avy--regex-candidates (regex &optional beg end pred group)
   "Return all elements that match REGEX.
 Each element of the list is ((BEG . END) . WND)
@@ -556,16 +583,20 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
                               (not (string= regex (upcase regex)))))
         candidates)
     (avy-dowindows nil
-      (let ((we (or end (window-end (selected-window) t))))
-        (save-excursion
-          (goto-char (or beg (window-start)))
-          (while (re-search-forward regex we t)
-            (unless (get-char-property (point) 'invisible)
-              (when (or (null pred)
-                        (funcall pred))
-                (push (cons (cons (match-beginning group)
-                                  (match-end group))
-                            wnd) candidates)))))))
+      (dolist (pair (avy--find-visible-regions
+                     (or beg (window-start))
+                     (or end (window-end (selected-window) t))))
+        (let ((beg (car pair))
+              (end (cdr pair)))
+          (save-excursion
+            (goto-char beg)
+            (while (re-search-forward regex end t)
+              (unless (get-char-property (point) 'invisible)
+                (when (or (null pred)
+                          (funcall pred))
+                  (push (cons (cons (match-beginning group)
+                                    (match-end group))
+                              wnd) candidates))))))))
     (nreverse candidates)))
 
 (defvar avy--overlay-offset 0
