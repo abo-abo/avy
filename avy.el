@@ -589,7 +589,7 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
         (save-excursion
           (goto-char (car pair))
           (while (re-search-forward regex (cdr pair) t)
-            (unless (get-char-property (point) 'invisible)
+            (unless (get-char-property (1- (point)) 'invisible)
               (when (or (null pred)
                         (funcall pred))
                 (push (cons (cons (match-beginning group)
