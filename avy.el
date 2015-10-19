@@ -951,15 +951,16 @@ Which one depends on variable `subword-mode'."
 
 (defvar visual-line-mode)
 
-(defun avy--line (&optional arg)
+(defun avy--line (&optional arg beg end)
   "Select a line.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
+The window scope is determined by `avy-all-windows' (ARG negates it).
+Narrow the scope to BEG END."
   (let (candidates)
     (avy-dowindows arg
-      (let ((ws (window-start)))
+      (let ((ws (or beg (window-start))))
         (save-excursion
           (save-restriction
-            (narrow-to-region ws (window-end (selected-window) t))
+            (narrow-to-region ws (or end (window-end (selected-window) t)))
             (goto-char (point-min))
             (while (< (point) (point-max))
               (unless (get-char-property
@@ -1008,6 +1009,24 @@ Otherwise, forward to `goto-line' with ARG."
              (r (avy--line (eq arg 4))))
         (unless (eq r t)
           (avy-action-goto r))))))
+
+;;;###autoload
+(defun avy-goto-line-above ()
+  "Goto visible line above the cursor."
+  (interactive)
+  (let ((r (avy--line nil (window-start) (point))))
+    (unless (eq r t)
+      (avy-action-goto r))))
+
+;;;###autoload
+(defun avy-goto-line-below ()
+  "Goto visible line below the cursor."
+  (interactive)
+  (let ((r (avy--line
+            nil (point)
+            (window-end (selected-window) t))))
+    (unless (eq r t)
+      (avy-action-goto r))))
 
 ;;;###autoload
 (defun avy-copy-line (arg)
