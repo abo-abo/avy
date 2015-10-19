@@ -586,17 +586,15 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
       (dolist (pair (avy--find-visible-regions
                      (or beg (window-start))
                      (or end (window-end (selected-window) t))))
-        (let ((beg (car pair))
-              (end (cdr pair)))
-          (save-excursion
-            (goto-char beg)
-            (while (re-search-forward regex end t)
-              (unless (get-char-property (point) 'invisible)
-                (when (or (null pred)
-                          (funcall pred))
-                  (push (cons (cons (match-beginning group)
-                                    (match-end group))
-                              wnd) candidates))))))))
+        (save-excursion
+          (goto-char (car pair))
+          (while (re-search-forward regex (cdr pair) t)
+            (unless (get-char-property (point) 'invisible)
+              (when (or (null pred)
+                        (funcall pred))
+                (push (cons (cons (match-beginning group)
+                                  (match-end group))
+                            wnd) candidates)))))))
     (nreverse candidates)))
 
 (defvar avy--overlay-offset 0
