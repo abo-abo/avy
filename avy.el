@@ -485,6 +485,11 @@ Set `avy-style' according to COMMMAND as well."
 (defun avy--process (candidates overlay-fn)
   "Select one of CANDIDATES using `avy-read'.
 Use OVERLAY-FN to visualize the decision overlay."
+  (unless (and (consp (car candidates))
+               (windowp (cdar candidates)))
+    (setq candidates
+          (mapcar (lambda (x) (cons x (selected-window)))
+                  candidates)))
   (let ((len (length candidates))
         (cands (copy-sequence candidates))
         res)
