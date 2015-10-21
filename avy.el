@@ -1131,9 +1131,7 @@ This function obeys `avy-all-windows' setting."
               (setq str (concat str (list char)))))
             ;; Highlight
             (when (>= (length str) 1)
-              (dolist (win (if avy-all-windows
-                               (window-list)
-                             (list (selected-window))))
+              (dolist (win (avy-window-list))
                 (with-selected-window win
                   (dolist (pair (avy--find-visible-regions
                                  (window-start)
