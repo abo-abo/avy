@@ -1132,15 +1132,18 @@ read string immediately instead of waiting for another char for
                                (window-list)
                              (list (selected-window))))
                 (with-selected-window win
-                  (save-excursion
-                    (goto-char (window-start))
-                    (setq regex (regexp-quote str))
-                    (while (re-search-forward regex (window-end) t)
-                      (unless (get-char-property (point) 'invisible)
-                        (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
-                          (push ov overlays)
-                          (overlay-put ov 'window (selected-window))
-                          (overlay-put ov 'face 'avy-goto-char-timer-face)))))))))
+                  (dolist (pair (avy--find-visible-regions
+                                 (window-start)
+                                 (window-end (selected-window) t)))
+                    (save-excursion
+                      (goto-char (car pair))
+                      (setq regex (regexp-quote str))
+                      (while (re-search-forward regex (cdr pair) t)
+                        (unless (get-char-property (point) 'invisible)
+                          (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+                            (push ov overlays)
+                            (overlay-put ov 'window (selected-window))
+                            (overlay-put ov 'face 'avy-goto-char-timer-face))))))))))
           str)
       (dolist (ov overlays)
         (delete-overlay ov)))))
@@ -1150,7 +1153,12 @@ read string immediately instead of waiting for another char for
   "Read one or many consecutive chars and jump to the first one.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
-  (let ((str (avy--read-string-timer)))
+  (let ((str
+         (let ((avy-all-windows
+                (if arg
+                    (not avy-all-windows)
+                  avy-all-windows)))
+           (avy--read-string-timer))))
     (avy-with avy-goto-char-timer
       (avy--generic-jump
        (regexp-quote str)
