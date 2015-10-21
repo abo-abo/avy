@@ -1093,24 +1093,27 @@ ARG lines can be used."
 (defcustom avy-timeout-seconds 0.5
   "How many seconds to wait for the second char.")
 
-(defun avy--read-string-timer ()
-  "Read as many chars as possible and return them as string.
+(defun avy--read-candidates ()
+  "Read as many chars as possible and return their occurences.
 At least one char must be read, and then repeatedly one next char
 may be read if it is entered before `avy-timeout-seconds'.  `DEL'
 deletes the last char entered, and `RET' exits with the currently
 read string immediately instead of waiting for another char for
-`avy-timeout-seconds'."
+`avy-timeout-seconds'.
+The format of the result is the same as that of `avy--regex-candidates'.
+This function obeys `avy-all-windows' setting."
   (let ((str "") char break overlays regex)
     (unwind-protect
         (progn
           (while (and (not break)
-                      (setq char (read-char (format "char%s: "
-                                                    (if (string= str "")
-                                                        str
-                                                      (format " (%s)" str)))
-                                            t
-                                            (and (not (string= str ""))
-                                                 avy-timeout-seconds))))
+                      (setq char
+                            (read-char (format "char%s: "
+                                               (if (string= str "")
+                                                   str
+                                                 (format " (%s)" str)))
+                                       t
+                                       (and (not (string= str ""))
+                                            avy-timeout-seconds))))
             ;; Unhighlight
             (dolist (ov overlays)
               (delete-overlay ov))
@@ -1140,11 +1143,17 @@ read string immediately instead of waiting for another char for
                       (setq regex (regexp-quote str))
                       (while (re-search-forward regex (cdr pair) t)
                         (unless (get-char-property (point) 'invisible)
-                          (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+                          (let ((ov (make-overlay
+                                     (match-beginning 0)
+                                     (match-end 0))))
                             (push ov overlays)
                             (overlay-put ov 'window (selected-window))
                             (overlay-put ov 'face 'avy-goto-char-timer-face))))))))))
-          str)
+          (mapcar (lambda (ov)
+                    (cons (cons (overlay-start ov)
+                                (overlay-end ov))
+                          (overlay-get ov 'window)))
+                  overlays))
       (dolist (ov overlays)
         (delete-overlay ov)))))
 
@@ -1153,17 +1162,13 @@ read string immediately instead of waiting for another char for
   "Read one or many consecutive chars and jump to the first one.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
-  (let ((str
-         (let ((avy-all-windows
-                (if arg
-                    (not avy-all-windows)
-                  avy-all-windows)))
-           (avy--read-string-timer))))
+  (let ((avy-all-windows (if arg
+                             (not avy-all-windows)
+                           avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--generic-jump
-       (regexp-quote str)
-       arg
-       avy-style))))
+      (avy--process
+       (avy--read-candidates)
+       (avy--style-fn avy-style)))))
 
 (defvar avy-ring (make-ring 20)
   "Hold the window and point history.")
