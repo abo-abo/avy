@@ -93,7 +93,7 @@ Use `avy-styles-alist' to customize this per-command."
           (const :tag "Post" post)
           (const :tag "De Bruijn" de-bruijn)))
 
-(defcustom avy-styles-alist nil
+(defcustom avy-styles-alist '((avy-goto-line . pre))
   "Alist of avy-jump commands to the style for each command.
 If the commands isn't on the list, `avy-style' is used."
   :type '(alist
@@ -619,10 +619,16 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
     (let* ((pt (+ pt avy--overlay-offset))
            (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
            (old-str (with-selected-window wnd
-                      (buffer-substring pt (1+ pt)))))
+                      (buffer-substring pt (1+ pt))))
+           (os-line-prefix (get-text-property 0 'line-prefix old-str))
+           (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str)))
       (when avy-background
         (setq old-str (propertize
                        old-str 'face 'avy-background-face)))
+      (when os-line-prefix
+        (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
+      (when os-wrap-prefix
+        (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
       (overlay-put ol 'window wnd)
       (overlay-put ol 'display (concat str old-str))
       (push ol avy--overlays-lead))))
@@ -976,8 +982,9 @@ Narrow the scope to BEG END."
                          (point))
                        (selected-window)) candidates))
               (if visual-line-mode
-                  (ignore-errors
-                    (line-move 1))
+                  (progn
+                    (setq temporary-goal-column 0)
+                    (line-move-visual 1 t))
                 (forward-line 1)))))))
     (setq avy-action #'identity)
     (avy--process (nreverse candidates) (avy--style-fn avy-style))))
