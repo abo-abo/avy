@@ -1138,22 +1138,26 @@ This function obeys `avy-all-windows' setting."
               (setq str (concat str (list char)))))
             ;; Highlight
             (when (>= (length str) 1)
-              (dolist (win (avy-window-list))
-                (with-selected-window win
-                  (dolist (pair (avy--find-visible-regions
-                                 (window-start)
-                                 (window-end (selected-window) t)))
-                    (save-excursion
-                      (goto-char (car pair))
-                      (setq regex (regexp-quote str))
-                      (while (re-search-forward regex (cdr pair) t)
-                        (unless (get-char-property (1- (point)) 'invisible)
-                          (let ((ov (make-overlay
-                                     (match-beginning 0)
-                                     (match-end 0))))
-                            (push ov overlays)
-                            (overlay-put ov 'window (selected-window))
-                            (overlay-put ov 'face 'avy-goto-char-timer-face))))))))))
+              (let (found)
+                (dolist (win (avy-window-list))
+                  (with-selected-window win
+                    (dolist (pair (avy--find-visible-regions
+                                   (window-start)
+                                   (window-end (selected-window) t)))
+                      (save-excursion
+                        (goto-char (car pair))
+                        (setq regex (regexp-quote str))
+                        (while (re-search-forward regex (cdr pair) t)
+                          (unless (get-char-property (1- (point)) 'invisible)
+                            (let ((ov (make-overlay
+                                       (match-beginning 0)
+                                       (match-end 0))))
+                              (setq found t)
+                              (push ov overlays)
+                              (overlay-put ov 'window (selected-window))
+                              (overlay-put ov 'face 'avy-goto-char-timer-face))))))))
+                ;; No matches at all, so there's surely a typo in the input.
+                (unless found (beep)))))
           (nreverse (mapcar (lambda (ov)
                               (cons (cons (overlay-start ov)
                                           (overlay-end ov))
