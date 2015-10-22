@@ -1140,7 +1140,7 @@ This function obeys `avy-all-windows' setting."
                       (goto-char (car pair))
                       (setq regex (regexp-quote str))
                       (while (re-search-forward regex (cdr pair) t)
-                        (unless (get-char-property (point) 'invisible)
+                        (unless (get-char-property (1- (point)) 'invisible)
                           (let ((ov (make-overlay
                                      (match-beginning 0)
                                      (match-end 0))))
