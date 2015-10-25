@@ -621,8 +621,9 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
         (propertize old-str 'face 'avy-background-face)
       old-str)))
 
-(defun avy--overlay (str pt wnd)
-  "Create an overlay with STR at PT in WND."
+(defun avy--overlay (str pt wnd &optional compose-fn)
+  "Create an overlay with STR at PT in WND.
+COMPOSE-FN is a lambda that concatenates the old string at PT with STR."
   (when (<= (1+ pt) (with-selected-window wnd (point-max)))
     (let* ((pt (+ pt avy--overlay-offset))
            (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
@@ -634,7 +635,9 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
       (when os-wrap-prefix
         (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
       (overlay-put ol 'window wnd)
-      (overlay-put ol 'display (concat str old-str))
+      (overlay-put ol 'display (funcall
+                                (or compose-fn #'concat)
+                                str old-str))
       (push ol avy--overlays-lead))))
 
 (defcustom avy-highlight-first nil
@@ -698,19 +701,19 @@ LEAF is normally ((BEG . END) . WND)."
   (let* ((path (mapcar #'avy--key-to-char path))
          (str (propertize
                (string (car (last path)))
-               'face 'avy-lead-face))
-         (pt (+ (avy-candidate-beg leaf) avy--overlay-offset))
-         (wnd (cdr leaf))
-         (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
-         (old-str (avy--old-str pt wnd)))
-    (overlay-put ol 'window wnd)
-    (overlay-put ol 'display (if (string= old-str "\n")
-                                 (concat str "\n")
-                               ;; add padding for wide-width character
-                               (if (eq (string-width old-str) 2)
-                                   (concat str " ")
-                                 str)))
-    (push ol avy--overlays-lead)))
+               'face 'avy-lead-face)))
+    (avy--overlay
+     str
+     (avy-candidate-beg leaf)
+     (avy-candidate-wnd leaf)
+     (lambda (str old-str)
+       (cond ((string= old-str "\n")
+              (concat str "\n"))
+             ;; add padding for wide-width character
+             ((eq (string-width old-str) 2)
+              (concat str " "))
+             (t
+              str))))))
 
 (defun avy--overlay-at-full (path leaf)
   "Create an overlay with PATH at LEAF.
