@@ -93,7 +93,7 @@ Use `avy-styles-alist' to customize this per-command."
           (const :tag "Post" post)
           (const :tag "De Bruijn" de-bruijn)))
 
-(defcustom avy-styles-alist '((avy-goto-line . pre))
+(defcustom avy-styles-alist nil
   "Alist of avy-jump commands to the style for each command.
 If the commands isn't on the list, `avy-style' is used."
   :type '(alist
@@ -635,6 +635,7 @@ COMPOSE-FN is a lambda that concatenates the old string at BEG with STR."
       (when os-wrap-prefix
         (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
       (overlay-put ol 'window wnd)
+      (overlay-put ol 'category 'avy)
       (overlay-put ol 'display (funcall
                                 (or compose-fn #'concat)
                                 str old-str))
@@ -725,7 +726,8 @@ LEAF is normally ((BEG . END) . WND)."
                'face 'avy-lead-face))
          (len (length path))
          (beg (avy-candidate-beg leaf))
-         (wnd (cdr leaf)))
+         (wnd (cdr leaf))
+         end)
     (dotimes (i len)
       (set-text-properties (- len i 1) (- len i)
                            `(face ,(nth i avy-lead-faces))
@@ -739,33 +741,28 @@ LEAF is normally ((BEG . END) . WND)."
     (with-selected-window wnd
       (save-excursion
         (goto-char beg)
-        (let* ((len-and-str (avy--update-offset-and-str len str))
-               (len (car len-and-str))
-               (str (cdr len-and-str))
-               (end (if (= beg (line-end-position))
+        (let ((len-and-str (avy--update-offset-and-str len str)))
+          (setq len (car len-and-str))
+          (setq str (cdr len-and-str))
+          (setq end (if (= beg (line-end-position))
                         (1+ beg)
                       (min (+ beg
                               (if (eq (char-after) ?\t)
                                   1
                                 len))
-                           (line-end-position))))
-               (ol (make-overlay
-                    beg end
-                    (current-buffer)))
-               (old-str (avy--old-str beg wnd)))
-          (overlay-put ol 'window wnd)
-          (overlay-put ol 'category 'avy)
-          (overlay-put ol 'display
-                       (cond ((string= old-str "\n")
-                              (concat str "\n"))
-                             ((string= old-str "\t")
-                              (concat str (make-string (max (- tab-width len) 0) ?\ )))
-                             (t
-                              ;; add padding for wide-width character
-                              (if (eq (string-width old-str) 2)
-                                  (concat str " ")
-                                str))))
-          (push ol avy--overlays-lead))))))
+                           (line-end-position)))))))
+    (avy--overlay
+     str beg end wnd
+     (lambda (str old-str)
+       (cond ((string= old-str "\n")
+              (concat str "\n"))
+             ((string= old-str "\t")
+              (concat str (make-string (max (- tab-width len) 0) ?\ )))
+             (t
+              ;; add padding for wide-width character
+              (if (eq (string-width old-str) 2)
+                  (concat str " ")
+                str)))))))
 
 (defun avy--overlay-post (path leaf)
   "Create an overlay with PATH at LEAF.
