@@ -649,6 +649,30 @@ Do this even when the char is terminating."
     (or (cdr (assoc c avy-key-to-char-alist))
         (error "Unknown key %s" c))))
 
+(defun avy-candidate-beg (leaf)
+  "Return the start position for LEAF."
+  (cond ((numberp leaf)
+         leaf)
+        ((consp (car leaf))
+         (caar leaf))
+        (t
+         (car leaf))))
+
+(defun avy-candidate-end (leaf)
+  "Return the end position for LEAF."
+  (cond ((numberp leaf)
+         leaf)
+        ((consp (car leaf))
+         (cdar leaf))
+        (t
+         (car leaf))))
+
+(defun avy-candidate-wnd (leaf)
+  "Return the window for LEAF."
+  (if (consp leaf)
+      (cdr leaf)
+    (selected-window)))
+
 (defun avy--overlay-pre (path leaf)
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
@@ -664,15 +688,8 @@ LEAF is normally ((BEG . END) . WND)."
                str))
     (avy--overlay
      str
-     (cond ((numberp leaf)
-            leaf)
-           ((consp (car leaf))
-            (caar leaf))
-           (t
-            (car leaf)))
-     (if (consp leaf)
-         (cdr leaf)
-       (selected-window)))))
+     (avy-candidate-beg leaf)
+     (avy-candidate-wnd leaf))))
 
 (defun avy--overlay-at (path leaf)
   "Create an overlay with PATH at LEAF.
@@ -682,10 +699,7 @@ LEAF is normally ((BEG . END) . WND)."
          (str (propertize
                (string (car (last path)))
                'face 'avy-lead-face))
-         (pt (+ (if (consp (car leaf))
-                    (caar leaf)
-                  (car leaf))
-                avy--overlay-offset))
+         (pt (+ (avy-candidate-beg leaf) avy--overlay-offset))
          (wnd (cdr leaf))
          (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
          (old-str (avy--old-str pt wnd)))
@@ -707,9 +721,7 @@ LEAF is normally ((BEG . END) . WND)."
                (apply #'string (reverse path))
                'face 'avy-lead-face))
          (len (length path))
-         (beg (if (consp (car leaf))
-                  (caar leaf)
-                (car leaf)))
+         (beg (avy-candidate-beg leaf))
          (wnd (cdr leaf))
          oov)
     (dotimes (i len)
@@ -791,15 +803,8 @@ LEAF is normally ((BEG . END) . WND)."
                str))
     (avy--overlay
      str
-     (cond ((numberp leaf)
-            leaf)
-           ((consp (car leaf))
-            (cdar leaf))
-           (t
-            (car leaf)))
-     (if (consp leaf)
-         (cdr leaf)
-       (selected-window)))))
+     (avy-candidate-end leaf)
+     (avy-candidate-wnd leaf))))
 
 (defun avy--style-fn (style)
   "Transform STYLE symbol to a style function."
