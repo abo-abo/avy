@@ -613,18 +613,22 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
   (mapc #'delete-overlay avy--overlays-lead)
   (setq avy--overlays-lead nil))
 
+(defun avy--old-str (pt wnd)
+  "Return a one-char string at PT in WND."
+  (let ((old-str (with-selected-window wnd
+                   (buffer-substring pt (1+ pt)))))
+    (if avy-background
+        (propertize old-str 'face 'avy-background-face)
+      old-str)))
+
 (defun avy--overlay (str pt wnd)
   "Create an overlay with STR at PT in WND."
   (when (<= (1+ pt) (with-selected-window wnd (point-max)))
     (let* ((pt (+ pt avy--overlay-offset))
            (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
-           (old-str (with-selected-window wnd
-                      (buffer-substring pt (1+ pt))))
+           (old-str (avy--old-str pt wnd))
            (os-line-prefix (get-text-property 0 'line-prefix old-str))
            (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str)))
-      (when avy-background
-        (setq old-str (propertize
-                       old-str 'face 'avy-background-face)))
       (when os-line-prefix
         (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
       (when os-wrap-prefix
@@ -683,13 +687,8 @@ LEAF is normally ((BEG . END) . WND)."
                   (car leaf))
                 avy--overlay-offset))
          (wnd (cdr leaf))
-         (ol (make-overlay pt (1+ pt)
-                           (window-buffer wnd)))
-         (old-str (with-selected-window wnd
-                    (buffer-substring pt (1+ pt)))))
-    (when avy-background
-      (setq old-str (propertize
-                     old-str 'face 'avy-background-face)))
+         (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
+         (old-str (avy--old-str pt wnd)))
     (overlay-put ol 'window wnd)
     (overlay-put ol 'display (if (string= old-str "\n")
                                  (concat str "\n")
@@ -762,10 +761,7 @@ LEAF is normally ((BEG . END) . WND)."
                (ol (make-overlay
                     beg end
                     (current-buffer)))
-               (old-str (buffer-substring beg (1+ beg))))
-          (when avy-background
-            (setq old-str (propertize
-                           old-str 'face 'avy-background-face)))
+               (old-str (avy--old-str beg wnd)))
           (overlay-put ol 'window wnd)
           (overlay-put ol 'category 'avy)
           (overlay-put ol 'display
