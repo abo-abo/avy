@@ -621,13 +621,13 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
         (propertize old-str 'face 'avy-background-face)
       old-str)))
 
-(defun avy--overlay (str pt wnd &optional compose-fn)
-  "Create an overlay with STR at PT in WND.
-COMPOSE-FN is a lambda that concatenates the old string at PT with STR."
-  (when (<= (1+ pt) (with-selected-window wnd (point-max)))
-    (let* ((pt (+ pt avy--overlay-offset))
-           (ol (make-overlay pt (1+ pt) (window-buffer wnd)))
-           (old-str (avy--old-str pt wnd))
+(defun avy--overlay (str beg end wnd &optional compose-fn)
+  "Create an overlay with STR from BEG to END in WND.
+COMPOSE-FN is a lambda that concatenates the old string at BEG with STR."
+  (when (<= (1+ beg) (with-selected-window wnd (point-max)))
+    (let* ((beg (+ beg avy--overlay-offset))
+           (ol (make-overlay beg (or end (1+ beg)) (window-buffer wnd)))
+           (old-str (avy--old-str beg wnd))
            (os-line-prefix (get-text-property 0 'line-prefix old-str))
            (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str)))
       (when os-line-prefix
@@ -691,7 +691,7 @@ LEAF is normally ((BEG . END) . WND)."
                str))
     (avy--overlay
      str
-     (avy-candidate-beg leaf)
+     (avy-candidate-beg leaf) nil
      (avy-candidate-wnd leaf))))
 
 (defun avy--overlay-at (path leaf)
@@ -704,7 +704,7 @@ LEAF is normally ((BEG . END) . WND)."
                'face 'avy-lead-face)))
     (avy--overlay
      str
-     (avy-candidate-beg leaf)
+     (avy-candidate-beg leaf) nil
      (avy-candidate-wnd leaf)
      (lambda (str old-str)
        (cond ((string= old-str "\n")
@@ -782,7 +782,7 @@ LEAF is normally ((BEG . END) . WND)."
                str))
     (avy--overlay
      str
-     (avy-candidate-end leaf)
+     (avy-candidate-end leaf) nil
      (avy-candidate-wnd leaf))))
 
 (defun avy--update-offset-and-str (offset str)
