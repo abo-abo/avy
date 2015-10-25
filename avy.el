@@ -741,16 +741,21 @@ LEAF is normally ((BEG . END) . WND)."
     (with-selected-window wnd
       (save-excursion
         (goto-char beg)
-        (let ((len-and-str (avy--update-offset-and-str len str)))
+        (let* ((lep (if (bound-and-true-p visual-line-mode)
+                        (save-excursion
+                          (end-of-visual-line)
+                          (point))
+                      (line-end-position)))
+               (len-and-str (avy--update-offset-and-str len str lep)))
           (setq len (car len-and-str))
           (setq str (cdr len-and-str))
-          (setq end (if (= beg (line-end-position))
+          (setq end (if (= beg lep)
                         (1+ beg)
                       (min (+ beg
                               (if (eq (char-after) ?\t)
                                   1
                                 len))
-                           (line-end-position)))))))
+                           lep))))))
     (avy--overlay
      str beg end wnd
      (lambda (str old-str)
@@ -782,11 +787,12 @@ LEAF is normally ((BEG . END) . WND)."
      (avy-candidate-end leaf) nil
      (avy-candidate-wnd leaf))))
 
-(defun avy--update-offset-and-str (offset str)
+(defun avy--update-offset-and-str (offset str lep)
   "Recalculate the length of the new overlay at point.
 
 OFFSET is the previous overlay length.
 STR is the overlay string that we wish to add.
+LEP is the line end position.
 
 We want to add an overlay between point and END=point+OFFSET.
 When other overlays already exist between point and END, set
@@ -802,8 +808,7 @@ exist."
                        (and (eq (overlay-get o 'category) 'avy)
                             (eq (overlay-get o 'window) wnd)
                             (overlay-start o)))
-                     (overlays-in beg (min (+ beg offset)
-                                           (line-end-position)))))))
+                     (overlays-in beg (min (+ beg offset) lep))))))
     (when oov
       (setq offset (- (apply #'min oov) beg))
       (setq str (substring str 0 offset)))
@@ -812,8 +817,7 @@ exist."
                        (and (eq (overlay-get o 'category) 'avy)
                             (eq (overlay-start o) beg)
                             (not (eq (overlay-get o 'window) wnd))))
-                     (overlays-in (point) (min (+ (point) offset)
-                                               (line-end-position))))))
+                     (overlays-in (point) (min (+ (point) offset) lep)))))
       (when (and other-ov
                  (> (overlay-end other-ov)
                     (+ beg offset)))
