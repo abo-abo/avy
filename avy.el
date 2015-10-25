@@ -755,7 +755,11 @@ LEAF is normally ((BEG . END) . WND)."
                               (if (eq (char-after) ?\t)
                                   1
                                 len))
-                           lep))))))
+                           lep)))
+          (when (and (bound-and-true-p visual-line-mode)
+                     (> len (- end beg)))
+            (setq len (- end beg))
+            (setq str (substring str 0 len))))))
     (avy--overlay
      str beg end wnd
      (lambda (str old-str)
