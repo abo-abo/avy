@@ -759,10 +759,16 @@ LEAF is normally ((BEG . END) . WND)."
           (when (and (bound-and-true-p visual-line-mode)
                      (> len (- end beg)))
             (setq len (- end beg))
-            (setq str
-                  (substring (propertize
-                              (apply #'string (reverse path))
-                              'face 'avy-lead-face) 0 len))))))
+            (let ((old-str (apply #'string (reverse path))))
+              (setq str
+                    (substring
+                     (propertize
+                      old-str
+                      'face
+                      (if (= (length old-str) 1)
+                          'avy-lead-face
+                        'avy-lead-face-0))
+                     0 len)))))))
     (avy--overlay
      str beg end wnd
      (lambda (str old-str)
