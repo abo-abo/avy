@@ -1147,58 +1147,57 @@ The format of the result is the same as that of `avy--regex-candidates'.
 This function obeys `avy-all-windows' setting."
   (let ((str "") char break overlays regex)
     (unwind-protect
-        (progn
-          (while (and (not break)
-                      (setq char
-                            (read-char (format "char%s: "
-                                               (if (string= str "")
-                                                   str
-                                                 (format " (%s)" str)))
-                                       t
-                                       (and (not (string= str ""))
-                                            avy-timeout-seconds))))
-            ;; Unhighlight
-            (dolist (ov overlays)
-              (delete-overlay ov))
-            (setq overlays nil)
-            (cond
-             ;; Handle RET
-             ((= char 13)
-              (setq break t))
-             ;; Handle DEL
-             ((= char 127)
-              (let ((l (length str)))
-                (when (>= l 1)
-                  (setq str (substring str 0 (1- l))))))
-             (t
-              (setq str (concat str (list char)))))
-            ;; Highlight
-            (when (>= (length str) 1)
-              (let (found)
-                (dolist (win (avy-window-list))
-                  (with-selected-window win
-                    (dolist (pair (avy--find-visible-regions
-                                   (window-start)
-                                   (window-end (selected-window) t)))
-                      (save-excursion
-                        (goto-char (car pair))
-                        (setq regex (regexp-quote str))
-                        (while (re-search-forward regex (cdr pair) t)
-                          (unless (get-char-property (1- (point)) 'invisible)
-                            (let ((ov (make-overlay
-                                       (match-beginning 0)
-                                       (match-end 0))))
-                              (setq found t)
-                              (push ov overlays)
-                              (overlay-put ov 'window (selected-window))
-                              (overlay-put ov 'face 'avy-goto-char-timer-face))))))))
-                ;; No matches at all, so there's surely a typo in the input.
-                (unless found (beep)))))
-          (nreverse (mapcar (lambda (ov)
-                              (cons (cons (overlay-start ov)
-                                          (overlay-end ov))
-                                    (overlay-get ov 'window)))
-                            overlays)))
+         (progn
+           (while (and (not break)
+                       (setq char
+                             (read-char (format "char%s: "
+                                                (if (string= str "")
+                                                    str
+                                                  (format " (%s)" str)))
+                                        t
+                                        (and (not (string= str ""))
+                                             avy-timeout-seconds))))
+             ;; Unhighlight
+             (dolist (ov overlays)
+               (delete-overlay ov))
+             (setq overlays nil)
+             (cond
+               ;; Handle RET
+               ((= char 13)
+                (setq break t))
+               ;; Handle DEL
+               ((= char 127)
+                (let ((l (length str)))
+                  (when (>= l 1)
+                    (setq str (substring str 0 (1- l))))))
+               (t
+                (setq str (concat str (list char)))))
+             ;; Highlight
+             (when (>= (length str) 1)
+               (let (found)
+                 (avy-dowindows nil
+                   (dolist (pair (avy--find-visible-regions
+                                  (window-start)
+                                  (window-end (selected-window) t)))
+                     (save-excursion
+                       (goto-char (car pair))
+                       (setq regex (regexp-quote str))
+                       (while (re-search-forward regex (cdr pair) t)
+                         (unless (get-char-property (1- (point)) 'invisible)
+                           (let ((ov (make-overlay
+                                      (match-beginning 0)
+                                      (match-end 0))))
+                             (setq found t)
+                             (push ov overlays)
+                             (overlay-put ov 'window (selected-window))
+                             (overlay-put ov 'face 'avy-goto-char-timer-face)))))))
+                 ;; No matches at all, so there's surely a typo in the input.
+                 (unless found (beep)))))
+           (nreverse (mapcar (lambda (ov)
+                               (cons (cons (overlay-start ov)
+                                           (overlay-end ov))
+                                     (overlay-get ov 'window)))
+                             overlays)))
       (dolist (ov overlays)
         (delete-overlay ov)))))
 
