@@ -390,31 +390,32 @@ multiple DISPLAY-FN invokations."
   ;; possible that the path-len must be incremented, e.g., if we're matching
   ;; for x and a buffer contains xaxbxcx only every second subsequence is
   ;; usable for the four matches.
-  (let* ((path-len (ceiling (log (length lst) (length keys))))
-         (alist (avy--path-alist-1 lst path-len keys)))
-    (while (not alist)
-      (cl-incf path-len)
-      (setq alist (avy--path-alist-1 lst path-len keys)))
-    (let* ((len (length (caar alist)))
-           (i 0))
-      (setq avy-current-path "")
-      (while (< i len)
-        (dolist (x (reverse alist))
-          (avy--overlay-at-full (reverse (car x)) (cdr x)))
-        (let ((char (funcall avy-translate-char-function (read-key))))
-          (avy--remove-leading-chars)
-          (setq alist
-                (delq nil
-                      (mapcar (lambda (x)
-                                (when (eq (caar x) char)
-                                  (cons (cdr (car x)) (cdr x))))
-                              alist)))
-          (setq avy-current-path
-                (concat avy-current-path (string (avy--key-to-char char))))
-          (cl-incf i)
-          (unless alist
-            (funcall avy-handler-function char))))
-      (cdar alist))))
+  (catch 'done
+    (let* ((path-len (ceiling (log (length lst) (length keys))))
+           (alist (avy--path-alist-1 lst path-len keys)))
+      (while (not alist)
+        (cl-incf path-len)
+        (setq alist (avy--path-alist-1 lst path-len keys)))
+      (let* ((len (length (caar alist)))
+             (i 0))
+        (setq avy-current-path "")
+        (while (< i len)
+          (dolist (x (reverse alist))
+            (avy--overlay-at-full (reverse (car x)) (cdr x)))
+          (let ((char (funcall avy-translate-char-function (read-key))))
+            (avy--remove-leading-chars)
+            (setq alist
+                  (delq nil
+                        (mapcar (lambda (x)
+                                  (when (eq (caar x) char)
+                                    (cons (cdr (car x)) (cdr x))))
+                                alist)))
+            (setq avy-current-path
+                  (concat avy-current-path (string (avy--key-to-char char))))
+            (cl-incf i)
+            (unless alist
+              (funcall avy-handler-function char))))
+        (cdar alist)))))
 
 ;;** Rest
 (defun avy-window-list ()
