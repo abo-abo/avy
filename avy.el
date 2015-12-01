@@ -1080,23 +1080,35 @@ Otherwise, forward to `goto-line' with ARG."
     (unless (eq r t)
       (avy-action-goto r))))
 
+(defcustom avy-line-insert-style 'above
+  "How to insert the newly copied/cut line."
+  :type '(choice
+          (const :tag "Above" above)
+          (const :tag "Below" below)))
+
 ;;;###autoload
 (defun avy-copy-line (arg)
   "Copy a selected line above the current line.
 ARG lines can be used."
   (interactive "p")
   (avy-with avy-copy-line
-    (let ((start (avy--line)))
-      (move-beginning-of-line nil)
-      (save-excursion
-        (insert
-         (buffer-substring-no-properties
-          start
-          (save-excursion
-            (goto-char start)
-            (move-end-of-line arg)
-            (point)))
-         "\n")))))
+    (let* ((start (avy--line))
+           (str (buffer-substring-no-properties
+                 start
+                 (save-excursion
+                   (goto-char start)
+                   (move-end-of-line arg)
+                   (point)))))
+      (cond ((eq avy-line-insert-style 'above)
+             (beginning-of-line)
+             (save-excursion
+               (insert str "\n")))
+            ((eq avy-line-insert-style 'below)
+             (end-of-line)
+             (insert "\n" str)
+             (beginning-of-line))
+            (t
+             (user-error "Unexpected `avy-line-insert-style'"))))))
 
 ;;;###autoload
 (defun avy-move-line (arg)
@@ -1105,13 +1117,21 @@ ARG lines can be used."
   (interactive "p")
   (avy-with avy-move-line
     (let ((start (avy--line)))
-      (move-beginning-of-line nil)
       (save-excursion
-        (save-excursion
-          (goto-char start)
-          (kill-whole-line arg))
-        (insert
-         (current-kill 0))))))
+        (goto-char start)
+        (kill-whole-line arg))
+      (cond ((eq avy-line-insert-style 'above)
+             (beginning-of-line)
+             (save-excursion
+               (insert
+                (current-kill 0))))
+            ((eq avy-line-insert-style 'below)
+             (end-of-line)
+             (newline)
+             (save-excursion
+               (insert (substring (current-kill 0) 0 -1))))
+            (t
+             (user-error "Unexpected `avy-line-insert-style'"))))))
 
 ;;;###autoload
 (defun avy-copy-region ()
