@@ -1138,18 +1138,24 @@ ARG lines can be used."
   "Select two lines and copy the text between them here."
   (interactive)
   (avy-with avy-copy-region
-    (let ((beg (avy--line))
-          (end (avy--line))
-          (pad (if (bolp) "" "\n")))
-      (move-beginning-of-line nil)
-      (save-excursion
-        (insert
-         (buffer-substring-no-properties
-          beg
-          (save-excursion
-            (goto-char end)
-            (line-end-position)))
-         pad)))))
+    (let* ((beg (avy--line))
+           (end (avy--line))
+           (str (buffer-substring-no-properties
+                 beg
+                 (save-excursion
+                   (goto-char end)
+                   (line-end-position)))))
+      (cond ((eq avy-line-insert-style 'above)
+             (beginning-of-line)
+             (save-excursion
+               (insert str "\n")))
+            ((eq avy-line-insert-style 'below)
+             (end-of-line)
+             (newline)
+             (save-excursion
+               (insert str)))
+            (t
+             (user-error "Unexpected `avy-line-insert-style'"))))))
 
 ;;;###autoload
 (defun avy-setup-default ()
