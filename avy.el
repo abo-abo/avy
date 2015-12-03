@@ -1067,7 +1067,8 @@ Otherwise, forward to `goto-line' with ARG."
   "Goto visible line above the cursor."
   (interactive)
   (let* ((avy-all-windows nil)
-         (r (avy--line nil (window-start) (point))))
+         (r (avy--line nil (window-start)
+                       (line-beginning-position))))
     (unless (eq r t)
       (avy-action-goto r))))
 
@@ -1077,7 +1078,7 @@ Otherwise, forward to `goto-line' with ARG."
   (interactive)
   (let* ((avy-all-windows nil)
          (r (avy--line
-             nil (point)
+             nil (line-beginning-position 2)
              (window-end (selected-window) t))))
     (unless (eq r t)
       (avy-action-goto r))))
