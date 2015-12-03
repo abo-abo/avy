@@ -1066,7 +1066,8 @@ Otherwise, forward to `goto-line' with ARG."
 (defun avy-goto-line-above ()
   "Goto visible line above the cursor."
   (interactive)
-  (let ((r (avy--line nil (window-start) (point))))
+  (let* ((avy-all-windows nil)
+         (r (avy--line nil (window-start) (point))))
     (unless (eq r t)
       (avy-action-goto r))))
 
@@ -1074,9 +1075,10 @@ Otherwise, forward to `goto-line' with ARG."
 (defun avy-goto-line-below ()
   "Goto visible line below the cursor."
   (interactive)
-  (let ((r (avy--line
-            nil (point)
-            (window-end (selected-window) t))))
+  (let* ((avy-all-windows nil)
+         (r (avy--line
+             nil (point)
+             (window-end (selected-window) t))))
     (unless (eq r t)
       (avy-action-goto r))))
 
