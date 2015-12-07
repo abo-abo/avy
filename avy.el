@@ -432,12 +432,18 @@ multiple DISPLAY-FN invokations."
         (t
          (error "Unrecognized option: %S" avy-all-windows))))
 
+(defcustom avy-all-windows-alt t
+  "The alternative `avy-all-windows' for use with \\[universal-argument]."
+  :type '(choice
+          (const :tag "All windows on the current frame" t)
+          (const :tag "All windows on all frames" all-frames)))
+
 (defmacro avy-dowindows (flip &rest body)
   "Depending on FLIP and `avy-all-windows' run BODY in each or selected window."
   (declare (indent 1)
            (debug (form body)))
   `(let ((avy-all-windows (if ,flip
-                              (not avy-all-windows)
+                              avy-all-windows-alt
                             avy-all-windows)))
      (dolist (wnd (avy-window-list))
        (with-selected-window wnd
@@ -591,7 +597,7 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
   (let ((case-fold-search (or avy-case-fold-search
                               (not (string= regex (upcase regex)))))
         candidates)
-    (avy-dowindows nil
+    (avy-dowindows current-prefix-arg
       (dolist (pair (avy--find-visible-regions
                      (or beg (window-start))
                      (or end (window-end (selected-window) t))))
@@ -1208,7 +1214,7 @@ This function obeys `avy-all-windows' setting."
              ;; Highlight
              (when (>= (length str) 1)
                (let (found)
-                 (avy-dowindows nil
+                 (avy-dowindows current-prefix-arg
                    (dolist (pair (avy--find-visible-regions
                                   (window-start)
                                   (window-end (selected-window) t)))
