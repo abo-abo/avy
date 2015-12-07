@@ -1143,28 +1143,33 @@ ARG lines can be used."
              (user-error "Unexpected `avy-line-insert-style'"))))))
 
 ;;;###autoload
-(defun avy-copy-region ()
-  "Select two lines and copy the text between them here."
-  (interactive)
-  (avy-with avy-copy-region
-    (let* ((beg (avy--line))
-           (end (avy--line))
-           (str (buffer-substring-no-properties
-                 beg
-                 (save-excursion
-                   (goto-char end)
-                   (line-end-position)))))
-      (cond ((eq avy-line-insert-style 'above)
-             (beginning-of-line)
-             (save-excursion
-               (insert str "\n")))
-            ((eq avy-line-insert-style 'below)
-             (end-of-line)
-             (newline)
-             (save-excursion
-               (insert str)))
-            (t
-             (user-error "Unexpected `avy-line-insert-style'"))))))
+(defun avy-copy-region (arg)
+  "Select two lines and copy the text between them to point.
+
+The window scope is determined by `avy-all-windows' or
+`avy-all-windows-alt' when ARG is non-nil."
+  (interactive "P")
+  (let ((initial-window (selected-window)))
+    (avy-with avy-copy-region
+      (let* ((beg (avy--line arg))
+             (end (avy--line arg))
+             (str (buffer-substring-no-properties
+                   beg
+                   (save-excursion
+                     (goto-char end)
+                     (line-end-position)))))
+        (select-window initial-window)
+        (cond ((eq avy-line-insert-style 'above)
+               (beginning-of-line)
+               (save-excursion
+                 (insert str "\n")))
+              ((eq avy-line-insert-style 'below)
+               (end-of-line)
+               (newline)
+               (save-excursion
+                 (insert str)))
+              (t
+               (user-error "Unexpected `avy-line-insert-style'")))))))
 
 ;;;###autoload
 (defun avy-setup-default ()
