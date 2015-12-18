@@ -1070,8 +1070,10 @@ Otherwise, forward to `goto-line' with ARG."
                                "Goto line: " (string char))))
                     (when line
                       (avy-push-mark)
-                      (goto-char (point-min))
-                      (forward-line (1- (string-to-number line)))
+                      (save-restriction
+                        (widen)
+                        (goto-char (point-min))
+                        (forward-line (1- (string-to-number line))))
                       (throw 'done 'exit))))))
              (r (avy--line (eq arg 4))))
         (unless (eq r t)
