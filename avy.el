@@ -634,22 +634,26 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
 (defun avy--overlay (str beg end wnd &optional compose-fn)
   "Create an overlay with STR from BEG to END in WND.
 COMPOSE-FN is a lambda that concatenates the old string at BEG with STR."
-  (when (<= (1+ beg) (with-selected-window wnd (point-max)))
-    (let* ((beg (+ beg avy--overlay-offset))
-           (ol (make-overlay beg (or end (1+ beg)) (window-buffer wnd)))
-           (old-str (avy--old-str beg wnd))
-           (os-line-prefix (get-text-property 0 'line-prefix old-str))
-           (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str)))
-      (when os-line-prefix
-        (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
-      (when os-wrap-prefix
-        (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
-      (overlay-put ol 'window wnd)
-      (overlay-put ol 'category 'avy)
-      (overlay-put ol 'display (funcall
-                                (or compose-fn #'concat)
-                                str old-str))
-      (push ol avy--overlays-lead))))
+  (let ((eob (with-selected-window wnd (point-max))))
+    (when (<= beg eob)
+      (let* ((beg (+ beg avy--overlay-offset))
+             (ol (make-overlay beg (or end (1+ beg)) (window-buffer wnd)))
+             (old-str (if (eq beg eob) "" (avy--old-str beg wnd)))
+             (os-line-prefix (get-text-property 0 'line-prefix old-str))
+             (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str)))
+        (when os-line-prefix
+          (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
+        (when os-wrap-prefix
+          (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
+        (overlay-put ol 'window wnd)
+        (overlay-put ol 'category 'avy)
+        (overlay-put ol (if (eq beg eob)
+                            'after-string
+                          'display)
+                     (funcall
+                      (or compose-fn #'concat)
+                      str old-str))
+        (push ol avy--overlays-lead)))))
 
 (defcustom avy-highlight-first nil
   "When non-nil highlight the first decision char with `avy-lead-face-0'.
