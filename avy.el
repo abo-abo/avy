@@ -595,7 +595,7 @@ When PRED is non-nil, it's a filter for matching point positions.
 When GROUP is non-nil, (BEG . END) should delimit that regex group."
   (setq group (or group 0))
   (let ((case-fold-search (or avy-case-fold-search
-                              (not (string= regex (upcase regex)))))
+                              (string= regex (downcase regex))))
         candidates)
     (avy-dowindows current-prefix-arg
       (dolist (pair (avy--find-visible-regions
