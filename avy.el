@@ -1167,7 +1167,8 @@ The window scope is determined by `avy-all-windows' or
   (interactive "P")
   (let ((initial-window (selected-window)))
     (avy-with avy-copy-region
-      (let* ((beg (avy--line arg))
+      (let* ((beg (save-selected-window
+                    (avy--line arg)))
              (end (avy--line arg))
              (str (buffer-substring-no-properties
                    beg
