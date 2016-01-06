@@ -771,7 +771,8 @@ LEAF is normally ((BEG . END) . WND)."
                                 len))
                            lep)))
           (when (and (bound-and-true-p visual-line-mode)
-                     (> len (- end beg)))
+                     (> len (- end beg))
+                     (not (eq lep beg)))
             (setq len (- end beg))
             (let ((old-str (apply #'string (reverse path))))
               (setq str
