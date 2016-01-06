@@ -1235,7 +1235,9 @@ This function obeys `avy-all-windows' setting."
                 (setq str (concat str (list char)))))
              ;; Highlight
              (when (>= (length str) 1)
-               (let (found)
+               (let ((case-fold-search
+                      (or avy-case-fold-search (string= str (downcase str))))
+                     found)
                  (avy-dowindows current-prefix-arg
                    (dolist (pair (avy--find-visible-regions
                                   (window-start)
