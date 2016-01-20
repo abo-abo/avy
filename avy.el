@@ -1,4 +1,4 @@
-;;; avy.el --- set-based completion -*- lexical-binding: t -*-
+;;; avy.el --- tree-based completion -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015  Free Software Foundation, Inc.
 
@@ -640,11 +640,18 @@ COMPOSE-FN is a lambda that concatenates the old string at BEG with STR."
              (ol (make-overlay beg (or end (1+ beg)) (window-buffer wnd)))
              (old-str (if (eq beg eob) "" (avy--old-str beg wnd)))
              (os-line-prefix (get-text-property 0 'line-prefix old-str))
-             (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str)))
+             (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str))
+             other-ol)
         (when os-line-prefix
           (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
         (when os-wrap-prefix
           (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
+        (when (setq other-ol (cl-find-if
+                              (lambda (o) (overlay-get o 'goto-address))
+                              (overlays-at beg)))
+          (add-text-properties
+           0 (length old-str)
+           `(face ,(overlay-get other-ol 'face)) old-str))
         (overlay-put ol 'window wnd)
         (overlay-put ol 'category 'avy)
         (overlay-put ol (if (eq beg eob)
