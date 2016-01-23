@@ -205,7 +205,121 @@ Use this to restore the previous default behavior:
 #+begin_src elisp
 (setq avy-style 'pre)
 #+end_src
-
-* trunk
+* 0.4.0
 ** Fixes
 *** =avy-goto-char-timer= obeys =avy-styles-alist=
+See [[https://github.com/abo-abo/avy/issues/67][#67]].
+*** Add =de-bruijn= to the defcustom of =avy-styles-alist=
+See [[https://github.com/abo-abo/avy/issues/73][#73]].
+*** Respect the current input method for target chars
+See [[https://github.com/abo-abo/avy/issues/76][#76]].
+*** =avy-goto-subword-0= shouldn't offer invisible chars
+See [[https://github.com/abo-abo/avy/issues/90][#90]].
+*** Better =case-fold-search= handling
+See [[https://github.com/abo-abo/avy/issues/87][#87]].
+*** Add misc punctuation to subword commands
+See [[https://github.com/abo-abo/avy/issues/93][#93]].
+*** Add padding for wide-width chars (ex. Japanese and Chinese)
+See [[https://github.com/abo-abo/avy/issues/96][#96]].
+*** =avy-goto-line=
+**** Push mark for numeric line
+See [[https://github.com/abo-abo/avy/issues/74][#74]].
+**** Allow numeric prefix arg
+The old behavior remains for ARG 1 or 4. For all other ARG, simply go
+to that line.
+See [[https://github.com/abo-abo/avy/issues/86][#86]].
+**** Work for =visual-line-mode=
+See [[https://github.com/abo-abo/avy/issues/91][#91]].
+**** Don't error on end of buffer
+See [[https://github.com/abo-abo/avy/issues/91][#91]].
+**** Obey =avy-background=
+See [[https://github.com/abo-abo/avy/issues/94][#94]].
+**** Fix for narrowed regions
+See [[https://github.com/abo-abo/avy/issues/122][#122]], [[https://github.com/abo-abo/avy/issues/123][#123]].
+**** Don't modify =avy-action=
+See [[https://github.com/abo-abo/avy/issues/124][#124]].
+*** =avy-goto-char-timer=
+**** May read as many chars as you want
+See [[https://github.com/abo-abo/avy/issues/97][#97]].
+**** Highlight matches while reading chars
+See [[https://github.com/abo-abo/avy/issues/98][#98]].
+**** Highlight depending on =avy-all-windows=
+See [[https://github.com/abo-abo/avy/issues/104][#104]].
+**** Make faster for =org-mode=
+See [[https://github.com/abo-abo/avy/issues/100][#100]].
+**** Add case fold search
+See [[https://github.com/abo-abo/avy/issues/128][#128]].
+*** =avy-copy-region=
+**** Keep the same selectors for the second pass
+See [[https://github.com/abo-abo/avy/issues/120][#120]], [[https://github.com/abo-abo/avy/issues/121][#121]].
+**** Copy/move to initial window
+See [[https://github.com/abo-abo/avy/issues/131][#131]].
+*** Search only in the visible region
+See [[https://github.com/abo-abo/avy/issues/108][#108]], [[https://github.com/abo-abo/avy/issues/109][#109]].
+*** Fix jumping to the last char of a folded Org outline
+See [[https://github.com/abo-abo/avy/issues/108][#108]].
+*** Fix for both =org-indent-mode= and =visual-line-mode=
+See [[https://github.com/abo-abo/avy/issues/110][#110]].
+*** Beep when there are no matches
+See [[https://github.com/abo-abo/avy/issues/111][#111]].
+*** Simplify overlay code
+Most functions reuse =avy--overlay= now.
+*** Fix de-bruijn "no catch for tag"
+See [[https://github.com/abo-abo/avy/issues/116][#116]].
+*** Fix overlays at =point-max=
+See [[https://github.com/abo-abo/avy/issues/125][#125]].
+*** Improve =case-fold-search= condition
+See [[https://github.com/abo-abo/avy/issues/126][#126]].
+*** Don't shorten selector string for =visual-line-mode= and =bolp=
+See [[https://github.com/abo-abo/avy/issues/129][#129]].
+*** Fix interaction with =goto-address-mode=
+** New Features
+*** Allow non-printing keys in =avy-keys=
+Now you can set avy-keys also to the arrow keys and page up/down, e.g.
+
+#+begin_src elisp
+(setq avy-keys '(left right up down prior next))
+#+end_src
+
+and those will be displayed as ▲, ▼, ◀, ▶, △, ▽ in the overlays.  The
+display is controlled by the variable =avy-key-to-char-alist=.
+
+See [[https://github.com/abo-abo/avy/issues/77][#77]].
+*** Allow to switch action midway from goto to kill/mark/copy
+For example, suppose you have:
+
+#+begin_src elisp
+(global-set-key (kbd "M-t") 'avy-goto-word-1)
+#+end_src
+
+- To jump to a certain word starting with "w" (e.g. first one on
+  screen): ~M-t w a~
+- To copy the word instead of jumping to it: ~M-t w na~.
+- To mark the word after jumping to it: ~M-t w ma~.
+- To kill the word after jumping to it: ~M-t w xa~.
+
+You can customize =avy-dispatch-alist= to modify these actions.
+
+See [[https://github.com/abo-abo/avy/issues/78][#78]].
+
+*** New command =avy-pop-mark=
+Goes back to the last location of =push-mark=:
+
+- has its own history,
+- handles multiple frames.
+
+See [[https://github.com/abo-abo/avy/issues/81][#81]] [[https://github.com/abo-abo/avy/issues/88][#88]] [[https://github.com/abo-abo/avy/issues/69][#69]].
+*** New commands =avy-goto-line-above= and =avy-goto-line-below=
+See [[https://github.com/abo-abo/avy/issues/106][#106]].
+*** New defcustom =avy-line-insert-style=
+Allows to modify the behavior of =avy-copy-line=, =avy-move-line=, and =avy-copy-region=.
+See [[https://github.com/abo-abo/avy/issues/117][#117]].
+*** New defcustom =avy-all-windows-alt=
+Allows to customize the behavior of =universal-argument= modifying
+=avy-all-windows=.
+See [[https://github.com/abo-abo/avy/issues/118][#118]].
+*** New defcustom =avy-subword-extra-word-chars=
+Allows to customize the behavior of =avy-goto-subword-0= and
+=avy-goto-subword-1= by adding extra chars that should match as word
+constituents.
+See [[https://github.com/abo-abo/avy/issues/116][#116]].
