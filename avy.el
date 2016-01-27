@@ -480,7 +480,12 @@ Set `avy-style' according to COMMMAND as well."
       (forward-sexp)
       (setq str (buffer-substring pt (point)))
       (kill-new str)
-      (message "Copied: %s" str))))
+      (message "Copied: %s" str)))
+  (let ((dat (ring-ref avy-ring 0)))
+    (select-frame-set-input-focus
+     (window-frame (cdr dat)))
+    (select-window (cdr dat))
+    (goto-char (car dat))))
 
 (defun avy-action-kill (pt)
   "Kill sexp at PT."
