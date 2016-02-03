@@ -160,6 +160,9 @@ When nil, punctuation chars will not be matched.
   "List of modes to ignore when searching for candidates.
 Typically, these modes don't use the text representation.")
 
+(defvar avy-ring (make-ring 20)
+  "Hold the window and point history.")
+
 (defvar avy-translate-char-function #'identity
   "Function to translate user input key into another key.
 For example, to make SPC do the same as ?a, use
@@ -1293,9 +1296,6 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
       (avy--process
        (avy--read-candidates)
        (avy--style-fn avy-style)))))
-
-(defvar avy-ring (make-ring 20)
-  "Hold the window and point history.")
 
 (defun avy-push-mark ()
   "Store the current point and window."
