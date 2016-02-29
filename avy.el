@@ -156,6 +156,13 @@ When nil, punctuation chars will not be matched.
 \"[!-/:-@[-`{-~]\" will match all printable punctuation chars."
   :type 'regexp)
 
+(defcustom avy-goto-word-0-regexp "\\b\\sw"
+  "Regexp that determines positions for `avy-goto-word-0'."
+  :type '(choice
+          (const :tag "Default" "\\b\\sw")
+          (const :tag "Not whitespace" "[^ \r\n\t]+")
+          (regexp :tag "Regex")))
+
 (defcustom avy-ignored-modes '(image-mode doc-view-mode pdf-view-mode)
   "List of modes to ignore when searching for candidates.
 Typically, these modes don't use the text representation.")
@@ -952,7 +959,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
   (avy-with avy-goto-word-0
-    (avy--generic-jump "\\b\\sw" arg avy-style)))
+    (avy--generic-jump avy-goto-word-0-regexp arg avy-style)))
 
 ;;;###autoload
 (defun avy-goto-word-1 (char &optional arg)
