@@ -120,7 +120,8 @@ If the commands isn't on the list, `avy-style' is used."
                        (const :tag "De Bruijn" de-bruijn))))
 
 (defcustom avy-dispatch-alist
-  '((?x . avy-action-kill)
+  '((?x . avy-action-kill-move)
+    (?X . avy-action-kill-stay)
     (?m . avy-action-mark)
     (?n . avy-action-copy))
   "List of actions for `avy-handler-default'.
@@ -134,7 +135,8 @@ pressed during the dispatch, ACTION is set to replace the default
     :value-type (choice
                  (const :tag "Mark" avy-action-mark)
                  (const :tag "Copy" avy-action-copy)
-                 (const :tag "Kill" avy-action-kill))))
+                 (const :tag "Kill and move point" avy-action-kill-move)
+                 (const :tag "Kill" avy-action-kill-stay))))
 
 (defcustom avy-background nil
   "When non-nil, a gray background will be added during the selection."
@@ -505,11 +507,20 @@ Set `avy-style' according to COMMMAND as well."
     (select-window (cdr dat))
     (goto-char (car dat))))
 
-(defun avy-action-kill (pt)
-  "Kill sexp at PT."
+(defun avy-action-kill-move (pt)
+  "Kill sexp at PT and move there."
   (goto-char pt)
   (forward-sexp)
   (kill-region pt (point))
+  (message "Killed: %s" (current-kill 0)))
+
+(defun avy-action-kill-stay (pt)
+  "Kill sexp at PT."
+  (save-excursion
+   (goto-char pt)
+   (forward-sexp)
+   (kill-region pt (point))
+   (just-one-space))
   (message "Killed: %s" (current-kill 0)))
 
 (defun avy--process (candidates overlay-fn)
