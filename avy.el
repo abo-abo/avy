@@ -123,7 +123,8 @@ If the commands isn't on the list, `avy-style' is used."
   '((?x . avy-action-kill-move)
     (?X . avy-action-kill-stay)
     (?m . avy-action-mark)
-    (?n . avy-action-copy))
+    (?n . avy-action-copy)
+    (?i . avy-action-ispell))
   "List of actions for `avy-handler-default'.
 
 Each item is (KEY . ACTION).  When KEY not on `avy-keys' is
