@@ -522,6 +522,17 @@ Set `avy-style' according to COMMMAND as well."
    (kill-region pt (point))
    (just-one-space))
   (message "Killed: %s" (current-kill 0)))
+  
+(defun avy-action-ispell (pt)
+  "Auto correct word at PT."
+  (save-excursion
+    (goto-char pt)
+    (if (looking-at-p "\\b")
+        (ispell-word)
+      (progn
+        (backward-word)
+        (when (looking-at-p "\\b")
+          (ispell-word))))))
 
 (defun avy--process (candidates overlay-fn)
   "Select one of CANDIDATES using `avy-read'.
