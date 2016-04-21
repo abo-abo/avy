@@ -453,9 +453,10 @@ multiple DISPLAY-FN invokations."
         (t
          (error "Unrecognized option: %S" avy-all-windows))))
 
-(defcustom avy-all-windows-alt t
+(defcustom avy-all-windows-alt nil
   "The alternative `avy-all-windows' for use with \\[universal-argument]."
   :type '(choice
+          (const :tag "Current window" nil)
           (const :tag "All windows on the current frame" t)
           (const :tag "All windows on all frames" all-frames)))
 
