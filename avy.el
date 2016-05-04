@@ -1049,7 +1049,12 @@ should return true."
                             (and predicate (funcall predicate)))
                     (unless (get-char-property (point) 'invisible)
                       (push (cons (point) (selected-window)) window-cands)))
-                  (subword-backward)))
+                  (subword-backward))
+                (and (= (point) ws)
+                     (or (null predicate)
+                         (and predicate (funcall predicate)))
+                     (not (get-char-property (point) 'invisible))
+                     (push (cons (point) (selected-window)) window-cands)))
               (setq candidates (nconc candidates window-cands))))))
       (avy--process candidates (avy--style-fn avy-style)))))
 
