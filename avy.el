@@ -71,18 +71,19 @@ in the avy overlays."
   "Alist of avy-jump commands to `avy-keys' overriding the default `avy-keys'."
   :type '(alist
           :key-type (choice :tag "Command"
-                     (const avy-goto-char)
-                     (const avy-goto-char-2)
-                     (const avy-isearch)
-                     (const avy-goto-line)
-                     (const avy-goto-subword-0)
-                     (const avy-goto-subword-1)
-                     (const avy-goto-word-0)
-                     (const avy-goto-word-1)
-                     (const avy-copy-line)
-                     (const avy-copy-region)
-                     (const avy-move-line)
-                     (function :tag "Other command"))
+                            (const avy-goto-char)
+                            (const avy-goto-char-2)
+                            (const avy-isearch)
+                            (const avy-goto-line)
+                            (const avy-goto-subword-0)
+                            (const avy-goto-subword-1)
+                            (const avy-goto-word-0)
+                            (const avy-goto-word-1)
+                            (const avy-copy-line)
+                            (const avy-copy-region)
+                            (const avy-move-line)
+                            (const avy-move-region)
+                            (function :tag "Other command"))
           :value-type (repeat :tag "Keys" character)))
 
 (defcustom avy-style 'at-full
@@ -100,18 +101,19 @@ Use `avy-styles-alist' to customize this per-command."
 If the commands isn't on the list, `avy-style' is used."
   :type '(alist
           :key-type (choice :tag "Command"
-                     (const avy-goto-char)
-                     (const avy-goto-char-2)
-                     (const avy-isearch)
-                     (const avy-goto-line)
-                     (const avy-goto-subword-0)
-                     (const avy-goto-subword-1)
-                     (const avy-goto-word-0)
-                     (const avy-goto-word-1)
-                     (const avy-copy-line)
-                     (const avy-copy-region)
-                     (const avy-move-line)
-                     (function :tag "Other command"))
+                            (const avy-goto-char)
+                            (const avy-goto-char-2)
+                            (const avy-isearch)
+                            (const avy-goto-line)
+                            (const avy-goto-subword-0)
+                            (const avy-goto-subword-1)
+                            (const avy-goto-word-0)
+                            (const avy-goto-word-1)
+                            (const avy-copy-line)
+                            (const avy-copy-region)
+                            (const avy-move-line)
+                            (const avy-move-region)
+                            (function :tag "Other command"))
           :value-type (choice
                        (const :tag "Pre" pre)
                        (const :tag "At" at)
@@ -1252,6 +1254,22 @@ The window scope is determined by `avy-all-windows' or
                  (insert str)))
               (t
                (user-error "Unexpected `avy-line-insert-style'")))))))
+
+;;;###autoload
+(defun avy-move-region ()
+  "Select two lines and move the text between them here."
+  (interactive)
+  (avy-with avy-move-region
+    (let* ((beg (avy--line))
+           (end (save-excursion
+                  (goto-char (avy--line))
+                  (forward-line)
+                  (point)))
+           (text (buffer-substring beg end))
+           (pad (if (bolp) "" "\n")))
+      (move-beginning-of-line nil)
+      (delete-region beg end)
+      (insert text pad))))
 
 ;;;###autoload
 (defun avy-setup-default ()
