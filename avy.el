@@ -982,7 +982,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (avy-with avy-isearch
     (let ((avy-background nil))
       (avy--process
-       (avy--regex-candidates isearch-string)
+       (avy--regex-candidates (if isearch-regexp
+                                  isearch-string
+                                (regexp-quote isearch-string)))
        (avy--style-fn avy-style))
       (isearch-done))))
 
