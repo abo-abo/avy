@@ -976,6 +976,38 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
      avy-style)))
 
 ;;;###autoload
+(defun avy-goto-char-2-above (char1 char2 &optional arg)
+  "Jump to the currently visible CHAR1 followed by CHAR2.
+This is a scoped version of `avy-goto-char-2', where the scope is
+the visible part of the current buffer up to point."
+  (interactive (list (read-char "char 1: " t)
+                     (read-char "char 2: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-char-2
+    (avy--generic-jump
+     (regexp-quote (string char1 char2))
+     arg
+     avy-style
+     (window-start (selected-window))
+     (point))))
+
+;;;###autoload
+(defun avy-goto-char-2-below (char1 char2 &optional arg)
+  "Jump to the currently visible CHAR1 followed by CHAR2.
+This is a scoped version of `avy-goto-char-2', where the scope is
+the visible part of the current buffer following point."
+  (interactive (list (read-char "char 1: " t)
+                     (read-char "char 2: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-char-2
+    (avy--generic-jump
+     (regexp-quote (string char1 char2))
+     arg
+     avy-style
+     (point)
+     (window-end (selected-window) t))))
+
+;;;###autoload
 (defun avy-isearch ()
   "Jump to one of the current isearch candidates."
   (interactive)
