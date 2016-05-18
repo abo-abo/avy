@@ -942,6 +942,7 @@ BEG and END delimit the area where candidates are searched."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
+  (setq avy--last-cmd `(avy-goto-char ,char ,arg))
   (avy-with avy-goto-char
     (avy--generic-jump
      (if (= 13 char)
@@ -954,6 +955,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-goto-char-in-line (char)
   "Jump to the currently visible CHAR in the current line."
   (interactive (list (read-char "char: " t)))
+  (setq avy--last-cmd `(avy-goto-char-in-line ,char ,arg))
   (avy-with avy-goto-char
     (avy--generic-jump
      (regexp-quote (string char))
@@ -969,6 +971,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
+  (setq avy--last-cmd `(avy-goto-char-2 ,char1 ,char2 ,arg))
   (avy-with avy-goto-char-2
     (avy--generic-jump
      (regexp-quote (string char1 char2))
@@ -983,6 +986,7 @@ the visible part of the current buffer up to point."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
+  (setq avy--last-cmd `(avy-goto-char-2-above ,char1 ,char2 ,arg))
   (avy-with avy-goto-char-2
     (avy--generic-jump
      (regexp-quote (string char1 char2))
@@ -999,6 +1003,7 @@ the visible part of the current buffer following point."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
+  (setq avy--last-cmd `(avy-goto-char-2-below ,char1 ,char2 ,arg))
   (avy-with avy-goto-char-2
     (avy--generic-jump
      (regexp-quote (string char1 char2))
@@ -1011,6 +1016,7 @@ the visible part of the current buffer following point."
 (defun avy-isearch ()
   "Jump to one of the current isearch candidates."
   (interactive)
+  (setq avy--last-cmd nil)
   (avy-with avy-isearch
     (let ((avy-background nil))
       (avy--process
@@ -1025,6 +1031,7 @@ the visible part of the current buffer following point."
   "Jump to a word start.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
+  (setq avy--last-cmd `(avy-goto-word-0 ,arg))
   (avy-with avy-goto-word-0
     (avy--generic-jump avy-goto-word-0-regexp arg avy-style)))
 
@@ -1034,6 +1041,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
+  (setq avy--last-cmd `(avy-goto-word-1 ,char ,arg))
   (avy-with avy-goto-word-1
     (let* ((str (string char))
            (regex (cond ((string= str ".")
@@ -1065,6 +1073,7 @@ When PREDICATE is non-nil it's a function of zero parameters that
 should return true."
   (interactive "P")
   (require 'subword)
+  (setq avy--last-cmd `(avy-goto-subword-0 ,arg ,predicate))
   (avy-with avy-goto-subword-0
     (let ((case-fold-search nil)
           (subword-backward-regexp
@@ -1101,6 +1110,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it).
 The case of CHAR is ignored."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
+  (setq avy--last-cmd `(avy-goto-subword-1 ,char ,arg))
   (avy-with avy-goto-subword-1
     (let ((char (downcase char)))
       (avy-goto-subword-0
@@ -1156,6 +1166,7 @@ When ARG is 4, negate the window scope determined by
 
 Otherwise, forward to `goto-line' with ARG."
   (interactive "p")
+  (setq avy--last-cmd `(avy-goto-line ,arg))
   (setq arg (or arg 1))
   (if (not (memq arg '(1 4)))
       (progn
@@ -1185,6 +1196,7 @@ Otherwise, forward to `goto-line' with ARG."
 (defun avy-goto-line-above ()
   "Goto visible line above the cursor."
   (interactive)
+  (setq avy--last-cmd `(avy-goto-line-above))
   (let* ((avy-all-windows nil)
          (r (avy--line nil (window-start)
                        (line-beginning-position))))
@@ -1195,6 +1207,7 @@ Otherwise, forward to `goto-line' with ARG."
 (defun avy-goto-line-below ()
   "Goto visible line below the cursor."
   (interactive)
+  (setq avy--last-cmd `(avy-goto-line-below))
   (let* ((avy-all-windows nil)
          (r (avy--line
              nil (line-beginning-position 2)
@@ -1213,6 +1226,7 @@ Otherwise, forward to `goto-line' with ARG."
   "Copy a selected line above the current line.
 ARG lines can be used."
   (interactive "p")
+  (setq avy--last-cmd `(avy-copy-line ,arg))
   (let ((initial-window (selected-window)))
     (avy-with avy-copy-line
       (let* ((start (avy--line))
@@ -1239,6 +1253,7 @@ ARG lines can be used."
   "Move a selected line above the current line.
 ARG lines can be used."
   (interactive "p")
+  (setq avy--last-cmd `(avy-move-line ,arg))
   (let ((initial-window (selected-window)))
     (avy-with avy-move-line
       (let ((start (avy--line)))
@@ -1266,6 +1281,7 @@ ARG lines can be used."
 The window scope is determined by `avy-all-windows' or
 `avy-all-windows-alt' when ARG is non-nil."
   (interactive "P")
+  (setq avy--last-cmd `(avy-copy-region ,arg))
   (let ((initial-window (selected-window)))
     (avy-with avy-copy-region
       (let* ((beg (save-selected-window
@@ -1293,6 +1309,7 @@ The window scope is determined by `avy-all-windows' or
 (defun avy-move-region ()
   "Select two lines and move the text between them here."
   (interactive)
+  (setq avy--last-cmd `(avy-move-region))
   (avy-with avy-move-region
     (let* ((beg (avy--line))
            (end (save-excursion
@@ -1392,6 +1409,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (let ((avy-all-windows (if arg
                              (not avy-all-windows)
                            avy-all-windows)))
+    (setq avy--last-cmd `(avy-goto-char-timer ,arg))
     (avy-with avy-goto-char-timer
       (avy--process
        (avy--read-candidates)
@@ -1421,6 +1439,16 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
             (goto-char (car res))))
       (error
        (set-mark-command 4)))))
+
+(defvar avy--last-cmd nil
+  "Save last command for `avy-repeat'")
+
+(defun avy-repeat ()
+  "Repeat last avy command with same key sequence if there was
+one."
+  (interactive)
+  (when avy--last-cmd
+    (apply #'funcall avy--last-cmd)))
 
 (provide 'avy)
 
