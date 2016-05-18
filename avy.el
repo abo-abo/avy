@@ -963,17 +963,19 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
      (line-end-position))))
 
 ;;;###autoload
-(defun avy-goto-char-2 (char1 char2 &optional arg)
+(defun avy-goto-char-2 (char1 char2 &optional arg beg end)
   "Jump to the currently visible CHAR1 followed by CHAR2.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
-                     current-prefix-arg))
+                     current-prefix-arg
+                     nil nil))
   (avy-with avy-goto-char-2
     (avy--generic-jump
      (regexp-quote (string char1 char2))
      arg
-     avy-style)))
+     avy-style
+     beg end)))
 
 ;;;###autoload
 (defun avy-goto-char-2-above (char1 char2 &optional arg)
@@ -983,13 +985,10 @@ the visible part of the current buffer up to point."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
-  (avy-with avy-goto-char-2
-    (avy--generic-jump
-     (regexp-quote (string char1 char2))
-     arg
-     avy-style
-     (window-start (selected-window))
-     (point))))
+  (avy-with avy-goto-char-2-above
+    (avy-goto-char-2
+     char1 char2 arg
+     (window-start) (point))))
 
 ;;;###autoload
 (defun avy-goto-char-2-below (char1 char2 &optional arg)
@@ -999,13 +998,10 @@ the visible part of the current buffer following point."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
-  (avy-with avy-goto-char-2
-    (avy--generic-jump
-     (regexp-quote (string char1 char2))
-     arg
-     avy-style
-     (point)
-     (window-end (selected-window) t))))
+  (avy-with avy-goto-char-2-below
+    (avy-goto-char-2
+     char1 char2 arg
+     (point) (window-end (selected-window) t))))
 
 ;;;###autoload
 (defun avy-isearch ()
