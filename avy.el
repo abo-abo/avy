@@ -1025,7 +1025,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
     (avy--generic-jump avy-goto-word-0-regexp arg avy-style)))
 
 ;;;###autoload
-(defun avy-goto-word-1 (char &optional arg)
+(defun avy-goto-word-1 (char &optional arg beg end)
   "Jump to the currently visible CHAR at a word start.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
@@ -1041,7 +1041,27 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                          (concat
                           "\\b"
                           str)))))
-      (avy--generic-jump regex arg avy-style))))
+      (avy--generic-jump regex arg avy-style beg end))))
+
+;;;###autoload
+(defun avy-goto-word-1-above (char &optional arg)
+  "Jump to the currently visible CHAR at a word start.
+This is a scoped version of `avy-goto-word-1', where the scope is
+the visible part of the current buffer up to point. "
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-word-1
+    (avy-goto-word-1 char arg (window-start) (point))))
+
+;;;###autoload
+(defun avy-goto-word-1-below (char &optional arg)
+  "Jump to the currently visible CHAR at a word start.
+This is a scoped version of `avy-goto-word-1', where the scope is
+the visible part of the current buffer following point. "
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-word-1
+    (avy-goto-word-1 char arg (point) (window-end (selected-window) t))))
 
 (declare-function subword-backward "subword")
 (defvar subword-backward-regexp)
