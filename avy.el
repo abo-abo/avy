@@ -970,6 +970,10 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                      (read-char "char 2: " t)
                      current-prefix-arg
                      nil nil))
+  (when (eq char1 ?)
+    (setq char1 ?\n))
+  (when (eq char2 ?)
+    (setq char2 ?\n))
   (avy-with avy-goto-char-2
     (avy--generic-jump
      (regexp-quote (string char1 char2))
