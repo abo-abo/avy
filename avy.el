@@ -83,6 +83,10 @@ in the avy overlays."
                      (const avy-copy-region)
                      (const avy-move-line)
                      (const avy-move-region)
+                     (const avy-kill-whole-line)
+                     (const avy-kill-region)
+                     (const avy-kill-ring-save-whole-line)
+                     (const avy-kill-ring-save-region)
                      (function :tag "Other command"))
           :value-type (repeat :tag "Keys" character)))
 
@@ -113,6 +117,10 @@ If the commands isn't on the list, `avy-style' is used."
                      (const avy-copy-region)
                      (const avy-move-line)
                      (const avy-move-region)
+                     (const avy-kill-whole-line)
+                     (const avy-kill-region)
+                     (const avy-kill-ring-save-whole-line)
+                     (const avy-kill-ring-save-region)
                      (function :tag "Other command"))
           :value-type (choice
                        (const :tag "Pre" pre)
@@ -1456,6 +1464,112 @@ The window scope is determined by `avy-all-windows' or
       (move-beginning-of-line nil)
       (delete-region beg end)
       (insert text pad))))
+
+;;;###autoload
+(defun avy-kill-region (arg)
+  "Select two lines and kill the region between them.
+
+The window scope is determined by `avy-all-windows' or
+`avy-all-windows-alt' when ARG is non-nil."
+  (interactive "P")
+  (let ((initial-window (selected-window)))
+    (avy-with avy-kill-region
+      (let* ((beg (save-selected-window
+                    (list (avy--line arg) (selected-window))))
+             (end (list (avy--line arg) (selected-window))))
+        (cond
+          ((not (numberp (car beg)))
+           (user-error "Fail to select the beginning of region."))
+          ((not (numberp (car end)))
+           (user-error "Fail to select the end of region"))
+          ;; Restrict operation to same window. It's better if it can be
+          ;; different windows but same buffer; however, then the cloned
+          ;; buffers with different narrowed regions might cause problem.
+          ((not (equal (cdr beg) (cdr end)))
+           (user-error "Selected points are not in the same window"))
+          ((< (car beg) (car end))
+           (save-excursion
+             (kill-region
+              (car beg)
+              (progn (goto-char (car end)) (forward-visible-line 1) (point)))))
+          (t
+           (save-excursion
+             (kill-region
+              (progn (goto-char (car beg)) (forward-visible-line 1) (point))
+              (car end)))))))
+    (select-window initial-window)))
+
+;;;###autoload
+(defun avy-kill-ring-save-region (arg)
+  "Select two lines and save the region between them to the kill ring."
+  (interactive "P")
+  (let ((initial-window (selected-window)))
+    (avy-with avy-kill-ring-save-region
+      (let* ((beg (save-selected-window
+                    (list (avy--line arg) (selected-window))))
+             (end (list (avy--line arg) (selected-window))))
+        (cond
+          ((not (numberp (car beg)))
+           (user-error "Fail to select the beginning of region."))
+          ((not (numberp (car end)))
+           (user-error "Fail to select the end of region"))
+          ((not (equal (cdr beg) (cdr end)))
+           (user-error "Selected points are not in the same window"))
+          ((< (car beg) (car end))
+           (save-excursion
+             (kill-ring-save
+              (car beg)
+              (progn (goto-char (car end)) (forward-visible-line 1) (point)))))
+          (t
+           (save-excursion
+             (kill-ring-save
+              (progn (goto-char (car beg)) (forward-visible-line 1) (point))
+              (car end)))))))
+    (select-window initial-window)))
+
+;;;###autoload
+(defun avy-kill-whole-line (arg)
+  "Select line and kill the whole selected line.
+
+With a numerical prefix ARG, kill ARG line(s) starting from the
+selected line. If ARG is negative, kill backward.
+
+If ARG is zero, kill the selected line but exclude the trailing
+newline.
+
+\\[universal-argument] 3 \\[avy-kil-whole-line] kill three lines
+starting from the selected line.  \\[universal-argument] -3
+
+\\[avy-kill-whole-line] kill three lines backward including the
+selected line."
+  (interactive "P")
+  (let ((initial-window (selected-window)))
+    (avy-with avy-kill-whole-line
+      (let* ((start (avy--line)))
+        (if (not (numberp start))
+            (user-error "Fail to select the line to kill")
+          (save-excursion (goto-char start)
+                          (kill-whole-line arg)))))
+    (select-window initial-window)))
+
+;;;###autoload
+(defun avy-kill-ring-save-whole-line (arg)
+  "Select line and Save the whole selected line as if killed, but don’t kill it.
+
+This command is similar to `avy-kill-whole-line', except that it
+saves the line(s) as if killed, but does not kill it(them)."
+  (interactive "P")
+  (let ((initial-window (selected-window)))
+    (avy-with avy-kill-ring-save-whole-line
+      (let* ((start (avy--line)))
+        (if (not (numberp start))
+            (user-error "Fail to select the line to kill")
+          (save-excursion
+            (let ((kill-read-only-ok t)
+                  (buffer-read-only t))
+              (goto-char start)
+              (kill-whole-line arg))))))
+    (select-window initial-window)))
 
 ;;;###autoload
 (defun avy-setup-default ()
