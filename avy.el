@@ -1137,10 +1137,7 @@ Which one depends on variable `subword-mode'."
 
 (defvar visual-line-mode)
 
-(defun avy--line (&optional arg beg end)
-  "Select a line.
-The window scope is determined by `avy-all-windows' (ARG negates it).
-Narrow the scope to BEG END."
+(defun avy--line-cands (&optional arg beg end)
   (let (candidates)
     (avy-dowindows arg
       (let ((ws (or beg (window-start))))
@@ -1161,8 +1158,16 @@ Narrow the scope to BEG END."
                     (setq temporary-goal-column 0)
                     (line-move-visual 1 t))
                 (forward-line 1)))))))
-    (let ((avy-action #'identity))
-      (avy--process (nreverse candidates) (avy--style-fn avy-style)))))
+    (nreverse candidates)))
+
+(defun avy--line (&optional arg beg end)
+  "Select a line.
+The window scope is determined by `avy-all-windows' (ARG negates it).
+Narrow the scope to BEG END."
+  (let ((avy-action #'identity))
+    (avy--process
+     (avy--line-cands arg beg end)
+     (avy--style-fn avy-style))))
 
 ;;;###autoload
 (defun avy-goto-line (&optional arg)
