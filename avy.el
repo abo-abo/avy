@@ -1204,6 +1204,22 @@ Which one depends on variable `subword-mode'."
          (push str line-list))))
     (nreverse line-list)))
 
+(defvar linum-available)
+(defvar linum-overlays)
+(defvar linum-format)
+(declare-function linum--face-width "linum")
+
+(define-minor-mode avy-linum-mode
+  "Minor mode that uses avy hints for `linum-mode'."
+  :group 'avy
+  (if avy-linum-mode
+      (progn
+        (require 'linum)
+        (advice-add 'linum-update-window :around 'avy--linum-update-window)
+        (linum-mode 1))
+    (advice-remove 'linum-update-window 'avy--linum-update-window)
+    (linum-mode -1)))
+
 (defun avy--linum-update-window (_ win)
   "Update line numbers for the portion visible in window WIN."
   (goto-char (window-start win))
@@ -1255,17 +1271,6 @@ Which one depends on variable `subword-mode'."
                    (/ (* width 1.0 (linum--face-width 'linum))
                       (frame-char-width)))))
     (set-window-margins win width (cdr (window-margins win)))))
-
-(define-minor-mode avy-linum-mode
-  "Minor mode that uses avy hints for `linum-mode'."
-  :group 'avy
-  (if avy-linum-mode
-      (progn
-        (require 'linum)
-        (advice-add 'linum-update-window :around 'avy--linum-update-window)
-        (linum-mode 1))
-    (advice-remove 'linum-update-window 'avy--linum-update-window)
-    (linum-mode -1)))
 
 (defun avy--line (&optional arg beg end)
   "Select a line.
