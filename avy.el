@@ -168,6 +168,7 @@ When nil, punctuation chars will not be matched.
   "Regexp that determines positions for `avy-goto-word-0'."
   :type '(choice
           (const :tag "Default" "\\b\\sw")
+          (const :tag "Symbol" "\\_<\\(\\sw\\|\\s_\\)")
           (const :tag "Not whitespace" "[^ \r\n\t]+")
           (regexp :tag "Regex")))
 
@@ -1029,7 +1030,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
     (avy--generic-jump avy-goto-word-0-regexp arg avy-style)))
 
 ;;;###autoload
-(defun avy-goto-word-1 (char &optional arg beg end)
+(defun avy-goto-word-1 (char &optional arg beg end symbol)
   "Jump to the currently visible CHAR at a word start.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
@@ -1043,7 +1044,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                          (regexp-quote str))
                         (t
                          (concat
-                          "\\b"
+                          (if symbol "\\_<" "\\b")
                           str)))))
       (avy--generic-jump regex arg avy-style beg end))))
 
@@ -1066,6 +1067,35 @@ the visible part of the current buffer following point. "
                      current-prefix-arg))
   (avy-with avy-goto-word-1
     (avy-goto-word-1 char arg (point) (window-end (selected-window) t))))
+
+;;;###autoload
+(defun avy-goto-symbol-1 (char &optional arg)
+  "Jump to the currently visible CHAR at a symbol start.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-symbol-1
+    (avy-goto-word-1 char arg nil nil t)))
+
+;;;###autoload
+(defun avy-goto-symbol-1-above (char &optional arg)
+  "Jump to the currently visible CHAR at a symbol start.
+This is a scoped version of `avy-goto-symbol-1', where the scope is
+the visible part of the current buffer up to point. "
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-symbol-1-above
+    (avy-goto-word-1 char arg (window-start) (point) t)))
+
+;;;###autoload
+(defun avy-goto-symbol-1-below (char &optional arg)
+  "Jump to the currently visible CHAR at a symbol start.
+This is a scoped version of `avy-goto-symbol-1', where the scope is
+the visible part of the current buffer following point. "
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-symbol-1-below
+    (avy-goto-word-1 char arg (point) (window-end (selected-window) t) t)))
 
 (declare-function subword-backward "subword")
 (defvar subword-backward-regexp)
