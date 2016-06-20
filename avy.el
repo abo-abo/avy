@@ -475,16 +475,23 @@ multiple DISPLAY-FN invokations."
          (unless (memq major-mode avy-ignored-modes)
            ,@body)))))
 
+(defun avy-resume ()
+  "Stub to hold last avy command.")
+
 (defmacro avy-with (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY.
 Set `avy-style' according to COMMMAND as well."
   (declare (indent 1)
            (debug (form body)))
-  `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
-                       avy-keys))
-         (avy-style (or (cdr (assq ',command avy-styles-alist))
-                        avy-style)))
+  `(lexical-let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
+                               avy-keys))
+                 (avy-style (or (cdr (assq ',command avy-styles-alist))
+                                avy-style)))
      (setq avy-action nil)
+     (setf (symbol-function 'avy-resume)
+           (lambda ()
+             (interactive)
+             ,@body))
      ,@body))
 
 (defun avy-action-goto (pt)
