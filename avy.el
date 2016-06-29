@@ -1327,9 +1327,7 @@ The window scope is determined by `avy-all-windows' or
 
 ;;;###autoload
 (defun avy-kill-region (arg)
-  "Select two lines and kill the region between them(inclusive) to the kill ring.
-
-The selected line(s) is(are) also killed.
+  "Select two lines and kill the region between them(inclusive) to the kill ring. The selected line(s) is(are) also killed.
 
 The window scope is determined by `avy-all-windows' or `avy-all-windows-alt' when ARG is non-nil."
   (interactive "P")
