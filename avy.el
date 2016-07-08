@@ -536,6 +536,8 @@ Set `avy-style' according to COMMMAND as well."
    (just-one-space))
   (message "Killed: %s" (current-kill 0)))
 
+(declare-function flyspell-correct-word-before-point "flyspell")
+
 (defun avy-action-ispell (pt)
   "Auto correct word at PT."
   (save-excursion
