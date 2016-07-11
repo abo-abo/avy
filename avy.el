@@ -1174,7 +1174,9 @@ The case of CHAR is ignored."
   (avy-with avy-goto-subword-1
     (let ((char (downcase char)))
       (avy-goto-subword-0
-       arg (lambda () (eq (downcase (char-after)) char))))))
+       arg (lambda ()
+             (and (char-after)
+                  (eq (downcase (char-after)) char)))))))
 
 ;;;###autoload
 (defun avy-goto-word-or-subword-1 ()
