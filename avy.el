@@ -485,7 +485,8 @@ multiple DISPLAY-FN invokations."
 
 (defun avy-resume ()
   "Stub to hold last avy command.
-Commands using `avy-with' macro can be resumed.")
+Commands using `avy-with' macro can be resumed."
+  (interactive))
 
 (defmacro avy-with (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY.
