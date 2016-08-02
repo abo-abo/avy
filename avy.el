@@ -1056,18 +1056,20 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
-  (avy-with avy-goto-word-1
-    (let* ((str (string char))
-           (regex (cond ((string= str ".")
-                         "\\.")
-                        ((and avy-word-punc-regexp
-                              (string-match avy-word-punc-regexp str))
-                         (regexp-quote str))
-                        (t
-                         (concat
-                          (if symbol "\\_<" "\\b")
-                          str)))))
-      (avy--generic-jump regex arg avy-style beg end))))
+  (if (= char 12)
+      (avy-goto-subword-0 1 (lambda () (= 12 (char-after))))
+    (avy-with avy-goto-word-1
+      (let* ((str (string char))
+             (regex (cond ((string= str ".")
+                           "\\.")
+                          ((and avy-word-punc-regexp
+                                (string-match avy-word-punc-regexp str))
+                           (regexp-quote str))
+                          (t
+                           (concat
+                            (if symbol "\\_<" "\\b")
+                            str)))))
+        (avy--generic-jump regex arg avy-style beg end)))))
 
 ;;;###autoload
 (defun avy-goto-word-1-above (char &optional arg)
