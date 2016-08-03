@@ -1063,6 +1063,8 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                         ((and avy-word-punc-regexp
                               (string-match avy-word-punc-regexp str))
                          (regexp-quote str))
+                        ((<= char 26)
+                         str)
                         (t
                          (concat
                           (if symbol "\\_<" "\\b")
