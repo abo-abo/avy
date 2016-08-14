@@ -632,14 +632,14 @@ Use OVERLAY-FN to visualize the decision overlay."
 (defun avy--next-visible-point ()
   "Return the next closest point without 'invisible property."
   (let ((s (point)))
-    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
+    (while (and (not (= (point-max) (setq s (next-char-property-change s))))
                 (get-char-property s 'invisible)))
     s))
 
 (defun avy--next-invisible-point ()
   "Return the next closest point with 'invisible property."
   (let ((s (point)))
-    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
+    (while (and (not (= (point-max) (setq s (next-char-property-change s))))
                 (not (get-char-property s 'invisible))))
     s))
 
