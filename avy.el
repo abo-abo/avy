@@ -1595,7 +1595,7 @@ read string immediately instead of waiting for another char for
 `avy-timeout-seconds'.
 The format of the result is the same as that of `avy--regex-candidates'.
 This function obeys `avy-all-windows' setting."
-  (let ((str "") char break overlays regex)
+  (let ((str "") char break overlays regex case-fold-search)
     (unwind-protect
          (progn
            (while (and (not break)
@@ -1633,6 +1633,8 @@ This function obeys `avy-all-windows' setting."
                                   (window-end (selected-window) t)))
                      (save-excursion
                        (goto-char (car pair))
+                       (setq case-fold-search (or avy-case-fold-search
+                              (string= str (downcase str))))
                        (setq regex (regexp-quote str))
                        (while (re-search-forward regex (cdr pair) t)
                          (unless (get-char-property (1- (point)) 'invisible)
