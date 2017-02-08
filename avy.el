@@ -506,7 +506,10 @@ Set `avy-style' according to COMMMAND as well."
 
 (defun avy-action-goto (pt)
   "Goto PT."
-  (goto-char pt))
+  (let ((frame (window-frame (selected-window))))
+    (select-frame-set-input-focus frame)
+    (raise-frame frame)
+    (goto-char pt)))
 
 (defun avy-action-mark (pt)
   "Mark sexp at PT."
