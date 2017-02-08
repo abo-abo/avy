@@ -838,6 +838,10 @@ LEAF is normally ((BEG . END) . WND)."
                           (end-of-visual-line)
                           (point))
                       (line-end-position)))
+               ;; `end-of-visual-line' is bugged sometimes
+               (lep (if (< lep beg)
+                        (line-end-position)
+                      lep))
                (len-and-str (avy--update-offset-and-str len str lep)))
           (setq len (car len-and-str))
           (setq str (cdr len-and-str))
