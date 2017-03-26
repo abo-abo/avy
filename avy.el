@@ -134,6 +134,7 @@ If the commands isn't on the list, `avy-style' is used."
     (?X . avy-action-kill-stay)
     (?m . avy-action-mark)
     (?n . avy-action-copy)
+    (?y . avy-action-yank)
     (?i . avy-action-ispell))
   "List of actions for `avy-handler-default'.
 
@@ -531,6 +532,11 @@ Set `avy-style' according to COMMMAND as well."
      (window-frame (cdr dat)))
     (select-window (cdr dat))
     (goto-char (car dat))))
+
+(defun avy-action-yank (pt)
+  "Yank sexp starting at PT at the current point."
+  (avy-action-copy pt)
+  (yank))
 
 (defun avy-action-kill-move (pt)
   "Kill sexp at PT and move there."
