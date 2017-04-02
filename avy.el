@@ -1484,7 +1484,8 @@ The window scope is determined by `avy-all-windows' or
   "Select two lines and move the text between them here."
   (interactive)
   (avy-with avy-move-region
-    (let* ((beg (avy--line))
+    (let* ((initial-window (selected-window))
+           (beg (avy--line))
            (end (save-excursion
                   (goto-char (avy--line))
                   (forward-line)
@@ -1493,6 +1494,7 @@ The window scope is determined by `avy-all-windows' or
            (pad (if (bolp) "" "\n")))
       (move-beginning-of-line nil)
       (delete-region beg end)
+      (select-window initial-window)
       (insert text pad))))
 
 ;;;###autoload
