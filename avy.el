@@ -489,6 +489,10 @@ multiple DISPLAY-FN invokations."
 Commands using `avy-with' macro can be resumed."
   (interactive))
 
+(defvar avy-command nil
+  "Store the current command symbol.
+E.g. 'avy-goto-line or 'avy-goto-char.")
+
 (defmacro avy-with (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY.
 Set `avy-style' according to COMMMAND as well."
@@ -497,7 +501,8 @@ Set `avy-style' according to COMMMAND as well."
   `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
                        avy-keys))
          (avy-style (or (cdr (assq ',command avy-styles-alist))
-                        avy-style)))
+                        avy-style))
+         (avy-command ',command))
      (setq avy-action nil)
      (setf (symbol-function 'avy-resume)
            (lambda ()
@@ -523,7 +528,9 @@ Set `avy-style' according to COMMMAND as well."
   (save-excursion
     (let (str)
       (goto-char pt)
-      (forward-sexp)
+      (if (eq avy-command 'avy-goto-line)
+          (end-of-line)
+        (forward-sexp))
       (setq str (buffer-substring pt (point)))
       (kill-new str)
       (message "Copied: %s" str)))
