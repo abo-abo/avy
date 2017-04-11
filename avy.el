@@ -1625,10 +1625,10 @@ saves the line(s) as if killed, but does not kill it(them)."
 (defun avy--read-candidates ()
   "Read as many chars as possible and return their occurences.
 At least one char must be read, and then repeatedly one next char
-may be read if it is entered before `avy-timeout-seconds'.  `DEL'
-deletes the last char entered, and `RET' exits with the currently
-read string immediately instead of waiting for another char for
-`avy-timeout-seconds'.
+may be read if it is entered before `avy-timeout-seconds'.  `C-h'
+or `DEL' deletes the last char entered, and `RET' exits with the
+currently read string immediately instead of waiting for another
+char for `avy-timeout-seconds'.
 The format of the result is the same as that of `avy--regex-candidates'.
 This function obeys `avy-all-windows' setting."
   (let ((str "") char break overlays regex)
@@ -1651,8 +1651,8 @@ This function obeys `avy-all-windows' setting."
                ;; Handle RET
                ((= char 13)
                 (setq break t))
-               ;; Handle DEL
-               ((= char 127)
+               ;; Handle C-h, DEL
+               ((memq char '(8 127))
                 (let ((l (length str)))
                   (when (>= l 1)
                     (setq str (substring str 0 (1- l))))))
