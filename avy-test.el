@@ -66,3 +66,7 @@
       (108 (97 leaf . 8)
        (115 leaf . 9)
        (100 leaf . 10))))))
+
+(provide 'avy-test)
+
+;;; avy-test.el ends here
