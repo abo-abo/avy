@@ -3,12 +3,15 @@ emacs ?= emacs
 
 LOAD = -l avy.el -l avy-test.el
 
-.PHONY: all test clean
+.PHONY: all test clean checkdoc
 
-all: compile test
+all: compile test checkdoc
 
 test:
 	$(emacs) -batch $(LOAD) -f ert-run-tests-batch-and-exit
+
+checkdoc:
+	$(emacs) -batch -l targets/checkdoc.el
 
 compile:
 	$(emacs) -batch -l targets/avy-init.el
