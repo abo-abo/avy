@@ -972,9 +972,10 @@ exist."
 
 (defun avy--generic-jump (regex window-flip style &optional beg end)
   "Jump to REGEX.
+The window scope is determined by `avy-all-windows'.
 When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
 STYLE determines the leading char overlay style.
-BEG and END delimit the area where candidates are searched."
+BEG and END narrow the scope where candidates are searched."
   (let ((avy-all-windows
          (if window-flip
              (not avy-all-windows)
@@ -1013,7 +1014,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 ;;;###autoload
 (defun avy-goto-char-2 (char1 char2 &optional arg beg end)
   "Jump to the currently visible CHAR1 followed by CHAR2.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'.
+BEG and END narrow the scope where candidates are searched."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg
@@ -1033,7 +1036,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-goto-char-2-above (char1 char2 &optional arg)
   "Jump to the currently visible CHAR1 followed by CHAR2.
 This is a scoped version of `avy-goto-char-2', where the scope is
-the visible part of the current buffer up to point."
+the visible part of the current buffer up to point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
@@ -1046,7 +1051,9 @@ the visible part of the current buffer up to point."
 (defun avy-goto-char-2-below (char1 char2 &optional arg)
   "Jump to the currently visible CHAR1 followed by CHAR2.
 This is a scoped version of `avy-goto-char-2', where the scope is
-the visible part of the current buffer following point."
+the visible part of the current buffer following point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
                      current-prefix-arg))
@@ -1071,19 +1078,25 @@ the visible part of the current buffer following point."
 ;;;###autoload
 (defun avy-goto-word-0 (arg &optional beg end)
   "Jump to a word start.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'.
+BEG and END narrow the scope where candidates are searched."
   (interactive "P")
   (avy-with avy-goto-word-0
     (avy--generic-jump avy-goto-word-0-regexp arg avy-style beg end)))
 
 (defun avy-goto-word-0-above (arg)
-  "Jump to a word start between window start and point."
+  "Jump to a word start between window start and point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive "P")
   (avy-with avy-goto-word-0
     (avy-goto-word-0 arg (window-start) (point))))
 
 (defun avy-goto-word-0-below (arg)
-  "Jump to a word start between point and window end."
+  "Jump to a word start between point and window end.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive "P")
   (avy-with avy-goto-word-0
     (avy-goto-word-0 arg (point) (window-end (selected-window) t))))
@@ -1091,7 +1104,10 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 ;;;###autoload
 (defun avy-goto-word-1 (char &optional arg beg end symbol)
   "Jump to the currently visible CHAR at a word start.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'.
+BEG and END narrow the scope where candidates are searched.
+When SYMBOL is non-nil, jump to symbol start instead of word start."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-word-1
@@ -1113,7 +1129,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-goto-word-1-above (char &optional arg)
   "Jump to the currently visible CHAR at a word start.
 This is a scoped version of `avy-goto-word-1', where the scope is
-the visible part of the current buffer up to point. "
+the visible part of the current buffer up to point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-word-1
@@ -1123,7 +1141,9 @@ the visible part of the current buffer up to point. "
 (defun avy-goto-word-1-below (char &optional arg)
   "Jump to the currently visible CHAR at a word start.
 This is a scoped version of `avy-goto-word-1', where the scope is
-the visible part of the current buffer following point. "
+the visible part of the current buffer following point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-word-1
@@ -1132,7 +1152,8 @@ the visible part of the current buffer following point. "
 ;;;###autoload
 (defun avy-goto-symbol-1 (char &optional arg)
   "Jump to the currently visible CHAR at a symbol start.
-The window scope is determined by `avy-all-windows' (ARG negates it)."
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-symbol-1
@@ -1142,7 +1163,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defun avy-goto-symbol-1-above (char &optional arg)
   "Jump to the currently visible CHAR at a symbol start.
 This is a scoped version of `avy-goto-symbol-1', where the scope is
-the visible part of the current buffer up to point. "
+the visible part of the current buffer up to point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-symbol-1-above
@@ -1152,7 +1175,9 @@ the visible part of the current buffer up to point. "
 (defun avy-goto-symbol-1-below (char &optional arg)
   "Jump to the currently visible CHAR at a symbol start.
 This is a scoped version of `avy-goto-symbol-1', where the scope is
-the visible part of the current buffer following point. "
+the visible part of the current buffer following point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-symbol-1-below
@@ -1231,6 +1256,10 @@ Which one depends on variable `subword-mode'."
 (defvar visual-line-mode)
 
 (defun avy--line-cands (&optional arg beg end)
+  "Get candidates for selecting a line.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'.
+BEG and END narrow the scope where candidates are searched."
   (let (candidates)
     (avy-dowindows arg
       (let ((ws (or beg (window-start))))
@@ -1254,6 +1283,7 @@ Which one depends on variable `subword-mode'."
     (nreverse candidates)))
 
 (defun avy--linum-strings ()
+  "Get strings for `avy-linum-mode'."
   (let* ((lines (mapcar #'car (avy--line-cands)))
          (line-tree (avy-tree lines avy-keys))
          (line-list nil))
@@ -1337,8 +1367,9 @@ Which one depends on variable `subword-mode'."
 
 (defun avy--line (&optional arg beg end)
   "Select a line.
-The window scope is determined by `avy-all-windows' (ARG negates it).
-Narrow the scope to BEG END."
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'.
+BEG and END narrow the scope where candidates are searched."
   (let ((avy-action #'identity))
     (avy--process
      (avy--line-cands arg beg end)
@@ -1526,7 +1557,7 @@ The window scope is determined by `avy-all-windows' or
              (end (list (avy--line arg) (selected-window))))
         (cond
           ((not (numberp (car beg)))
-           (user-error "Fail to select the beginning of region."))
+           (user-error "Fail to select the beginning of region"))
           ((not (numberp (car end)))
            (user-error "Fail to select the end of region"))
           ;; Restrict operation to same window. It's better if it can be
@@ -1548,7 +1579,9 @@ The window scope is determined by `avy-all-windows' or
 
 ;;;###autoload
 (defun avy-kill-ring-save-region (arg)
-  "Select two lines and save the region between them to the kill ring."
+  "Select two lines and save the region between them to the kill ring.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive "P")
   (let ((initial-window (selected-window)))
     (avy-with avy-kill-ring-save-region
@@ -1557,7 +1590,7 @@ The window scope is determined by `avy-all-windows' or
              (end (list (avy--line arg) (selected-window))))
         (cond
           ((not (numberp (car beg)))
-           (user-error "Fail to select the beginning of region."))
+           (user-error "Fail to select the beginning of region"))
           ((not (numberp (car end)))
            (user-error "Fail to select the end of region"))
           ((not (equal (cdr beg) (cdr end)))
@@ -1579,7 +1612,7 @@ The window scope is determined by `avy-all-windows' or
   "Select line and kill the whole selected line.
 
 With a numerical prefix ARG, kill ARG line(s) starting from the
-selected line. If ARG is negative, kill backward.
+selected line.  If ARG is negative, kill backward.
 
 If ARG is zero, kill the selected line but exclude the trailing
 newline.
@@ -1601,10 +1634,16 @@ selected line."
 
 ;;;###autoload
 (defun avy-kill-ring-save-whole-line (arg)
-  "Select line and Save the whole selected line as if killed, but don’t kill it.
+  "Select line and save the whole selected line as if killed, but don’t kill it.
 
 This command is similar to `avy-kill-whole-line', except that it
-saves the line(s) as if killed, but does not kill it(them)."
+saves the line(s) as if killed, but does not kill it(them).
+
+With a numerical prefix ARG, kill ARG line(s) starting from the
+selected line.  If ARG is negative, kill backward.
+
+If ARG is zero, kill the selected line but exclude the trailing
+newline."
   (interactive "P")
   (let ((initial-window (selected-window)))
     (avy-with avy-kill-ring-save-whole-line
