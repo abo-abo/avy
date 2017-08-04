@@ -62,7 +62,10 @@ key (letters, digits, punctuation, etc.) or a symbol denoting a
 non-printing key like an arrow key (left, right, up, down).  For
 non-printing keys, a corresponding entry in
 `avy-key-to-char-alist' must exist in order to visualize the key
-in the avy overlays."
+in the avy overlays.
+
+If `avy-style' is set to words, make sure there are at least three
+keys different than the following: a, e, i, o, u, y"
   :type '(repeat :tag "Keys" (choice
                               (character :tag "char")
                               (symbol :tag "non-printing key"))))
@@ -90,6 +93,38 @@ in the avy overlays."
                      (function :tag "Other command"))
           :value-type (repeat :tag "Keys" character)))
 
+(defcustom avy-words
+  '("am" "by" "if" "is" "it" "my" "ox" "up"
+    "ace" "act" "add" "age" "ago" "aim" "air" "ale" "all" "and" "ant" "any"
+    "ape" "apt" "arc" "are" "arm" "art" "ash" "ate" "awe" "axe" "bad" "bag"
+    "ban" "bar" "bat" "bay" "bed" "bee" "beg" "bet" "bid" "big" "bit" "bob"
+    "bot" "bow" "box" "boy" "but" "cab" "can" "cap" "car" "cat" "cog" "cop"
+    "cow" "cry" "cup" "cut" "day" "dew" "did" "die" "dig" "dim" "dip" "dog"
+    "dot" "dry" "dub" "dug" "dye" "ear" "eat" "eel" "egg" "ego" "elf" "eve"
+    "eye" "fan" "far" "fat" "fax" "fee" "few" "fin" "fit" "fix" "flu" "fly"
+    "foe" "fog" "for" "fox" "fry" "fun" "fur" "gag" "gap" "gas" "gel" "gem"
+    "get" "gig" "gin" "gnu" "god" "got" "gum" "gun" "gut" "guy" "gym" "had"
+    "hag" "ham" "has" "hat" "her" "hid" "him" "hip" "his" "hit" "hop" "hot"
+    "how" "hub" "hue" "hug" "hut" "ice" "icy" "imp" "ink" "inn" "ion" "ire"
+    "ivy" "jab" "jam" "jar" "jaw" "jet" "job" "jog" "joy" "key" "kid" "kit"
+    "lag" "lap" "lay" "let" "lid" "lie" "lip" "lit" "lob" "log" "lot" "low"
+    "mad" "man" "map" "mat" "may" "men" "met" "mix" "mob" "mop" "mud" "mug"
+    "nag" "nap" "new" "nil" "nod" "nor" "not" "now" "nun" "oak" "odd" "off"
+    "oil" "old" "one" "orb" "ore" "ork" "our" "out" "owl" "own" "pad" "pan"
+    "par" "pat" "paw" "pay" "pea" "pen" "pet" "pig" "pin" "pit" "pod" "pot"
+    "pry" "pub" "pun" "put" "rag" "ram" "ran" "rat" "raw" "ray" "red" "rib"
+    "rim" "rip" "rob" "rod" "rot" "row" "rub" "rug" "rum" "run" "sad" "sat"
+    "saw" "say" "sea" "see" "sew" "she" "shy" "sin" "sip" "sit" "six" "ski"
+    "sky" "sly" "sob" "son" "soy" "spy" "sum" "sun" "tab" "tad" "tag" "tan"
+    "tap" "tar" "tax" "tea" "the" "tie" "tin" "tip" "toe" "ton" "too" "top"
+    "toy" "try" "tub" "two" "urn" "use" "van" "war" "was" "wax" "way" "web"
+    "wed" "wet" "who" "why" "wig" "win" "wit" "woe" "won" "wry" "you" "zap"
+    "zip" "zoo")
+  "Words to use in case `avy-style' is set to `words'.
+Every word should contain at least one vowel i.e. one of the following
+characters: a, e, i, o, u, y
+They do not have to be sorted but no word should be a prefix of another one.")
+
 (defcustom avy-style 'at-full
   "The default method of displaying the overlays.
 Use `avy-styles-alist' to customize this per-command."
@@ -98,7 +133,8 @@ Use `avy-styles-alist' to customize this per-command."
           (const :tag "At" at)
           (const :tag "At Full" at-full)
           (const :tag "Post" post)
-          (const :tag "De Bruijn" de-bruijn)))
+          (const :tag "De Bruijn" de-bruijn)
+          (const :tag "Words" words)))
 
 (defcustom avy-styles-alist nil
   "Alist of avy-jump commands to the style for each command.
@@ -127,7 +163,8 @@ If the commands isn't on the list, `avy-style' is used."
                        (const :tag "At" at)
                        (const :tag "At Full" at-full)
                        (const :tag "Post" post)
-                       (const :tag "De Bruijn" de-bruijn))))
+                       (const :tag "De Bruijn" de-bruijn)
+                       (const :tag "Words" words))))
 
 (defcustom avy-dispatch-alist
   '((?x . avy-action-kill-move)
@@ -451,6 +488,56 @@ multiple DISPLAY-FN invokations."
               (funcall avy-handler-function char))))
         (cdar alist)))))
 
+(defun avy-read-words (lst words)
+  "Select from LST using WORDS."
+  (catch 'done
+    (let ((num-words (length words))
+          (num-entries (length lst))
+          alist)
+      ;; If there are not enough words to cover all the candidates,
+      ;; we use a De Bruijn sequence to generate the remaining ones.
+      (when (< num-words num-entries)
+        (let ((keys avy-keys)
+              (bad-keys '(?a ?e ?i ?o ?u ?y))
+              (path-len 1)
+              (num-remaining (- num-entries num-words))
+              tmp-alist)
+          ;; Delete all keys which could lead to duplicates.
+          ;; We want at least three keys left to work with.
+          (dolist (x bad-keys)
+            (when (memq x keys)
+              (setq keys (delq ?a keys))))
+          (when (< (length keys) 3)
+            (signal 'user-error
+                    '("Please add more keys to the variable `avy-keys'.")))
+          ;; Generate the sequence and add the keys to the existing words.
+          (while (not tmp-alist)
+            (cl-incf path-len)
+            (setq tmp-alist (avy--path-alist-1 lst path-len keys)))
+          (while (>= (cl-decf num-remaining) 0)
+            (push (mapconcat 'string (caar tmp-alist) nil) (cdr (last words)))
+            (setq tmp-alist (cdr tmp-alist)))))
+      (dolist (x lst)
+        (push (cons (string-to-list (pop words)) x) alist))
+      (setq avy-current-path "")
+      (while (or (> (length alist) 1)
+                 (caar alist))
+        (dolist (x (reverse alist))
+          (avy--overlay-at-full (reverse (car x)) (cdr x)))
+        (let ((char (funcall avy-translate-char-function (read-key))))
+          (avy--remove-leading-chars)
+          (setq alist
+                (delq nil
+                      (mapcar (lambda (x)
+                                (when (eq (caar x) char)
+                                  (cons (cdr (car x)) (cdr x))))
+                              alist)))
+          (setq avy-current-path
+                (concat avy-current-path (string (avy--key-to-char char))))
+          (unless alist
+            (funcall avy-handler-function char))))
+      (cdar alist))))
+
 ;;** Rest
 (defun avy-window-list ()
   "Return a list of windows depending on `avy-all-windows'."
@@ -598,15 +685,19 @@ Use OVERLAY-FN to visualize the decision overlay."
       (if (= len 1)
           (setq res (car candidates))
         (unwind-protect
-             (progn
-               (avy--make-backgrounds
-                (avy-window-list))
-               (setq res (if (eq avy-style 'de-bruijn)
-                             (avy-read-de-bruijn
-                              candidates avy-keys)
-                           (avy-read (avy-tree candidates avy-keys)
-                                     overlay-fn
-                                     #'avy--remove-leading-chars))))
+            (progn
+              (avy--make-backgrounds
+               (avy-window-list))
+              (setq res (cond ((eq avy-style 'de-bruijn)
+                               (avy-read-de-bruijn
+                                candidates avy-keys))
+                              ((eq avy-style 'words)
+                               (avy-read-words
+                                candidates avy-words))
+                              (t
+                               (avy-read (avy-tree candidates avy-keys)
+                                         overlay-fn
+                                         #'avy--remove-leading-chars)))))
           (avy--done)))
       (cond ((eq res 'restart)
              (avy--process cands overlay-fn))
@@ -968,6 +1059,7 @@ exist."
     (at-full 'avy--overlay-at-full)
     (post #'avy--overlay-post)
     (de-bruijn #'avy--overlay-at-full)
+    (words #'avy--overlay-at-full)
     (t (error "Unexpected style %S" style))))
 
 (defun avy--generic-jump (regex window-flip style &optional beg end)
