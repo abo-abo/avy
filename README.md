@@ -80,6 +80,10 @@ After <kbd>M-g e</kbd>:
 
 ![avy-goto-word-0](http://oremacs.com/download/avi-goto-word-0.png)
 
+### Org-mode commands
+
+  * `avy-org-goto-heading-timer`: Type part of an Org heading.  When you stop typing, if only one heading on the screen matches, it will be jumped to; if more than one matches, you can jump to a heading with Avy.  This is like `avy-goto-char-timer` but for Org headings.
+  * `avy-org-refile-as-child`: With point in an entry you want to refile, run this command, select a heading with Avy, and the entry will be refiled as its first child heading.  This makes it quick and easy to refile to headings that are visible on-screen, even to other windows or buffers.
 
 ### Other commands
 

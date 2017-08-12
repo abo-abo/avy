@@ -538,6 +538,56 @@ multiple DISPLAY-FN invokations."
             (funcall avy-handler-function char))))
       (cdar alist))))
 
+;; ** Org-mode
+
+(defun avy-org-refile-as-child ()
+  "Refile current heading as first child of heading selected with `avy.'"
+  ;; Inspired by `org-teleport': http://kitchingroup.cheme.cmu.edu/blog/2016/03/18/Org-teleport-headlines/
+  (interactive)
+  (let ((rfloc (save-excursion
+                 (let* ((org-reverse-note-order t)
+                        (pos (avy-with avy-goto-line
+                               (avy--generic-jump (rx bol (1+ "*") (1+ space))
+                                                  nil avy-style)
+                               (point)))
+                        (filename (buffer-file-name (or (buffer-base-buffer (current-buffer))
+                                                        (current-buffer)))))
+                   (list nil filename nil pos)))))
+    ;; org-refile must be called outside of the excursion
+    (org-refile nil nil rfloc)))
+
+(defun avy-org-goto-heading-timer (&optional arg)
+  "Read one or many characters and jump to matching Org headings.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
+  (interactive "P")
+  (let* ((avy-all-windows (if arg
+                              (not avy-all-windows)
+                            avy-all-windows))
+         (input (avy--read-string-with-timeout))
+         (regexp (rx-to-string `(seq bol (1+ "*") (1+ space) (0+ not-newline)
+                                     ,input (0+ not-newline) eol))))
+    (avy-with avy-goto-char-timer
+      (avy--process (avy--regex-candidates regexp)
+                    (avy--style-fn avy-style)))))
+
+(defun avy--read-string-with-timeout ()
+  "Read string from minibuffer with a timeout."
+  ;; It's a shame that only `read-char' has the timeout option, so we
+  ;; have to do this funky loop ourselves, instead of
+  ;; e.g. `read-string' with a timeout.
+  (cl-loop with charnum
+           with string = ""
+           while (not (equal 13 charnum))
+           for charnum = (read-char (format "Prompt: %s" string )
+                                    t
+                                    (unless (string-empty-p string)
+                                      avy-timeout-seconds))
+           if (and charnum
+                   (not (equal 13 charnum)))
+           concat (make-string 1 charnum) into string
+           else do (setq charnum 13)
+           finally return string))
+
 ;;** Rest
 (defun avy-window-list ()
   "Return a list of windows depending on `avy-all-windows'."
