@@ -560,33 +560,16 @@ multiple DISPLAY-FN invokations."
   "Read one or many characters and jump to matching Org headings.
 The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive "P")
-  (let* ((avy-all-windows (if arg
-                              (not avy-all-windows)
-                            avy-all-windows))
-         (input (avy--read-string-with-timeout))
-         (regexp (rx-to-string `(seq bol (1+ "*") (1+ space) (0+ not-newline)
-                                     ,input (0+ not-newline) eol))))
+  (let ((avy-all-windows (if arg
+                             (not avy-all-windows)
+                           avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--process (avy--regex-candidates regexp)
-                    (avy--style-fn avy-style)))))
-
-(defun avy--read-string-with-timeout ()
-  "Read string from minibuffer with a timeout."
-  ;; It's a shame that only `read-char' has the timeout option, so we
-  ;; have to do this funky loop ourselves, instead of
-  ;; e.g. `read-string' with a timeout.
-  (cl-loop with charnum
-           with string = ""
-           while (not (equal 13 charnum))
-           for charnum = (read-char (format "Prompt: %s" string )
-                                    t
-                                    (unless (string-empty-p string)
-                                      avy-timeout-seconds))
-           if (and charnum
-                   (not (equal 13 charnum)))
-           concat (make-string 1 charnum) into string
-           else do (setq charnum 13)
-           finally return string))
+      (avy--process
+       (avy--read-candidates
+        (lambda (input)
+          (format "^\\*+ .*\\(%s\\)" input)))
+       (avy--style-fn avy-style))
+      (org-back-to-heading))))
 
 ;;** Rest
 (defun avy-window-list ()
@@ -1809,7 +1792,7 @@ newline."
   "How many seconds to wait for the second char."
   :type 'float)
 
-(defun avy--read-candidates ()
+(defun avy--read-candidates (&optional re-builder)
   "Read as many chars as possible and return their occurences.
 At least one char must be read, and then repeatedly one next char
 may be read if it is entered before `avy-timeout-seconds'.  `C-h'
@@ -1817,8 +1800,14 @@ or `DEL' deletes the last char entered, and `RET' exits with the
 currently read string immediately instead of waiting for another
 char for `avy-timeout-seconds'.
 The format of the result is the same as that of `avy--regex-candidates'.
-This function obeys `avy-all-windows' setting."
-  (let ((str "") char break overlays regex)
+This function obeys `avy-all-windows' setting.
+RE-BUILDER is a function that takes a string and returns a regex.
+When nil, `regexp-quote' is used.
+If a group is captured, the first group is highlighted.
+Otherwise, the whole regex is highlighted."
+  (let ((str "")
+        (re-builder (or re-builder #'regexp-quote))
+        char break overlays regex)
     (unwind-protect
          (progn
            (while (and (not break)
@@ -1856,12 +1845,12 @@ This function obeys `avy-all-windows' setting."
                                   (window-end (selected-window) t)))
                      (save-excursion
                        (goto-char (car pair))
-                       (setq regex (regexp-quote str))
+                       (setq regex (funcall re-builder str))
                        (while (re-search-forward regex (cdr pair) t)
                          (unless (get-char-property (1- (point)) 'invisible)
-                           (let ((ov (make-overlay
-                                      (match-beginning 0)
-                                      (match-end 0))))
+                           (let* ((idx (if (= (length (match-data)) 4) 1 0))
+                                  (ov (make-overlay
+                                       (match-beginning idx) (match-end idx))))
                              (setq found t)
                              (push ov overlays)
                              (overlay-put
