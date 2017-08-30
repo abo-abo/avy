@@ -1113,9 +1113,11 @@ BEG and END narrow the scope where candidates are searched."
                      (read-char "char 2: " t)
                      current-prefix-arg
                      nil nil))
-  (when (eq char1 ?)
+  (when (eq char1 ?
+)
     (setq char1 ?\n))
-  (when (eq char2 ?)
+  (when (eq char2 ?
+)
     (setq char2 ?\n))
   (avy-with avy-goto-char-2
     (avy--generic-jump
@@ -1760,7 +1762,7 @@ newline."
   :type 'float)
 
 (defun avy--read-candidates (&optional re-builder)
-  "Read as many chars as possible and return their occurences.
+  "Read as many chars as possible and return their occurrences.
 At least one char must be read, and then repeatedly one next char
 may be read if it is entered before `avy-timeout-seconds'.  `C-h'
 or `DEL' deletes the last char entered, and `RET' exits with the
