@@ -1807,7 +1807,7 @@ newline."
   :type 'boolean)
 
 (defun avy--read-candidates (&optional re-builder)
-  "Read as many chars as possible and return their occurences.
+  "Read as many chars as possible and return their occurrences.
 At least one char must be read, and then repeatedly one next char
 may be read if it is entered before `avy-timeout-seconds'.  `C-h'
 or `DEL' deletes the last char entered, and `RET' exits with the
