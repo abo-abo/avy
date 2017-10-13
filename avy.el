@@ -123,7 +123,8 @@ keys different than the following: a, e, i, o, u, y"
   "Words to use in case `avy-style' is set to `words'.
 Every word should contain at least one vowel i.e. one of the following
 characters: a, e, i, o, u, y
-They do not have to be sorted but no word should be a prefix of another one.")
+They do not have to be sorted but no word should be a prefix of another one."
+  :type '(repeat string))
 
 (defcustom avy-style 'at-full
   "The default method of displaying the overlays.
