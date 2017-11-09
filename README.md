@@ -91,13 +91,11 @@ There are some more commands which you can explore yourself by looking at the co
 
 ### Bindings
 
-You add this to your config to bind some stuff:
+You add this to your config to bind `avy-isearch` to <kbd>C-'</kbd> in `isearch-mode-map`, so that you can select one of the currently visible `isearch` candidates using `avy`.
 
 ```elisp
 (avy-setup-default)
 ```
-
-It will bind, for example, `avy-isearch` to <kbd>C-'</kbd> in `isearch-mode-map`, so that you can select one of the currently visible `isearch` candidates using `avy`.
 
 ### Customization
 
