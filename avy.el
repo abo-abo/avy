@@ -1,4 +1,4 @@
-;;; avy.el --- tree-based completion -*- lexical-binding: t -*-
+;;; avy.el --- Jump to arbitrary positions in visible text and select text quickly. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015  Free Software Foundation, Inc.
 
@@ -25,15 +25,23 @@
 
 ;;; Commentary:
 ;;
-;; This package provides a generic completion method based on building
-;; a balanced decision tree with each candidate being a leaf.  To
-;; traverse the tree from the root to a desired leaf, typically a
-;; sequence of `read-key' can be used.
+;; With Avy, you can move point to any position in Emacs – even in a
+;; different window – using very few keystrokes. For this, you look at
+;; the position where you want point to be, invoke Avy, and then enter
+;; the sequence of characters displayed at that position.
 ;;
-;; In order for `read-key' to make sense, the tree needs to be
-;; visualized appropriately, with a character at each branch node.  So
-;; this completion method works only for things that you can see on
-;; your screen, all at once:
+;; If the position you want to jump to can be determined after only
+;; issuing a single keystroke, point is moved to the desired position
+;; immediately after that keystroke. In case this isn't possible, the
+;; sequence of keystrokes you need to enter is comprised of more than
+;; one character. Avy uses a decision tree where each candidate position
+;; is a leaf and each edge is described by a character which is distinct
+;; per level of the tree. By entering those characters, you navigate the
+;; tree, quickly arriving at the desired candidate position, such that
+;; Avy can move point to it.
+;;
+;; Note that this only makes sense for positions you are able to see
+;; when invoking Avy. These kinds of positions are supported:
 ;;
 ;; * character positions
 ;; * word or subword start positions
