@@ -1768,6 +1768,10 @@ newline."
   "How many seconds to wait for the second char."
   :type 'float)
 
+(defcustom avy-enter-times-out t
+  "Whether enter exits avy-goto-char-timer early. If nil it matches newline"
+  :type 'boolean)
+
 (defun avy--read-candidates (&optional re-builder)
   "Read as many chars as possible and return their occurences.
 At least one char must be read, and then repeatedly one next char
@@ -1802,7 +1806,9 @@ Otherwise, the whole regex is highlighted."
              (cond
                ;; Handle RET
                ((= char 13)
-                (setq break t))
+                (if avy-enter-times-out
+                    (setq break t)
+                  (setq str (concat str (list ?\n)))))
                ;; Handle C-h, DEL
                ((memq char '(8 127))
                 (let ((l (length str)))
