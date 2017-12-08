@@ -434,6 +434,16 @@ KEYS is the path from the root of `avy-tree' to LEAF."
 (defvar avy-current-path ""
   "Store the current incomplete path during `avy-read'.")
 
+(defun avy-mouse-press-event-p (char)
+  "If CHAR is a mouse event, return the window of the event if any or the selected window.
+Return nil if not a mouse event."
+  (when (mouse-event-p char)
+    (cond ((windowp (posn-window (event-start char)))
+	   (posn-window (event-start char)))
+	  ((framep (posn-window (event-start char)))
+	   (frame-selected-window (posn-window (event-start char))))
+	  (t (selected-window)))))
+
 (defun avy-read (tree display-fn cleanup-fn)
   "Select a leaf from TREE using consecutive `read-char'.
 
@@ -442,7 +452,7 @@ associated with CHAR will be selected if CHAR is pressed.  This is
 commonly done by adding a CHAR overlay at LEAF position.
 
 CLEANUP-FN should take no arguments and remove the effects of
-multiple DISPLAY-FN invokations."
+multiple DISPLAY-FN invocations."
   (catch 'done
     (setq avy-current-path "")
     (while tree
@@ -453,14 +463,19 @@ multiple DISPLAY-FN invokations."
         (dolist (x avy--leafs)
           (funcall display-fn (car x) (cdr x))))
       (let ((char (funcall avy-translate-char-function (read-key)))
+	    window
             branch)
         (funcall cleanup-fn)
-        (if (setq branch (assoc char tree))
-            (if (eq (car (setq tree (cdr branch))) 'leaf)
-                (throw 'done (cdr tree))
-              (setq avy-current-path
-                    (concat avy-current-path (string (avy--key-to-char char)))))
-          (funcall avy-handler-function char))))))
+	(if (setq window (avy-mouse-press-event-p char))
+	    (throw 'done (cons char window))
+	  ;; Ensure avy-current-path stores the full path given before
+	  ;; exit for testing when an invalid path character is given.
+          (setq avy-current-path
+		(concat avy-current-path (string (avy--key-to-char char))))
+          (if (setq branch (assoc char tree))
+              (if (eq (car (setq tree (cdr branch))) 'leaf)
+                  (throw 'done (cdr tree)))
+            (funcall avy-handler-function char)))))))
 
 (defun avy-read-de-bruijn (lst keys)
   "Select from LST dispatching on KEYS."
