@@ -424,6 +424,8 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           ((memq char '(27 ?\C-g))
            ;; exit silently
            (throw 'done 'exit))
+          ((avy-mouse-press-event-p char)
+           (signal 'user-error "Mouse event not handled" char))
           (t
            (signal 'user-error (list "No such candidate" char))
            (throw 'done nil)))))
@@ -872,10 +874,11 @@ Do this even when the char is terminating."
 
 (defun avy--key-to-char (c)
   "If C is no character, translate it using `avy-key-to-char-alist'."
-  (if (characterp c)
-      c
-    (or (cdr (assoc c avy-key-to-char-alist))
-        (error "Unknown key %s" c))))
+  (cond ((characterp c) c)
+        ((cdr (assoc c avy-key-to-char-alist)))
+        ((mouse-event-p c) c)
+        (t
+         (error "Unknown key %s" c))))
 
 (defun avy-candidate-beg (leaf)
   "Return the start position for LEAF."
