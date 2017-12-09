@@ -424,8 +424,8 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           ((memq char '(27 ?\C-g))
            ;; exit silently
            (throw 'done 'exit))
-          ((avy-mouse-press-event-p char)
-           (signal 'user-error "Mouse event not handled" char))
+          ((mouse-event-p char)
+           (signal 'user-error (list "Mouse event not handled" char)))
           (t
            (signal 'user-error (list "No such candidate" char))
            (throw 'done nil)))))
