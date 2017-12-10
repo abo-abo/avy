@@ -696,14 +696,20 @@ Set `avy-style' according to COMMMAND as well."
   "Auto correct word at PT."
   (save-excursion
     (goto-char pt)
-    (if (bound-and-true-p flyspell-mode)
-        (flyspell-correct-word-before-point)
-      (if (looking-at-p "\\b")
-          (ispell-word)
-        (progn
-          (backward-word)
-          (when (looking-at-p "\\b")
-            (ispell-word)))))))
+    (cond
+      ((eq avy-command 'avy-goto-line)
+       (ispell-region
+        (line-beginning-position)
+        (line-end-position)))
+      ((bound-and-true-p flyspell-mode)
+       (flyspell-correct-word-before-point))
+      ((looking-at-p "\\b")
+       (ispell-word))
+      (t
+       (progn
+         (backward-word)
+         (when (looking-at-p "\\b")
+           (ispell-word)))))))
 
 (defun avy--process (candidates overlay-fn)
   "Select one of CANDIDATES using `avy-read'.
