@@ -657,7 +657,8 @@ Set `avy-style' according to COMMMAND as well."
 (defun avy-action-yank (pt)
   "Yank sexp starting at PT at the current point."
   (avy-action-copy pt)
-  (yank))
+  (yank)
+  t)
 
 (defun avy-action-kill-move (pt)
   "Kill sexp at PT and move there."
