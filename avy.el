@@ -427,7 +427,8 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           ((mouse-event-p char)
            (signal 'user-error (list "Mouse event not handled" char)))
           (t
-           (signal 'user-error (list "No such candidate" char))
+           (signal 'user-error (list "No such candidate"
+                                     (if (characterp char) (string char) char)))
            (throw 'done nil)))))
 
 (defvar avy-handler-function 'avy-handler-default
