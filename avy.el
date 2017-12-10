@@ -470,8 +470,8 @@ multiple DISPLAY-FN invocations."
         (funcall cleanup-fn)
 	(if (setq window (avy-mouse-event-window char))
 	    (throw 'done (cons char window))
-	  ;; Ensure avy-current-path stores the full path given before
-	  ;; exit for testing when an invalid path character is given.
+	  ;; Ensure avy-current-path stores the full path prior to
+          ;; exit so other packages can utilize its value.
           (setq avy-current-path
 		(concat avy-current-path (string (avy--key-to-char char))))
           (if (setq branch (assoc char tree))
