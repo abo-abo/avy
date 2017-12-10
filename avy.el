@@ -676,12 +676,19 @@ Set `avy-style' according to COMMMAND as well."
     (kill-region pt (point))
     (just-one-space))
   (message "Killed: %s" (current-kill 0))
+  (select-window
+   (cdr
+    (ring-ref avy-ring 0)))
   t)
 
 (defun avy-action-teleport (pt)
   "Kill sexp starting on PT and yank into the current location."
   (avy-action-kill-stay pt)
-  (yank))
+  (select-window
+   (cdr
+    (ring-ref avy-ring 0)))
+  (yank)
+  t)
 
 (declare-function flyspell-correct-word-before-point "flyspell")
 
