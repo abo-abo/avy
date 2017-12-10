@@ -662,9 +662,10 @@ Set `avy-style' according to COMMMAND as well."
 (defun avy-action-kill-move (pt)
   "Kill sexp at PT and move there."
   (goto-char pt)
-  (forward-sexp)
+  (avy-forward-item)
   (kill-region pt (point))
-  (message "Killed: %s" (current-kill 0)))
+  (message "Killed: %s" (current-kill 0))
+  (point))
 
 (defun avy-action-kill-stay (pt)
   "Kill sexp at PT."
