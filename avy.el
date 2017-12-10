@@ -468,10 +468,11 @@ multiple DISPLAY-FN invocations."
             branch)
         (funcall cleanup-fn)
         (if (setq branch (assoc char tree))
-            (if (eq (car (setq tree (cdr branch))) 'leaf)
-                (throw 'done (cdr tree))
+            (progn
               (setq avy-current-path
-                    (concat avy-current-path (string (avy--key-to-char char)))))
+                    (concat avy-current-path (string (avy--key-to-char char))))
+              (when (eq (car (setq tree (cdr branch))) 'leaf)
+                (throw 'done (cdr tree))))
           (funcall avy-handler-function char))))))
 
 (defun avy-read-de-bruijn (lst keys)
