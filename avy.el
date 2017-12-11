@@ -687,7 +687,8 @@ Set `avy-style' according to COMMMAND as well."
   (select-window
    (cdr
     (ring-ref avy-ring 0)))
-  (yank)
+  (save-excursion
+    (yank))
   t)
 
 (declare-function flyspell-correct-word-before-point "flyspell")
