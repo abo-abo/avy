@@ -427,7 +427,8 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           ((mouse-event-p char)
            (signal 'user-error (list "Mouse event not handled" char)))
           (t
-           (signal 'user-error (list "No such candidate" char))
+           (signal 'user-error (list "No such candidate"
+                                     (if (characterp char) (string char) char)))
            (throw 'done nil)))))
 
 (defvar avy-handler-function 'avy-handler-default
@@ -465,15 +466,19 @@ multiple DISPLAY-FN invocations."
         (dolist (x avy--leafs)
           (funcall display-fn (car x) (cdr x))))
       (let ((char (funcall avy-translate-char-function (read-key)))
+	    window
             branch)
         (funcall cleanup-fn)
-        (if (setq branch (assoc char tree))
-            (progn
-              (setq avy-current-path
-                    (concat avy-current-path (string (avy--key-to-char char))))
-              (when (eq (car (setq tree (cdr branch))) 'leaf)
-                (throw 'done (cdr tree))))
-          (funcall avy-handler-function char))))))
+	(if (setq window (avy-mouse-event-window char))
+	    (throw 'done (cons char window))
+	  ;; Ensure avy-current-path stores the full path prior to
+          ;; exit so other packages can utilize its value.
+          (setq avy-current-path
+		(concat avy-current-path (string (avy--key-to-char char))))
+          (if (setq branch (assoc char tree))
+              (if (eq (car (setq tree (cdr branch))) 'leaf)
+                  (throw 'done (cdr tree)))
+            (funcall avy-handler-function char)))))))
 
 (defun avy-read-de-bruijn (lst keys)
   "Select from LST dispatching on KEYS."
