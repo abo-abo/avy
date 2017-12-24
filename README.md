@@ -95,6 +95,7 @@ You add this to your config to bind some stuff:
 
 ```elisp
 (avy-setup-default)
+(global-set-key (kbd "C-c C-j") 'avy-resume)
 ```
 
 It will bind, for example, `avy-isearch` to <kbd>C-'</kbd> in `isearch-mode-map`, so that you can select one of the currently visible `isearch` candidates using `avy`.
