@@ -466,15 +466,15 @@ multiple DISPLAY-FN invocations."
         (dolist (x avy--leafs)
           (funcall display-fn (car x) (cdr x))))
       (let ((char (funcall avy-translate-char-function (read-key)))
-	    window
+            window
             branch)
         (funcall cleanup-fn)
-	(if (setq window (avy-mouse-event-window char))
-	    (throw 'done (cons char window))
-	  ;; Ensure avy-current-path stores the full path prior to
+        (if (setq window (avy-mouse-event-window char))
+            (throw 'done (cons char window))
+          ;; Ensure avy-current-path stores the full path prior to
           ;; exit so other packages can utilize its value.
           (setq avy-current-path
-		(concat avy-current-path (string (avy--key-to-char char))))
+                (concat avy-current-path (string (avy--key-to-char char))))
           (if (setq branch (assoc char tree))
               (if (eq (car (setq tree (cdr branch))) 'leaf)
                   (throw 'done (cdr tree)))
@@ -733,19 +733,19 @@ Use OVERLAY-FN to visualize the decision overlay."
       (if (= len 1)
           (setq res (car candidates))
         (unwind-protect
-            (progn
-              (avy--make-backgrounds
-               (avy-window-list))
-              (setq res (cond ((eq avy-style 'de-bruijn)
-                               (avy-read-de-bruijn
-                                candidates avy-keys))
-                              ((eq avy-style 'words)
-                               (avy-read-words
-                                candidates avy-words))
-                              (t
-                               (avy-read (avy-tree candidates avy-keys)
-                                         overlay-fn
-                                         #'avy--remove-leading-chars)))))
+             (progn
+               (avy--make-backgrounds
+                (avy-window-list))
+               (setq res (cond ((eq avy-style 'de-bruijn)
+                                (avy-read-de-bruijn
+                                 candidates avy-keys))
+                               ((eq avy-style 'words)
+                                (avy-read-words
+                                 candidates avy-words))
+                               (t
+                                (avy-read (avy-tree candidates avy-keys)
+                                          overlay-fn
+                                          #'avy--remove-leading-chars)))))
           (avy--done)))
       (cond ((eq res 'restart)
              (avy--process cands overlay-fn))
