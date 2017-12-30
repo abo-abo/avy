@@ -628,8 +628,9 @@ Set `avy-style' according to COMMMAND as well."
 (defun avy-action-goto (pt)
   "Goto PT."
   (let ((frame (window-frame (selected-window))))
-    (select-frame-set-input-focus frame)
-    (raise-frame frame)
+    (unless (equal frame (selected-frame))
+      (select-frame-set-input-focus frame)
+      (raise-frame frame))
     (goto-char pt)))
 
 (defun avy-forward-item ()
