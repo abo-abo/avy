@@ -182,7 +182,8 @@ If the commands isn't on the list, `avy-style' is used."
     (?m . avy-action-mark)
     (?n . avy-action-copy)
     (?y . avy-action-yank)
-    (?i . avy-action-ispell))
+    (?i . avy-action-ispell)
+    (?z . avy-action-zap-to-char))
   "List of actions for `avy-handler-default'.
 
 Each item is (KEY . ACTION).  When KEY not on `avy-keys' is
@@ -686,6 +687,12 @@ Set `avy-style' according to COMMMAND as well."
    (cdr
     (ring-ref avy-ring 0)))
   t)
+
+(defun avy-action-zap-to-char (pt)
+  "Kill from point up to PT."
+  (if (> pt (point))
+      (kill-region (point) (1+ pt))
+    (kill-region pt (1+ (point)))))
 
 (defun avy-action-teleport (pt)
   "Kill sexp starting on PT and yank into the current location."
