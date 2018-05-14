@@ -691,8 +691,8 @@ Set `avy-style' according to COMMMAND as well."
 (defun avy-action-zap-to-char (pt)
   "Kill from point up to PT."
   (if (> pt (point))
-      (kill-region (point) (1+ pt))
-    (kill-region pt (1+ (point)))))
+      (kill-region (point) pt)
+    (kill-region pt (point))))
 
 (defun avy-action-teleport (pt)
   "Kill sexp starting on PT and yank into the current location."
