@@ -737,7 +737,9 @@ Use OVERLAY-FN to visualize the decision overlay."
         (cands (copy-sequence candidates))
         res)
     (if (= len 0)
-        (message "zero candidates")
+        (progn
+          (message "zero candidates")
+          t)
       (if (= len 1)
           (setq res (car candidates))
         (unwind-protect
