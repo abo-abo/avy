@@ -734,7 +734,6 @@ Use OVERLAY-FN to visualize the decision overlay."
           (mapcar (lambda (x) (cons x (selected-window)))
                   candidates)))
   (let ((len (length candidates))
-        (cands (copy-sequence candidates))
         res)
     (if (= len 0)
         (progn
@@ -758,7 +757,7 @@ Use OVERLAY-FN to visualize the decision overlay."
                                           #'avy--remove-leading-chars)))))
           (avy--done)))
       (cond ((eq res 'restart)
-             (avy--process cands overlay-fn))
+             (avy--process candidates overlay-fn))
             ;; ignore exit from `avy-handler-function'
             ((eq res 'exit))
             (t
