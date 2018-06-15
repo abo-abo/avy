@@ -756,13 +756,14 @@ Use OVERLAY-FN to visualize the decision overlay."
     (setq candidates
           (mapcar (lambda (x) (cons x (selected-window)))
                   candidates)))
-  (let ((res (avy--process-1 candidates overlay-fn)))
+  (let ((original-cands (copy-sequence candidates))
+        (res (avy--process-1 candidates overlay-fn)))
     (cond
       ((null res)
        (message "zero candidates")
        t)
       ((eq res 'restart)
-       (avy--process candidates overlay-fn))
+       (avy--process original-cands overlay-fn))
       ;; ignore exit from `avy-handler-function'
       ((eq res 'exit))
       (t
