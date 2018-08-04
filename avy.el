@@ -1616,6 +1616,13 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
           (const :tag "Below" below)))
 
 ;;;###autoload
+(defun avy-goto-end-of-line (&optional arg)
+  "Mirror avy-goto-line behaviour and then jump to the end of the line"
+  (interactive "p")
+  (progn (avy-goto-line arg)
+         (end-of-line)))
+
+;;;###autoload
 (defun avy-copy-line (arg)
   "Copy a selected line above the current line.
 ARG lines can be used."
