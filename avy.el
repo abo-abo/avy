@@ -78,28 +78,38 @@ keys different than the following: a, e, i, o, u, y"
                               (character :tag "char")
                               (symbol :tag "non-printing key"))))
 
+(defconst avy--key-type
+  '(choice :tag "Command"
+    (const avy-goto-char)
+    (const avy-goto-char-2)
+    (const avy-isearch)
+    (const avy-goto-line)
+    (const avy-goto-subword-0)
+    (const avy-goto-subword-1)
+    (const avy-goto-word-0)
+    (const avy-goto-word-1)
+    (const avy-copy-line)
+    (const avy-copy-region)
+    (const avy-move-line)
+    (const avy-move-region)
+    (const avy-kill-whole-line)
+    (const avy-kill-region)
+    (const avy-kill-ring-save-whole-line)
+    (const avy-kill-ring-save-region)
+    (function :tag "Other command")))
+
 (defcustom avy-keys-alist nil
   "Alist of avy-jump commands to `avy-keys' overriding the default `avy-keys'."
-  :type '(alist
-          :key-type (choice :tag "Command"
-                     (const avy-goto-char)
-                     (const avy-goto-char-2)
-                     (const avy-isearch)
-                     (const avy-goto-line)
-                     (const avy-goto-subword-0)
-                     (const avy-goto-subword-1)
-                     (const avy-goto-word-0)
-                     (const avy-goto-word-1)
-                     (const avy-copy-line)
-                     (const avy-copy-region)
-                     (const avy-move-line)
-                     (const avy-move-region)
-                     (const avy-kill-whole-line)
-                     (const avy-kill-region)
-                     (const avy-kill-ring-save-whole-line)
-                     (const avy-kill-ring-save-region)
-                     (function :tag "Other command"))
+  :type `(alist
+          :key-type ,avy--key-type
           :value-type (repeat :tag "Keys" character)))
+
+(defcustom avy-orders-alist '((avy-goto-char . avy-order-closest))
+  "Alist of candidate ordering functions.
+Usually, candidates appear in their point position order."
+  :type `(alist
+          :key-type ,avy--key-type
+          :value-type function))
 
 (defcustom avy-words
   '("am" "by" "if" "is" "it" "my" "ox" "up"
@@ -362,11 +372,18 @@ SEQ-LEN is how many elements of KEYS it takes to identify a match."
                   lst (cdr lst))))))
     (nreverse path-alist)))
 
+(defun avy-order-closest (x)
+  (abs (- (caar x) (point))))
+
 (defun avy-tree (lst keys)
   "Coerce LST into a balanced tree.
 The degree of the tree is the length of KEYS.
 KEYS are placed appropriately on internal nodes."
-  (let ((len (length keys)))
+  (let* ((len (length keys))
+         (order-fn (cdr (assq avy-command avy-orders-alist)))
+         (lst (if order-fn
+                  (cl-sort lst #'< :key order-fn)
+                lst)))
     (cl-labels
         ((rd (ls)
            (let ((ln (length ls)))
