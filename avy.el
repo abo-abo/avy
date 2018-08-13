@@ -1429,6 +1429,10 @@ Which one depends on variable `subword-mode'."
 
 (defvar visual-line-mode)
 
+(defcustom avy-indent-line-overlay nil
+  "When non-nil, `avy-goto-line' will display the line overlay next to the first non-whitespace character of each line."
+  :type 'boolean)
+
 (defun avy--line-cands (&optional arg beg end bottom-up)
   "Get candidates for selecting a line.
 The window scope is determined by `avy-all-windows'.
@@ -1448,7 +1452,10 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
                 (push (cons
                        (if (eq avy-style 'post)
                            (line-end-position)
-                         (point))
+                         (save-excursion
+                           (when avy-indent-line-overlay
+                             (skip-chars-forward " \t"))
+                           (point)))
                        (selected-window)) candidates))
               (if visual-line-mode
                   (progn
