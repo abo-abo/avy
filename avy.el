@@ -375,6 +375,10 @@ SEQ-LEN is how many elements of KEYS it takes to identify a match."
 (defun avy-order-closest (x)
   (abs (- (caar x) (point))))
 
+(defvar avy-command nil
+  "Store the current command symbol.
+E.g. 'avy-goto-line or 'avy-goto-char.")
+
 (defun avy-tree (lst keys)
   "Coerce LST into a balanced tree.
 The degree of the tree is the length of KEYS.
@@ -621,10 +625,6 @@ multiple DISPLAY-FN invocations."
   "Stub to hold last avy command.
 Commands using `avy-with' macro can be resumed."
   (interactive))
-
-(defvar avy-command nil
-  "Store the current command symbol.
-E.g. 'avy-goto-line or 'avy-goto-char.")
 
 (defmacro avy-with (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY.
