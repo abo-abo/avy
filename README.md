@@ -38,7 +38,8 @@ After <kbd>C-' bu</kbd>:
 
 > Input an arbitrary amount of consecutive chars, jump to the first one with a tree.
 
-This is a more flexible version of `avy-goto-char-2`. First part works similarly to `isearch`: you type a query and it's highlighted dynamically on the screen.  When you stop typing for `avy-timeout-seconds` (0.5s by default), you'll be able to select one of the candidates with `avy`.
+This is a more flexible version of `avy-goto-char-2`. First part works similarly to `isearch`: you type a query and it's highlighted dynamically on the screen.  When you stop typing for `avy-timeout-seconds` (0.5s by default), you'll be able to select one of the candidates with `avy`. As you're inputting characters, you can use `C-h` (backspace) or `DEL` (delete) to
+forget the last typed character and `RET` to end the input sequence immediately and select a candidate.
 
 ### `avy-goto-line`
 
