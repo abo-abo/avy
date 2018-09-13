@@ -1917,6 +1917,9 @@ Otherwise, the whole regex is highlighted."
                 (let ((l (length str)))
                   (when (>= l 1)
                     (setq str (substring str 0 (1- l))))))
+               ;; Handle ESC
+               ((= char 27)
+                (keyboard-quit))
                (t
                 (setq str (concat str (list char)))))
              ;; Highlight
