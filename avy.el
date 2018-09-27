@@ -244,6 +244,10 @@ When nil, punctuation chars will not be matched.
 Typically, these modes don't use the text representation."
   :type 'list)
 
+(defcustom avy-single-candidate-jump t
+  "In case there is only one candidate jumps directly to it."
+  :type 'boolean)
+
 (defvar avy-ring (make-ring 20)
   "Hold the window and point history.")
 
@@ -746,7 +750,7 @@ Set `avy-style' according to COMMMAND as well."
   (let ((len (length candidates)))
     (cond ((= len 0)
            nil)
-          ((= len 1)
+          ((and (= len 1) avy-single-candidate-jump)
            (car candidates))
           (t
            (unwind-protect
