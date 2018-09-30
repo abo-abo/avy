@@ -248,6 +248,12 @@ Typically, these modes don't use the text representation."
   "In case there is only one candidate jumps directly to it."
   :type 'boolean)
 
+(defcustom avy-del-last-char-by '(8 127)
+  "List of event types, i.e. key presses, that delete the last
+character read.  The default represents `C-h' and `DEL'.  See
+`event-convert-list'."
+  :type 'list)
+
 (defvar avy-ring (make-ring 20)
   "Hold the window and point history.")
 
@@ -1882,8 +1888,9 @@ newline."
 (defun avy--read-candidates (&optional re-builder)
   "Read as many chars as possible and return their occurrences.
 At least one char must be read, and then repeatedly one next char
-may be read if it is entered before `avy-timeout-seconds'.  `C-h'
-or `DEL' deletes the last char entered, and `RET' exits with the
+may be read if it is entered before `avy-timeout-seconds'.  Any
+key defined in `avy-del-last-char-by' (by default `C-h' and `DEL')
+deletes the last char entered, and `RET' exits with the
 currently read string immediately instead of waiting for another
 char for `avy-timeout-seconds'.
 The format of the result is the same as that of `avy--regex-candidates'.
@@ -1917,7 +1924,8 @@ Otherwise, the whole regex is highlighted."
                     (setq break t)
                   (setq str (concat str (list ?\n)))))
                ;; Handle C-h, DEL
-               ((memq char '(8 127))
+               ((and avy-del-last-char-by
+                     (memq char avy-del-last-char-by))
                 (let ((l (length str)))
                   (when (>= l 1)
                     (setq str (substring str 0 (1- l))))))
