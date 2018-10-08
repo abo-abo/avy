@@ -1906,7 +1906,8 @@ Otherwise, the whole regex is highlighted."
          (progn
            (while (and (not break)
                        (setq char
-                             (read-char (format "char%s: "
+                             (read-char (format "%d  char%s: "
+                                                (length overlays)
                                                 (if (string= str "")
                                                     str
                                                   (format " (%s)" str)))
