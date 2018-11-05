@@ -459,9 +459,8 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           ((mouse-event-p char)
            (signal 'user-error (list "Mouse event not handled" char)))
           (t
-           (signal 'user-error (list "No such candidate"
-                                     (if (characterp char) (string char) char)))
-           (throw 'done nil)))))
+           (message "No such candidate: %s, hit `C-g' to quit."
+                    (if (characterp char) (string char) char))))))
 
 (defvar avy-handler-function 'avy-handler-default
   "A function to call for a bad `read-key' in `avy-read'.")
@@ -480,7 +479,7 @@ Return nil if not a mouse event."
           (t (selected-window)))))
 
 (defun avy-read (tree display-fn cleanup-fn)
-  "Select a leaf from TREE using consecutive `read-char'.
+  "Select a leaf from TREE using consecutive `read-key'.
 
 DISPLAY-FN should take CHAR and LEAF and signify that LEAFs
 associated with CHAR will be selected if CHAR is pressed.  This is
