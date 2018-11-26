@@ -2009,6 +2009,9 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
 (defvar org-reverse-note-order)
 (declare-function org-refile "org")
 (declare-function org-back-to-heading "org")
+(declare-function org-reveal "org")
+
+(defvar org-after-refile-insert-hook)
 
 (defun avy-org-refile-as-child ()
   "Refile current heading as first child of heading selected with `avy.'"
