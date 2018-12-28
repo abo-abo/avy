@@ -774,9 +774,10 @@ Set `avy-style' according to COMMMAND as well."
                                    #'avy--remove-leading-chars))))
              (avy--done))))))
 
-(defun avy--process (candidates overlay-fn)
+(defun avy--process (candidates overlay-fn &optional no-select)
   "Select one of CANDIDATES using `avy-read'.
-Use OVERLAY-FN to visualize the decision overlay."
+Use OVERLAY-FN to visualize the decision overlay. When NO-SELECT is non-nil, do
+not select the frame or window or push the mark before running the action."
   (unless (and (consp (car candidates))
                (windowp (cdar candidates)))
     (setq candidates
@@ -793,15 +794,16 @@ Use OVERLAY-FN to visualize the decision overlay."
       ;; ignore exit from `avy-handler-function'
       ((eq res 'exit))
       (t
-       (avy-push-mark)
-       (when (and (consp res)
-                  (windowp (cdr res)))
-         (let* ((window (cdr res))
-                (frame (window-frame window)))
-           (unless (equal frame (selected-frame))
-             (select-frame-set-input-focus frame))
-           (select-window window))
-         (setq res (car res)))
+       (unless no-select
+         (avy-push-mark)
+         (when (and (consp res)
+                    (windowp (cdr res)))
+           (let* ((window (cdr res))
+                  (frame (window-frame window)))
+             (unless (equal frame (selected-frame))
+               (select-frame-set-input-focus frame))
+             (select-window window))
+           (setq res (car res))))
 
        (funcall (or avy-action 'avy-action-goto)
                 (if (consp res)
