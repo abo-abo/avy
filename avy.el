@@ -751,6 +751,19 @@ Set `avy-style' according to COMMMAND as well."
          (when (looking-at-p "\\b")
            (ispell-word)))))))
 
+(defvar avy-pre-action #'avy-pre-action-default
+  "Function to call before `avy-action' is called.")
+
+(defun avy-pre-action-default (res)
+  (avy-push-mark)
+  (when (and (consp res)
+             (windowp (cdr res)))
+    (let* ((window (cdr res))
+           (frame (window-frame window)))
+      (unless (equal frame (selected-frame))
+        (select-frame-set-input-focus frame))
+      (select-window window))))
+
 (defun avy--process-1 (candidates overlay-fn)
   (let ((len (length candidates)))
     (cond ((= len 0)
@@ -793,16 +806,8 @@ Use OVERLAY-FN to visualize the decision overlay."
       ;; ignore exit from `avy-handler-function'
       ((eq res 'exit))
       (t
-       (avy-push-mark)
-       (when (and (consp res)
-                  (windowp (cdr res)))
-         (let* ((window (cdr res))
-                (frame (window-frame window)))
-           (unless (equal frame (selected-frame))
-             (select-frame-set-input-focus frame))
-           (select-window window))
-         (setq res (car res)))
-
+       (funcall avy-pre-action res)
+       (setq res (car res))
        (funcall (or avy-action 'avy-action-goto)
                 (if (consp res)
                     (car res)
