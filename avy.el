@@ -1157,7 +1157,7 @@ exist."
     (words #'avy--overlay-at-full)
     (t (error "Unexpected style %S" style))))
 
-(defun avy--generic-jump (regex window-flip style &optional beg end)
+(defun avy--generic-jump (regex window-flip &optional beg end)
   "Jump to REGEX.
 The window scope is determined by `avy-all-windows'.
 When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
@@ -1183,8 +1183,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
      (if (= 13 char)
          "\n"
        (regexp-quote (string char)))
-     arg
-     avy-style)))
+     arg)))
 
 ;;;###autoload
 (defun avy-goto-char-in-line (char)
@@ -1194,7 +1193,6 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
     (avy--generic-jump
      (regexp-quote (string char))
      avy-all-windows
-     avy-style
      (line-beginning-position)
      (line-end-position))))
 
@@ -1216,7 +1214,6 @@ BEG and END narrow the scope where candidates are searched."
     (avy--generic-jump
      (regexp-quote (string char1 char2))
      arg
-     avy-style
      beg end)))
 
 ;;;###autoload
@@ -1270,7 +1267,7 @@ When ARG is non-nil, do the opposite of `avy-all-windows'.
 BEG and END narrow the scope where candidates are searched."
   (interactive "P")
   (avy-with avy-goto-word-0
-    (avy--generic-jump avy-goto-word-0-regexp arg avy-style beg end)))
+    (avy--generic-jump avy-goto-word-0-regexp arg beg end)))
 
 (defun avy-goto-word-0-above (arg)
   "Jump to a word start between window start and point.
@@ -1310,7 +1307,7 @@ When SYMBOL is non-nil, jump to symbol start instead of word start."
                          (concat
                           (if symbol "\\_<" "\\b")
                           str)))))
-      (avy--generic-jump regex arg avy-style beg end))))
+      (avy--generic-jump regex arg beg end))))
 
 ;;;###autoload
 (defun avy-goto-word-1-above (char &optional arg)
@@ -2025,7 +2022,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
          (marker (save-excursion
                    (avy-with avy-goto-line
                      (unless (eq 't (avy--generic-jump (rx bol (1+ "*") (1+ space))
-                                                       nil avy-style))
+                                                       nil))
                        ;; `avy--generic-jump' returns t when aborted with C-g.
                        (point-marker)))))
          (filename (buffer-file-name (or (buffer-base-buffer (marker-buffer marker))
