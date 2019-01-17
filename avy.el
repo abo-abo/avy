@@ -1911,6 +1911,8 @@ Otherwise, the whole regex is highlighted."
         char break overlays regex)
     (unwind-protect
          (progn
+           (avy--make-backgrounds
+            (avy-window-list))
            (while (and (not break)
                        (setq char
                              (read-char (format "%d  char%s: "
@@ -1972,7 +1974,8 @@ Otherwise, the whole regex is highlighted."
                                      (overlay-get ov 'window)))
                              overlays)))
       (dolist (ov overlays)
-        (delete-overlay ov)))))
+        (delete-overlay ov))
+      (avy--done))))
 
 ;;;###autoload
 (defun avy-goto-char-timer (&optional arg)
