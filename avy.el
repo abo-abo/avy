@@ -837,18 +837,23 @@ Use OVERLAY-FN to visualize the decision overlay."
   (setq avy--overlays-back nil)
   (avy--remove-leading-chars))
 
+(defun avy--visible-p (s)
+  (let ((invisible (get-char-property s 'invisible)))
+    (or (null invisible)
+        (null (assoc invisible buffer-invisibility-spec)))))
+
 (defun avy--next-visible-point ()
   "Return the next closest point without 'invisible property."
   (let ((s (point)))
     (while (and (not (= (point-max) (setq s (next-char-property-change s))))
-                (get-char-property s 'invisible)))
+                (not (avy--visible-p s))))
     s))
 
 (defun avy--next-invisible-point ()
   "Return the next closest point with 'invisible property."
   (let ((s (point)))
     (while (and (not (= (point-max) (setq s (next-char-property-change s))))
-                (not (get-char-property s 'invisible))))
+                (avy--visible-p s)))
     s))
 
 (defun avy--find-visible-regions (rbeg rend)
@@ -883,7 +888,7 @@ When GROUP is non-nil, (BEG . END) should delimit that regex group."
         (save-excursion
           (goto-char (car pair))
           (while (re-search-forward regex (cdr pair) t)
-            (unless (get-char-property (1- (point)) 'invisible)
+            (when (avy--visible-p (1- (point)))
               (when (or (null pred)
                         (funcall pred))
                 (push (cons (cons (match-beginning group)
