@@ -1,3 +1,6 @@
+[![MELPA](https://melpa.org/packages/avy-badge.svg)](https://melpa.org/#/avy)
+[![MELPA Stable](https://stable.melpa.org/packages/avy-badge.svg)](https://stable.melpa.org/#/avy)
+
 ## Introduction
 
 `avy` is a GNU Emacs package for jumping to visible text using a char-based decision tree.  See also [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode) and [vim-easymotion](https://github.com/Lokaltog/vim-easymotion) - `avy` uses the same idea.
