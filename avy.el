@@ -1409,7 +1409,7 @@ BEG and END narrow the scope where candidates are searched."
                 (while (> (point) ws)
                   (when (or (null predicate)
                             (and predicate (funcall predicate)))
-                    (unless (get-char-property (point) 'invisible)
+                    (unless (not (avy--visible-p (point)))
                       (push (cons (point) (selected-window)) window-cands)))
                   (subword-backward))
                 (and (= (point) ws)
@@ -1956,7 +1956,7 @@ Otherwise, the whole regex is highlighted."
                        (goto-char (car pair))
                        (setq regex (funcall re-builder str))
                        (while (re-search-forward regex (cdr pair) t)
-                         (unless (get-char-property (1- (point)) 'invisible)
+                         (unless (not (avy--visible-p (1- (point))))
                            (let* ((idx (if (= (length (match-data)) 4) 1 0))
                                   (ov (make-overlay
                                        (match-beginning idx) (match-end idx))))
