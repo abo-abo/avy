@@ -875,6 +875,7 @@ Use OVERLAY-FN to visualize the decision overlay."
 (defun avy--visible-p (s)
   (let ((invisible (get-char-property s 'invisible)))
     (or (null invisible)
+        (eq t buffer-invisibility-spec)
         (null (assoc invisible buffer-invisibility-spec)))))
 
 (defun avy--next-visible-point ()
