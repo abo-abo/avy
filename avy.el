@@ -787,6 +787,40 @@ Set `avy-style' according to COMMMAND as well."
                                    #'avy--remove-leading-chars))))
              (avy--done))))))
 
+(defvar avy-last-candidates nil
+  "Store the last candidate list.")
+
+(defun avy--last-candidates-cycle (advancer)
+  (let* ((avy-last-candidates
+          (cl-remove-if-not
+           (lambda (x) (equal (cdr x) (selected-window)))
+           avy-last-candidates))
+         (min-dist
+          (apply #'min
+                 (mapcar (lambda (x) (abs (- (caar x) (point)))) avy-last-candidates)))
+         (pos
+          (cl-position-if
+           (lambda (x)
+             (= (- (caar x) (point)) min-dist))
+           avy-last-candidates)))
+    (funcall advancer pos avy-last-candidates)))
+
+(defun avy-prev ()
+  "Go to the previous candidate of the last `avy-read'."
+  (interactive)
+  (avy--last-candidates-cycle
+   (lambda (pos lst)
+     (when (> pos 0)
+       (goto-char (caar (nth (1- pos) lst)))))))
+
+(defun avy-next ()
+  "Go to the next candidate of the last `avy-read'."
+  (interactive)
+  (avy--last-candidates-cycle
+   (lambda (pos lst)
+     (when (< pos (1- (length lst)))
+       (goto-char (caar (nth (1+ pos) lst)))))))
+
 (defun avy--process (candidates &optional overlay-fn)
   "Select one of CANDIDATES using `avy-read'.
 Use OVERLAY-FN to visualize the decision overlay."
@@ -796,6 +830,7 @@ Use OVERLAY-FN to visualize the decision overlay."
     (setq candidates
           (mapcar (lambda (x) (cons x (selected-window)))
                   candidates)))
+  (setq avy-last-candidates (copy-sequence candidates))
   (let ((original-cands (copy-sequence candidates))
         (res (avy--process-1 candidates overlay-fn)))
     (cond
