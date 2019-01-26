@@ -1204,7 +1204,6 @@ exist."
   "Jump to REGEX.
 The window scope is determined by `avy-all-windows'.
 When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
-STYLE determines the leading char overlay style.
 BEG and END narrow the scope where candidates are searched."
   (let ((avy-all-windows
          (if window-flip
