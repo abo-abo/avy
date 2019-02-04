@@ -1200,11 +1200,26 @@ exist."
     (ignore #'ignore)
     (t (error "Unexpected style %S" style))))
 
+(cl-defun avy-jump (regex &key window-flip beg end action)
+  "Jump to REGEX.
+The window scope is determined by `avy-all-windows'.
+When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
+BEG and END narrow the scope where candidates are searched.
+ACTION is a function that takes point position as an argument."
+  (setq avy-action (or action avy-action))
+  (let ((avy-all-windows
+         (if window-flip
+             (not avy-all-windows)
+           avy-all-windows)))
+    (avy--process
+     (avy--regex-candidates regex beg end))))
+
 (defun avy--generic-jump (regex window-flip &optional beg end)
   "Jump to REGEX.
 The window scope is determined by `avy-all-windows'.
 When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
 BEG and END narrow the scope where candidates are searched."
+  (declare (obsolete avy-jump "0.4.0"))
   (let ((avy-all-windows
          (if window-flip
              (not avy-all-windows)
@@ -1220,22 +1235,21 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-char
-    (avy--generic-jump
+    (avy-jump
      (if (= 13 char)
          "\n"
        (regexp-quote (string char)))
-     arg)))
+     :window-flip arg)))
 
 ;;;###autoload
 (defun avy-goto-char-in-line (char)
   "Jump to the currently visible CHAR in the current line."
   (interactive (list (read-char "char: " t)))
   (avy-with avy-goto-char
-    (avy--generic-jump
+    (avy-jump
      (regexp-quote (string char))
-     avy-all-windows
-     (line-beginning-position)
-     (line-end-position))))
+     :beg (line-beginning-position)
+     :end (line-end-position))))
 
 ;;;###autoload
 (defun avy-goto-char-2 (char1 char2 &optional arg beg end)
@@ -1252,10 +1266,11 @@ BEG and END narrow the scope where candidates are searched."
   (when (eq char2 ?)
     (setq char2 ?\n))
   (avy-with avy-goto-char-2
-    (avy--generic-jump
+    (avy-jump
      (regexp-quote (string char1 char2))
-     arg
-     beg end)))
+     :window-flip arg
+     :beg beg
+     :end end)))
 
 ;;;###autoload
 (defun avy-goto-char-2-above (char1 char2 &optional arg)
@@ -1307,7 +1322,10 @@ When ARG is non-nil, do the opposite of `avy-all-windows'.
 BEG and END narrow the scope where candidates are searched."
   (interactive "P")
   (avy-with avy-goto-word-0
-    (avy--generic-jump avy-goto-word-0-regexp arg beg end)))
+    (avy-jump avy-goto-word-0-regexp
+              :window-flip arg
+              :beg beg
+              :end end)))
 
 (defun avy-goto-word-0-above (arg)
   "Jump to a word start between window start and point.
@@ -1347,7 +1365,10 @@ When SYMBOL is non-nil, jump to symbol start instead of word start."
                          (concat
                           (if symbol "\\_<" "\\b")
                           str)))))
-      (avy--generic-jump regex arg beg end))))
+      (avy-jump regex
+                :window-flip arg
+                :beg beg
+                :end end))))
 
 ;;;###autoload
 (defun avy-goto-word-1-above (char &optional arg)
@@ -2064,9 +2085,8 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (let* ((org-reverse-note-order t)
          (marker (save-excursion
                    (avy-with avy-goto-line
-                     (unless (eq 't (avy--generic-jump (rx bol (1+ "*") (1+ space))
-                                                       nil))
-                       ;; `avy--generic-jump' returns t when aborted with C-g.
+                     (unless (eq 't (avy-jump (rx bol (1+ "*") (1+ space))))
+                       ;; `avy-jump' returns t when aborted with C-g.
                        (point-marker)))))
          (filename (buffer-file-name (or (buffer-base-buffer (marker-buffer marker))
                                          (marker-buffer marker))))
