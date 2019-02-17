@@ -764,7 +764,7 @@ Set `avy-style' according to COMMMAND as well."
         (select-frame-set-input-focus frame))
       (select-window window))))
 
-(defun avy--process-1 (candidates overlay-fn)
+(defun avy--process-1 (candidates overlay-fn &optional cleanup-fn)
   (let ((len (length candidates)))
     (cond ((= len 0)
            nil)
@@ -784,7 +784,7 @@ Set `avy-style' according to COMMMAND as well."
                         (t
                          (avy-read (avy-tree candidates avy-keys)
                                    overlay-fn
-                                   #'avy--remove-leading-chars))))
+                                   (or cleanup-fn #'avy--remove-leading-chars)))))
              (avy--done))))))
 
 (defvar avy-last-candidates nil
@@ -821,10 +821,13 @@ Set `avy-style' according to COMMMAND as well."
      (when (< pos (1- (length lst)))
        (goto-char (caar (nth (1+ pos) lst)))))))
 
-(defun avy--process (candidates &optional overlay-fn)
+(defun avy-process (candidates &optional overlay-fn cleanup-fn)
   "Select one of CANDIDATES using `avy-read'.
-Use OVERLAY-FN to visualize the decision overlay."
+Use OVERLAY-FN to visualize the decision overlay.
+CLEANUP-FN should take no arguments and remove the effects of
+multiple OVERLAY-FN invocations."
   (setq overlay-fn (or overlay-fn (avy--style-fn avy-style)))
+  (setq cleanup-fn (or cleanup-fn #'avy--remove-leading-chars))
   (unless (and (consp (car candidates))
                (windowp (cdar candidates)))
     (setq candidates
@@ -832,13 +835,13 @@ Use OVERLAY-FN to visualize the decision overlay."
                   candidates)))
   (setq avy-last-candidates (copy-sequence candidates))
   (let ((original-cands (copy-sequence candidates))
-        (res (avy--process-1 candidates overlay-fn)))
+        (res (avy--process-1 candidates overlay-fn cleanup-fn)))
     (cond
       ((null res)
        (message "zero candidates")
        t)
       ((eq res 'restart)
-       (avy--process original-cands overlay-fn))
+       (avy--process original-cands overlay-fn cleanup-fn))
       ;; ignore exit from `avy-handler-function'
       ((eq res 'exit))
       (t
@@ -848,6 +851,8 @@ Use OVERLAY-FN to visualize the decision overlay."
                 (if (consp res)
                     (car res)
                   res))))))
+
+(defalias 'avy--process 'avy-process)
 
 (defvar avy--overlays-back nil
   "Hold overlays for when `avy-background' is t.")
