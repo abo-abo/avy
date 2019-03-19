@@ -841,7 +841,7 @@ multiple OVERLAY-FN invocations."
        (message "zero candidates")
        t)
       ((eq res 'restart)
-       (avy--process original-cands overlay-fn cleanup-fn))
+       (avy-process original-cands overlay-fn cleanup-fn))
       ;; ignore exit from `avy-handler-function'
       ((eq res 'exit))
       (t
@@ -1217,7 +1217,7 @@ ACTION is a function that takes point position as an argument."
          (if window-flip
              (not avy-all-windows)
            avy-all-windows)))
-    (avy--process
+    (avy-process
      (avy--regex-candidates regex beg end))))
 
 (defun avy--generic-jump (regex window-flip &optional beg end)
@@ -1230,7 +1230,7 @@ BEG and END narrow the scope where candidates are searched."
          (if window-flip
              (not avy-all-windows)
            avy-all-windows)))
-    (avy--process
+    (avy-process
      (avy--regex-candidates regex beg end))))
 
 ;;* Commands
@@ -1314,7 +1314,7 @@ When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive)
   (avy-with avy-isearch
     (let ((avy-background nil))
-      (avy--process
+      (avy-process
        (avy--regex-candidates (if isearch-regexp
                                   isearch-string
                                 (regexp-quote isearch-string))))
@@ -1480,7 +1480,7 @@ BEG and END narrow the scope where candidates are searched."
                      (not (get-char-property (point) 'invisible))
                      (push (cons (point) (selected-window)) window-cands)))
               (setq candidates (nconc candidates window-cands))))))
-      (avy--process candidates))))
+      (avy-process candidates))))
 
 ;;;###autoload
 (defun avy-goto-subword-1 (char &optional arg)
@@ -1639,7 +1639,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
                          (message "Goto line:")
                          'ignore)
                      avy-style)))
-    (avy--process
+    (avy-process
      (avy--line-cands arg beg end bottom-up))))
 
 ;;;###autoload
@@ -2048,7 +2048,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                              (not avy-all-windows)
                            avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--process
+      (avy-process
        (avy--read-candidates)))))
 
 (defun avy-push-mark ()
@@ -2113,7 +2113,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                              (not avy-all-windows)
                            avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--process
+      (avy-process
        (avy--read-candidates
         (lambda (input)
           (format "^\\*+ .*\\(%s\\)" input))))
