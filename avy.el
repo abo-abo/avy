@@ -850,7 +850,8 @@ multiple OVERLAY-FN invocations."
        (funcall (or avy-action 'avy-action-goto)
                 (if (consp res)
                     (car res)
-                  res))))))
+                  res))
+       res))))
 
 (define-obsolete-function-alias 'avy--process 'avy-process
   "0.4.0")
