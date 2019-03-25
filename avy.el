@@ -456,11 +456,27 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           ((memq char '(27 ?\C-g))
            ;; exit silently
            (throw 'done 'exit))
+          ((eq char ??)
+           (avy-show-dispatch-help)
+           (throw 'done 'restart))
           ((mouse-event-p char)
            (signal 'user-error (list "Mouse event not handled" char)))
           (t
            (message "No such candidate: %s, hit `C-g' to quit."
                     (if (characterp char) (string char) char))))))
+
+(defun avy-show-dispatch-help ()
+  "Display action shortucts in echo area."
+  (let ((len (length "avy-action-")))
+    (message "%s" (mapconcat
+                   (lambda (x)
+                     (format "%s: %s"
+                             (propertize
+                              (char-to-string (car x))
+                              'face 'aw-key-face)
+                             (substring (symbol-name (cdr x)) len)))
+                   avy-dispatch-alist
+                   " "))))
 
 (defvar avy-handler-function 'avy-handler-default
   "A function to call for a bad `read-key' in `avy-read'.")
