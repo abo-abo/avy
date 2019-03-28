@@ -1223,19 +1223,20 @@ exist."
     (ignore #'ignore)
     (t (error "Unexpected style %S" style))))
 
-(cl-defun avy-jump (regex &key window-flip beg end action)
+(cl-defun avy-jump (regex &key window-flip beg end action pred)
   "Jump to REGEX.
 The window scope is determined by `avy-all-windows'.
 When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
 BEG and END narrow the scope where candidates are searched.
-ACTION is a function that takes point position as an argument."
+ACTION is a function that takes point position as an argument.
+When PRED is non-nil, it's a filter for matching point positions."
   (setq avy-action (or action avy-action))
   (let ((avy-all-windows
          (if window-flip
              (not avy-all-windows)
            avy-all-windows)))
     (avy-process
-     (avy--regex-candidates regex beg end))))
+     (avy--regex-candidates regex beg end pred))))
 
 (defun avy--generic-jump (regex window-flip &optional beg end)
   "Jump to REGEX.
