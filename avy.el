@@ -1543,8 +1543,8 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
             (narrow-to-region ws (or end (window-end (selected-window) t)))
             (goto-char (point-min))
             (while (< (point) (point-max))
-              (unless (get-char-property
-                       (max (1- (point)) ws) 'invisible)
+              (when (member (get-char-property
+                             (max (1- (point)) ws) 'invisible) '(nil org-link))
                 (push (cons
                        (if (eq avy-style 'post)
                            (line-end-position)
