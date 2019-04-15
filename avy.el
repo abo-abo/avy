@@ -254,6 +254,21 @@ character read.  The default represents `C-h' and `DEL'.  See
 `event-convert-list'."
   :type 'list)
 
+(defcustom avy-color-direction 'right-to-left
+  "Direction to color candidates.
+
+Set candidate colors from right to left or left to right.
+
+Historically the nth color is applied from the right to the left on candidates.
+The right most candidate character would receive the `avy-lead-face',
+then the next charactor to the left `avy-lead-face-0' and so on.
+
+Painting the colors left to right can make selecting candidates easier."
+
+  :type '(choice
+          (const :tag "Right to left" right-to-left)
+          (const :tag "Left to right" left-to-right)))
+
 (defvar avy-ring (make-ring 20)
   "Hold the window and point history.")
 
@@ -1094,9 +1109,12 @@ LEAF is normally ((BEG . END) . WND)."
          (wnd (cdr leaf))
          end)
     (dotimes (i len)
-      (set-text-properties (- len i 1) (- len i)
-                           `(face ,(nth i avy-lead-faces))
-                           str))
+      (let ((position (pcase avy-color-direction
+                        ('right-to-left i)
+                        ('left-to-right (- len i)))))
+        (set-text-properties (- len i 1) (- len i)
+                             `(face ,(nth position avy-lead-faces))
+                             str)))
     (when (eq avy-style 'de-bruijn)
       (setq str (concat
                  (propertize avy-current-path
