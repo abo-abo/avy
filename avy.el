@@ -1094,7 +1094,7 @@ LEAF is normally ((BEG . END) . WND)."
          (wnd (cdr leaf))
          end)
     (dotimes (i len)
-      (set-text-properties (- len i 1) (- len i)
+      (set-text-properties i (1+ i)
                            `(face ,(nth i avy-lead-faces))
                            str))
     (when (eq avy-style 'de-bruijn)
