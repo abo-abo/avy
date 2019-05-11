@@ -141,7 +141,7 @@ Pros and cons of =de-bruijn= over other styles:
   clumped up chars, which is truncated for other styles
 - a con is that the decision path is of the same length (e.g. 2 or 3)
   for all candidates, while with other styles it's possible to have a
-  few candidets with a shorter path.
+  few candidates with a shorter path.
 
 See [[https://github.com/abo-abo/avy/issues/51][#51]] and [[https://github.com/abo-abo/avy/issues/5][#5]].
 
@@ -323,3 +323,176 @@ Allows to customize the behavior of =avy-goto-subword-0= and
 =avy-goto-subword-1= by adding extra chars that should match as word
 constituents.
 See [[https://github.com/abo-abo/avy/issues/116][#116]].
+* 0.5.0
+** Fixes
+*** el:avy-action-copy
+Save selected window and frame. See #133.
+
+Copy line for el:avy-goto-line. See #191.
+*** el:avy-read
+Make ~C-g~ and ~ESC~ fail silently when reading char. See #137.
+
+Display error message on mouse clicks. See #226.
+
+Update el:avy-current-path before returning. See #226.
+
+Quit on ~ESC~. See #249.
+
+Fix for el:org-toggle-link-display. See #261.
+
+Fix for el:buffer-invisibility-spec being t. See #264.
+
+Allow "invisible" 'org-link. See #269.
+*** el:avy-goto-word-1
+Works for "^A"-"^Z", see #167.
+*** el:avy-goto-subword-0
+Add char at window start if empty, See #145.
+
+Add option to limit scope. See #235.
+*** el:avy-goto-subword-1
+Check el:char-after. See #163.
+*** el:avy-isearch
+Escape regex. See #147.
+*** el:avy-goto-char-2
+Translate ~RET~ to ~C-j~. See #153.
+*** el:avy-action-goto
+Add el:raise-frame.
+*** el:avy-goto-char-timer
+Allow ~C-h~ to delete. See #193.
+
+Obey el:avy-background for the initial search. See #259.
+*** el:avy-goto-line
+Fix for empty buffer. See #238.
+
+Add ability to display candidates from bottom to top. See #236.
+*** el:avy--overlay-at-full
+More consistent face order.
+See #270.
+*** documentation
+See #223, #226, #218, #245, #262.
+
+** New Features
+*** API
+New functions have been added as drop-in replacements of double-dash (private) avy
+functions that were used in other packages and configs. Please replace the references to
+the obsolete functions.
+
+**** el:avy-jump
+New API function to replace el:avy--generic-jump. See #265, #267.
+**** el:avy-process
+New API function to replace el:avy--process. See #266.
+
+*** New actions
+**** el:avy-action-kill-stay
+Kill a word with el:avy-goto-char without moving there.
+Bound to ~X~.
+**** el:avy-action-ispell
+Auto-correct word at point. See #142, #160, #161.
+Bound to ~i~.
+**** el:avy-action-yank
+Yank sexp starting at selected point at the current point. See #183.
+Bound to ~y~.
+**** el:avy-action-teleport
+Kill sexp starting on selected point and yank into the current location. See #207.
+Bound to ~t~.
+**** el:avy-action-zap-to-char
+Kill from point up to selected point. See #234.
+Bound to ~z~.
+
+*** New defcustoms
+**** New el:avy-style setting: 'words
+Use this setting:
+#+begin_src elisp
+(setq avy-style 'words)
+#+end_src
+And you'll see overlays like "by", "if", "is", "it", "my" for 2-letter sequences, and
+"can", "car", "cog" for 3-letter sequences. You might find them easier to type than "hla",
+"lls" and "jhl". But you will have to adjust your el:avy-dispatch-alist, e.g. to use only
+upper case characters.
+
+See #210, #219.
+**** el:avy-orders-alist
+Use it to customize the order of candidates with relation to point.  The default is for
+el:avy-goto-char to have the shortest overlay for candidates closest to point.
+See #242.
+**** el:avy-indent-line-overlay
+When non-nil el:avy-goto-line will display the line overlay next to the first
+non-whitespace character of each line. See #244.
+**** el:avy-single-candidate-jump
+When non-nil, and there is only one candidate, jump there. See #250.
+**** el:avy-del-last-char-by
+Customize keys which delete the last read char. The defaults are ~C-h~ and ~DEL~. See #251.
+**** el:avy-goto-word-0-regexp
+Customize el:avy-goto-word-0. See #136, #156.
+**** el:avy-pre-action
+Function to all before el:avy-action. See #260.
+**** el:avy-enter-times-out
+When non-nil (the default), ~RET~ exists el:avy-goto-char-timer early.
+When nil, it matches a newline.
+See #220, #225.
+
+*** New commands
+**** el:avy-move-region
+Select two lines and move the text between them above the current line.
+See #75, #187, #188.
+**** el:avy-goto-end-of-line
+Call el:avy-goto-line and move to the end of the line. See #240.
+
+**** el:avy-linum-mode
+Minor mode that uses avy hints for el:linum-mode.
+
+**** el:avy-resume
+Holds last command avy command after user input. This is a quick way to bring back the
+same markers after a jump. See #157, #165.
+**** el:avy-next
+Go to the next candidate after el:avy-read.
+Example config:
+
+#+begin_src elisp
+(defhydra hydra-avy-cycle ()
+  ("j" avy-next "next")
+  ("k" avy-prev "prev")
+  ("q" nil "quit"))
+
+(global-set-key (kbd "C-M-'") 'hydra-avy-cycle/body)
+#+end_src
+
+After e.g. el:avy-goto-char or el:avy-goto-char-timer, use the above hydra to cycle
+between the last candidates.  See #254.
+**** *-above and *-below variants
+Command versions restricted to matches before or after the point.
+
+See #148:
+- el:avy-goto-char-2-above
+- el:avy-goto-char-2-below
+
+See #151:
+- el:avy-goto-word-1-above
+- el:avy-goto-word-1-below
+
+See #156:
+- el:avy-goto-symbol-1-above
+- el:avy-goto-symbol-1-below
+
+See #186:
+- el:avy-goto-word-0-below
+- el:avy-goto-word-0-above
+**** kill and save region functionality
+New avy-enabled commands:
+- el:avy-kill-whole-line
+- el:avy-kill-region
+- el:avy-kill-ring-save-whole-line
+- el:avy-kill-ring-save-region
+
+See #158.
+**** org-mode functionality
+New avy-enabled commands:
+- el:avy-org-refile-as-child
+- el:avy-org-goto-heading-timer
+See #214, #258.
+*** el:avy-goto-char-timer
+Show the number of matches so far in the prompt. See #253.
+*** el:avy-read
+Ignore mistyping when no candidates are available. See #256.
+
+When the overlays are shown, press ~?~ to get dispatch help.
