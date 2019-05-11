@@ -1975,11 +1975,10 @@ newline."
 (defun avy--read-candidates (&optional re-builder)
   "Read as many chars as possible and return their occurrences.
 At least one char must be read, and then repeatedly one next char
-may be read if it is entered before `avy-timeout-seconds'.  Any
-key defined in `avy-del-last-char-by' (by default `C-h' and `DEL')
-deletes the last char entered, and `RET' exits with the
-currently read string immediately instead of waiting for another
-char for `avy-timeout-seconds'.
+may be read if it is entered before `avy-timeout-seconds'.  DEL
+deletes the last char entered, and RET exits with the currently
+read string immediately instead of waiting for another char for
+`avy-timeout-seconds'.
 The format of the result is the same as that of `avy--regex-candidates'.
 This function obeys `avy-all-windows' setting.
 RE-BUILDER is a function that takes a string and returns a regex.
