@@ -326,50 +326,50 @@ See [[https://github.com/abo-abo/avy/issues/116][#116]].
 * 0.5.0
 ** Fixes
 *** el:avy-action-copy
-Save selected window and frame. See #133.
+Save selected window and frame. See [[https://github.com/abo-abo/avy/issues/133][#133]].
 
-Copy line for el:avy-goto-line. See #191.
+Copy line for el:avy-goto-line. See [[https://github.com/abo-abo/avy/issues/191][#191]].
 *** el:avy-read
-Make ~C-g~ and ~ESC~ fail silently when reading char. See #137.
+Make ~C-g~ and ~ESC~ fail silently when reading char. See [[https://github.com/abo-abo/avy/issues/137][#137]].
 
-Display error message on mouse clicks. See #226.
+Display error message on mouse clicks. See [[https://github.com/abo-abo/avy/issues/226][#226]].
 
-Update el:avy-current-path before returning. See #226.
+Update el:avy-current-path before returning. See [[https://github.com/abo-abo/avy/issues/226][#226]].
 
-Quit on ~ESC~. See #249.
+Quit on ~ESC~. See [[https://github.com/abo-abo/avy/issues/249][#249]].
 
-Fix for el:org-toggle-link-display. See #261.
+Fix for el:org-toggle-link-display. See [[https://github.com/abo-abo/avy/issues/261][#261]].
 
-Fix for el:buffer-invisibility-spec being t. See #264.
+Fix for el:buffer-invisibility-spec being t. See [[https://github.com/abo-abo/avy/issues/264][#264]].
 
-Allow "invisible" 'org-link. See #269.
+Allow "invisible" 'org-link. See [[https://github.com/abo-abo/avy/issues/269][#269]].
 *** el:avy-goto-word-1
-Works for "^A"-"^Z", see #167.
+Works for "^A"-"^Z", see [[https://github.com/abo-abo/avy/issues/167][#167]].
 *** el:avy-goto-subword-0
-Add char at window start if empty, See #145.
+Add char at window start if empty, See [[https://github.com/abo-abo/avy/issues/145][#145]].
 
-Add option to limit scope. See #235.
+Add option to limit scope. See [[https://github.com/abo-abo/avy/issues/235][#235]].
 *** el:avy-goto-subword-1
-Check el:char-after. See #163.
+Check el:char-after. See [[https://github.com/abo-abo/avy/issues/163][#163]].
 *** el:avy-isearch
-Escape regex. See #147.
+Escape regex. See [[https://github.com/abo-abo/avy/issues/147][#147]].
 *** el:avy-goto-char-2
-Translate ~RET~ to ~C-j~. See #153.
+Translate ~RET~ to ~C-j~. See [[https://github.com/abo-abo/avy/issues/153][#153]].
 *** el:avy-action-goto
 Add el:raise-frame.
 *** el:avy-goto-char-timer
-Allow ~C-h~ to delete. See #193.
+Allow ~C-h~ to delete. See [[https://github.com/abo-abo/avy/issues/193][#193]].
 
-Obey el:avy-background for the initial search. See #259.
+Obey el:avy-background for the initial search. See [[https://github.com/abo-abo/avy/issues/259][#259]].
 *** el:avy-goto-line
-Fix for empty buffer. See #238.
+Fix for empty buffer. See [[https://github.com/abo-abo/avy/issues/238][#238]].
 
-Add ability to display candidates from bottom to top. See #236.
+Add ability to display candidates from bottom to top. See [[https://github.com/abo-abo/avy/issues/236][#236]].
 *** el:avy--overlay-at-full
 More consistent face order.
-See #270.
+See [[https://github.com/abo-abo/avy/issues/270][#270]].
 *** documentation
-See #223, #226, #218, #245, #262.
+See [[https://github.com/abo-abo/avy/issues/223][#223]], [[https://github.com/abo-abo/avy/issues/226][#226]], [[https://github.com/abo-abo/avy/issues/218][#218]], [[https://github.com/abo-abo/avy/issues/245][#245]], [[https://github.com/abo-abo/avy/issues/262][#262]].
 
 ** New Features
 *** API
@@ -378,25 +378,25 @@ functions that were used in other packages and configs. Please replace the refer
 the obsolete functions.
 
 **** el:avy-jump
-New API function to replace el:avy--generic-jump. See #265, #267.
+New API function to replace el:avy--generic-jump. See [[https://github.com/abo-abo/avy/issues/265][#265]], [[https://github.com/abo-abo/avy/issues/267][#267]].
 **** el:avy-process
-New API function to replace el:avy--process. See #266.
+New API function to replace el:avy--process. See [[https://github.com/abo-abo/avy/issues/266][#266]].
 
 *** New actions
 **** el:avy-action-kill-stay
 Kill a word with el:avy-goto-char without moving there.
 Bound to ~X~.
 **** el:avy-action-ispell
-Auto-correct word at point. See #142, #160, #161.
+Auto-correct word at point. See [[https://github.com/abo-abo/avy/issues/142][#142]], [[https://github.com/abo-abo/avy/issues/160][#160]], [[https://github.com/abo-abo/avy/issues/161][#161]].
 Bound to ~i~.
 **** el:avy-action-yank
-Yank sexp starting at selected point at the current point. See #183.
+Yank sexp starting at selected point at the current point. See [[https://github.com/abo-abo/avy/issues/183][#183]].
 Bound to ~y~.
 **** el:avy-action-teleport
-Kill sexp starting on selected point and yank into the current location. See #207.
+Kill sexp starting on selected point and yank into the current location. See [[https://github.com/abo-abo/avy/issues/207][#207]].
 Bound to ~t~.
 **** el:avy-action-zap-to-char
-Kill from point up to selected point. See #234.
+Kill from point up to selected point. See [[https://github.com/abo-abo/avy/issues/234][#234]].
 Bound to ~z~.
 
 *** New defcustoms
@@ -410,40 +410,40 @@ And you'll see overlays like "by", "if", "is", "it", "my" for 2-letter sequences
 "lls" and "jhl". But you will have to adjust your el:avy-dispatch-alist, e.g. to use only
 upper case characters.
 
-See #210, #219.
+See [[https://github.com/abo-abo/avy/issues/210][#210]], [[https://github.com/abo-abo/avy/issues/219][#219]].
 **** el:avy-orders-alist
 Use it to customize the order of candidates with relation to point.  The default is for
 el:avy-goto-char to have the shortest overlay for candidates closest to point.
-See #242.
+See [[https://github.com/abo-abo/avy/issues/242][#242]].
 **** el:avy-indent-line-overlay
 When non-nil el:avy-goto-line will display the line overlay next to the first
-non-whitespace character of each line. See #244.
+non-whitespace character of each line. See [[https://github.com/abo-abo/avy/issues/244][#244]].
 **** el:avy-single-candidate-jump
-When non-nil, and there is only one candidate, jump there. See #250.
+When non-nil, and there is only one candidate, jump there. See [[https://github.com/abo-abo/avy/issues/250][#250]].
 **** el:avy-del-last-char-by
-Customize keys which delete the last read char. The defaults are ~C-h~ and ~DEL~. See #251.
+Customize keys which delete the last read char. The defaults are ~C-h~ and ~DEL~. See [[https://github.com/abo-abo/avy/issues/251][#251]].
 **** el:avy-goto-word-0-regexp
-Customize el:avy-goto-word-0. See #136, #156.
+Customize el:avy-goto-word-0. See [[https://github.com/abo-abo/avy/issues/136][#136]], [[https://github.com/abo-abo/avy/issues/156][#156]].
 **** el:avy-pre-action
-Function to all before el:avy-action. See #260.
+Function to all before el:avy-action. See [[https://github.com/abo-abo/avy/issues/260][#260]].
 **** el:avy-enter-times-out
 When non-nil (the default), ~RET~ exists el:avy-goto-char-timer early.
 When nil, it matches a newline.
-See #220, #225.
+See [[https://github.com/abo-abo/avy/issues/220][#220]], [[https://github.com/abo-abo/avy/issues/225][#225]].
 
 *** New commands
 **** el:avy-move-region
 Select two lines and move the text between them above the current line.
-See #75, #187, #188.
+See [[https://github.com/abo-abo/avy/issues/75][#75]], [[https://github.com/abo-abo/avy/issues/187][#187]], [[https://github.com/abo-abo/avy/issues/188][#188]].
 **** el:avy-goto-end-of-line
-Call el:avy-goto-line and move to the end of the line. See #240.
+Call el:avy-goto-line and move to the end of the line. See [[https://github.com/abo-abo/avy/issues/240][#240]].
 
 **** el:avy-linum-mode
 Minor mode that uses avy hints for el:linum-mode.
 
 **** el:avy-resume
 Holds last command avy command after user input. This is a quick way to bring back the
-same markers after a jump. See #157, #165.
+same markers after a jump. See [[https://github.com/abo-abo/avy/issues/157][#157]], [[https://github.com/abo-abo/avy/issues/165][#165]].
 **** el:avy-next
 Go to the next candidate after el:avy-read.
 Example config:
@@ -458,23 +458,23 @@ Example config:
 #+end_src
 
 After e.g. el:avy-goto-char or el:avy-goto-char-timer, use the above hydra to cycle
-between the last candidates.  See #254.
+between the last candidates.  See [[https://github.com/abo-abo/avy/issues/254][#254]].
 **** *-above and *-below variants
 Command versions restricted to matches before or after the point.
 
-See #148:
+See [[https://github.com/abo-abo/avy/issues/148][#148]]:
 - el:avy-goto-char-2-above
 - el:avy-goto-char-2-below
 
-See #151:
+See [[https://github.com/abo-abo/avy/issues/151][#151]]:
 - el:avy-goto-word-1-above
 - el:avy-goto-word-1-below
 
-See #156:
+See [[https://github.com/abo-abo/avy/issues/156][#156]]:
 - el:avy-goto-symbol-1-above
 - el:avy-goto-symbol-1-below
 
-See #186:
+See [[https://github.com/abo-abo/avy/issues/186][#186]]:
 - el:avy-goto-word-0-below
 - el:avy-goto-word-0-above
 **** kill and save region functionality
@@ -484,15 +484,15 @@ New avy-enabled commands:
 - el:avy-kill-ring-save-whole-line
 - el:avy-kill-ring-save-region
 
-See #158.
+See [[https://github.com/abo-abo/avy/issues/158][#158]].
 **** org-mode functionality
 New avy-enabled commands:
 - el:avy-org-refile-as-child
 - el:avy-org-goto-heading-timer
-See #214, #258.
+See [[https://github.com/abo-abo/avy/issues/214][#214]], [[https://github.com/abo-abo/avy/issues/258][#258]].
 *** el:avy-goto-char-timer
-Show the number of matches so far in the prompt. See #253.
+Show the number of matches so far in the prompt. See [[https://github.com/abo-abo/avy/issues/253][#253]].
 *** el:avy-read
-Ignore mistyping when no candidates are available. See #256.
+Ignore mistyping when no candidates are available. See [[https://github.com/abo-abo/avy/issues/256][#256]].
 
 When the overlays are shown, press ~?~ to get dispatch help.
