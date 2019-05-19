@@ -1656,8 +1656,8 @@ The window scope is determined by `avy-all-windows'.
 When ARG is non-nil, do the opposite of `avy-all-windows'.
 BEG and END narrow the scope where candidates are searched.
 When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
-  (let ((avy-action #'identity)
-        (avy-style (if avy-linum-mode
+  (setq avy-action (or avy-action #'identity))
+  (let ((avy-style (if avy-linum-mode
                        (progn
                          (message "Goto line:")
                          'ignore)
@@ -1699,7 +1699,7 @@ Otherwise, forward to `goto-line' with ARG."
                         (forward-line (1- (string-to-number line))))
                       (throw 'done 'exit))))))
              (r (avy--line (eq arg 4))))
-        (unless (eq r t)
+        (when (and (not (eq r t)) (eq avy-action #'identity))
           (avy-action-goto r))))))
 
 ;;;###autoload
