@@ -455,7 +455,7 @@ KEYS is the path from the root of `avy-tree' to LEAF."
            (throw 'done 'restart))
           ((memq char '(27 ?\C-g))
            ;; exit silently
-           (throw 'done 'exit))
+           (throw 'done 'abort))
           ((eq char ??)
            (avy-show-dispatch-help)
            (throw 'done 'restart))
@@ -867,6 +867,8 @@ multiple OVERLAY-FN invocations."
        (avy-process original-cands overlay-fn cleanup-fn))
       ;; ignore exit from `avy-handler-function'
       ((eq res 'exit))
+      ((eq res 'abort)
+       nil)
       (t
        (funcall avy-pre-action res)
        (setq res (car res))
