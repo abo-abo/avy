@@ -1396,6 +1396,22 @@ When ARG is non-nil, do the opposite of `avy-all-windows'."
   (avy-with avy-goto-word-0
     (avy-goto-word-0 arg (point) (window-end (selected-window) t))))
 
+(defun avy-goto-whitespace-end-above (arg)
+  "Jump to the end of a whitespace sequence between point and window end.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
+  (interactive "P")
+  (avy-with avy-goto-whitespace-end
+    (avy-goto-whitespace-end arg (window-start) (point))))
+
+(defun avy-goto-whitespace-end-below (arg)
+  "Jump to the end of a whitespace sequence between window start and point.
+The window scope is determined by `avy-all-windows'.
+When ARG is non-nil, do the opposite of `avy-all-windows'."
+  (interactive "P")
+  (avy-with avy-goto-whitespace-end
+    (avy-goto-whitespace-end arg (point) (window-end (selected-window) t))))
+
 ;;;###autoload
 (defun avy-goto-word-1 (char &optional arg beg end symbol)
   "Jump to the currently visible CHAR at a word start.
