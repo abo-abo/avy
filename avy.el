@@ -254,6 +254,12 @@ character read.  The default represents `C-h' and `DEL'.  See
 `event-convert-list'."
   :type 'list)
 
+(defcustom avy-restart-on-fail nil
+  "Restart candidate selection if no candidate was matched.
+Set this to t to make candidate selection more tolerant to typos. You
+can still use `C-g' to cancel the selection."
+  :type 'boolean)
+
 (defvar avy-ring (make-ring 20)
   "Hold the window and point history.")
 
@@ -862,8 +868,10 @@ multiple OVERLAY-FN invocations."
         (res (avy--process-1 candidates overlay-fn cleanup-fn)))
     (cond
       ((null res)
-       (message "zero candidates")
-       t)
+       (if avy-restart-on-fail
+           (avy-process original-cands overlay-fn cleanup-fn)
+         (message "zero candidates")
+         t))
       ((eq res 'restart)
        (avy-process original-cands overlay-fn cleanup-fn))
       ;; ignore exit from `avy-handler-function'
