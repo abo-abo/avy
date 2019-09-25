@@ -1349,7 +1349,8 @@ When ARG is non-nil, do the opposite of `avy-all-windows'."
   "Jump to one of the current isearch candidates."
   (interactive)
   (avy-with avy-isearch
-    (let ((avy-background nil))
+    (let ((avy-background nil)
+          (avy-case-fold-search case-fold-search))
       (avy-process
        (avy--regex-candidates (if isearch-regexp
                                   isearch-string
