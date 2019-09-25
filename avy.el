@@ -1351,11 +1351,12 @@ When ARG is non-nil, do the opposite of `avy-all-windows'."
   (avy-with avy-isearch
     (let ((avy-background nil)
           (avy-case-fold-search case-fold-search))
-      (avy-process
-       (avy--regex-candidates (if isearch-regexp
-                                  isearch-string
-                                (regexp-quote isearch-string))))
-      (isearch-done))))
+      (prog1
+          (avy-process
+           (avy--regex-candidates (if isearch-regexp
+                                      isearch-string
+                                    (regexp-quote isearch-string))))
+        (isearch-done)))))
 
 ;;;###autoload
 (defun avy-goto-word-0 (arg &optional beg end)
