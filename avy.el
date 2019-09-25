@@ -863,7 +863,7 @@ multiple OVERLAY-FN invocations."
         (res (avy--process-1 candidates overlay-fn cleanup-fn)))
     (cond
       ((null res)
-       (if (eq avy-style 'words)
+       (if (and (eq avy-style 'words) candidates)
            (avy-process original-cands overlay-fn cleanup-fn)
          (message "zero candidates")
          t))
