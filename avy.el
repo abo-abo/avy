@@ -655,7 +655,7 @@ Commands using `avy-with' macro can be resumed."
 
 (defmacro avy-with (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY.
-Set `avy-style' according to COMMMAND as well."
+Set `avy-style' according to COMMAND as well."
   (declare (indent 1)
            (debug (form body)))
   `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
