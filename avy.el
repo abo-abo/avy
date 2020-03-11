@@ -1746,7 +1746,7 @@ Otherwise, forward to `goto-line' with ARG."
                         (forward-line (1- (string-to-number line))))
                       (throw 'done 'exit))))))
              (r (avy--line (eq arg 4))))
-        (when (and (not (eq r t)) (eq avy-action #'identity))
+        (when (and (not (memq r '(t nil))) (eq avy-action #'identity))
           (avy-action-goto r))))))
 
 ;;;###autoload
