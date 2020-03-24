@@ -192,6 +192,7 @@ If the commands isn't on the list, `avy-style' is used."
     (?m . avy-action-mark)
     (?n . avy-action-copy)
     (?y . avy-action-yank)
+    (?Y . avy-action-yank-line)
     (?i . avy-action-ispell)
     (?z . avy-action-zap-to-char))
   "List of actions for `avy-handler-default'.
@@ -712,6 +713,11 @@ Set `avy-style' according to COMMAND as well."
   (avy-action-copy pt)
   (yank)
   t)
+
+(defun avy-action-yank-line (pt)
+  "Yank sexp starting at PT at the current point."
+  (let ((avy-command 'avy-goto-line))
+    (avy-action-yank pt)))
 
 (defun avy-action-kill-move (pt)
   "Kill sexp at PT and move there."
