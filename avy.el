@@ -1612,9 +1612,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
                            (point)))
                        (selected-window)) candidates))
               (if visual-line-mode
-                  (progn
-                    (setq temporary-goal-column 0)
-                    (line-move-visual 1 t))
+                  (line-move-visual 1 t)
                 (forward-line 1)))))))
     (if bottom-up
         candidates
