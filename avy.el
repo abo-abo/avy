@@ -1,6 +1,6 @@
 ;;; avy.el --- Jump to arbitrary positions in visible text and select text quickly. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015-2019  Free Software Foundation, Inc.
+;; Copyright (C) 2015-2020  Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/avy
@@ -255,6 +255,10 @@ character read.  The default represents `C-h' and `DEL'.  See
 `event-convert-list'."
   :type 'list)
 
+(defcustom avy-escape-chars '(?\e ?\C-g)
+  "List of characters that quit avy during `read-char'."
+  :type 'list)
+
 (defvar avy-ring (make-ring 20)
   "Hold the window and point history.")
 
@@ -455,7 +459,7 @@ KEYS is the path from the root of `avy-tree' to LEAF."
            (unless (eq avy-style 'words)
              (setq avy-action (cdr dispatch)))
            (throw 'done 'restart))
-          ((memq char '(?\e ?\C-g))
+          ((memq char avy-escape-chars)
            ;; exit silently
            (throw 'done 'abort))
           ((eq char ??)
