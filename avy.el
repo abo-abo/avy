@@ -1068,19 +1068,22 @@ Do this even when the char is terminating."
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
-  (let* ((path (mapcar #'avy--key-to-char path))
-         (str (propertize (apply #'string (reverse path))
-                          'face 'avy-lead-face)))
-    (when (or avy-highlight-first (> (length str) 1))
-      (set-text-properties 0 1 '(face avy-lead-face-0) str))
-    (setq str (concat
-               (propertize avy-current-path
-                           'face 'avy-lead-face-1)
-               str))
-    (avy--overlay
-     str
-     (avy-candidate-beg leaf) nil
-     (avy-candidate-wnd leaf))))
+  (if (with-selected-window (cdr leaf)
+        (bound-and-true-p visual-line-mode))
+      (avy--overlay-at-full path leaf)
+    (let* ((path (mapcar #'avy--key-to-char path))
+           (str (propertize (apply #'string (reverse path))
+                            'face 'avy-lead-face)))
+      (when (or avy-highlight-first (> (length str) 1))
+        (set-text-properties 0 1 '(face avy-lead-face-0) str))
+      (setq str (concat
+                 (propertize avy-current-path
+                             'face 'avy-lead-face-1)
+                 str))
+      (avy--overlay
+       str
+       (avy-candidate-beg leaf) nil
+       (avy-candidate-wnd leaf)))))
 
 (defun avy--overlay-at (path leaf)
   "Create an overlay with PATH at LEAF.
