@@ -856,6 +856,7 @@ Set `avy-style' according to COMMAND as well."
      (when (< pos (1- (length lst)))
        (goto-char (caar (nth (1+ pos) lst)))))))
 
+;;;###autoload
 (defun avy-process (candidates &optional overlay-fn cleanup-fn)
   "Select one of CANDIDATES using `avy-read'.
 Use OVERLAY-FN to visualize the decision overlay.
