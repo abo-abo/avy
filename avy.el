@@ -388,7 +388,10 @@ SEQ-LEN is how many elements of KEYS it takes to identify a match."
     (nreverse path-alist)))
 
 (defun avy-order-closest (x)
-  (abs (- (caar x) (point))))
+  (abs (- (if (numberp (car x))
+              (car x)
+            (caar x))
+          (point))))
 
 (defvar avy-command nil
   "Store the current command symbol.
