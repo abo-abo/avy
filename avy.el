@@ -2176,6 +2176,22 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
       (error
        (set-mark-command 4)))))
 
+;;;###autoload
+(defun avy-swap-lines ()
+  "Transpose lines in the active region."
+  (interactive)
+  (when (and (use-region-p) (> (count-lines (region-beginning) (region-end)) 1))
+    (let ((avy-all-windows nil)
+          (fst-line-point (avy--line nil (region-beginning) (region-end))))
+      (when fst-line-point
+        (let ((snd-line-point (avy--line nil (region-beginning) (region-end))))
+          (when snd-line-point
+            (save-mark-and-excursion
+              (push-mark fst-line-point)
+              (goto-char snd-line-point)
+              (transpose-lines 0))
+            (avy-swap-lines)))))))
+
 ;; ** Org-mode
 (defvar org-reverse-note-order)
 (declare-function org-refile "org")
