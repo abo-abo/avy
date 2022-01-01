@@ -1,3 +1,4 @@
+[![GNU ELPA](https://elpa.gnu.org/packages/avy.svg)](https://elpa.gnu.org/packages/avy.html)
 [![MELPA](https://melpa.org/packages/avy-badge.svg)](https://melpa.org/#/avy)
 [![MELPA Stable](https://stable.melpa.org/packages/avy-badge.svg)](https://stable.melpa.org/#/avy)
 
