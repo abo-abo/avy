@@ -494,8 +494,8 @@ KEYS is the path from the root of `avy-tree' to LEAF."
   "Store the current incomplete path during `avy-read'.")
 
 (defun avy-mouse-event-window (char)
-  "If CHAR is a mouse event, return the window of the event if any or the selected window.
-Return nil if not a mouse event."
+  "Return the window of mouse event CHAR if any or the selected window.
+Return nil if CHAR is not a mouse event."
   (when (mouse-event-p char)
     (cond ((windowp (posn-window (event-start char)))
            (posn-window (event-start char)))
@@ -1605,7 +1605,8 @@ Which one depends on variable `subword-mode'."
 (defvar visual-line-mode)
 
 (defcustom avy-indent-line-overlay nil
-  "When non-nil, `avy-goto-line' will display the line overlay next to the first non-whitespace character of each line."
+  "When non-nil, display line overlay next to the first non-whitespace character.
+This affects `avy-goto-line'."
   :type 'boolean)
 
 (defun avy--line-cands (&optional arg beg end bottom-up)
