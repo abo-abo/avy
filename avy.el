@@ -405,7 +405,9 @@ KEYS are placed appropriately on internal nodes."
          (order-fn (cdr (assq avy-command avy-orders-alist)))
          (lst (if order-fn
                   (cl-sort lst #'< :key order-fn)
-                lst)))
+                (if (string-match-p "above" (symbol-name this-command))
+		    (nreverse lst)
+		  lst))))
     (cl-labels
         ((rd (ls)
            (let ((ln (length ls)))
