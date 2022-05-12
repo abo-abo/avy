@@ -207,7 +207,13 @@ pressed during the dispatch, ACTION is set to replace the default
                  (const :tag "Mark" avy-action-mark)
                  (const :tag "Copy" avy-action-copy)
                  (const :tag "Kill and move point" avy-action-kill-move)
-                 (const :tag "Kill" avy-action-kill-stay))))
+                 (const :tag "Kill" avy-action-kill-stay)
+		 (const :tag "Teleport" avy-action-teleport)
+		 (const :tag "Yank" avy-action-yank)
+		 (const :tag "Yank line" avy-action-yank-line)
+		 (const :tag "Ispell" avy-action-ispell)
+		 (const :tag "Zap to char" avy-action-zap-to-char)
+		 (function :tag "Custom function"))))
 
 (defcustom avy-background nil
   "When non-nil, a gray background will be added during the selection."
@@ -1330,9 +1336,11 @@ BEG and END narrow the scope where candidates are searched."
                               c2)))
                      current-prefix-arg
                      nil nil))
-  (when (eq char1 ?)
+  (when (eq char1 ?
+)
     (setq char1 ?\n))
-  (when (eq char2 ?)
+  (when (eq char2 ?
+)
     (setq char2 ?\n))
   (avy-with avy-goto-char-2
     (avy-jump
