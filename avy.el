@@ -208,12 +208,12 @@ pressed during the dispatch, ACTION is set to replace the default
                  (const :tag "Copy" avy-action-copy)
                  (const :tag "Kill and move point" avy-action-kill-move)
                  (const :tag "Kill" avy-action-kill-stay)
-		 (const :tag "Teleport" avy-action-teleport)
-		 (const :tag "Yank" avy-action-yank)
-		 (const :tag "Yank line" avy-action-yank-line)
-		 (const :tag "Ispell" avy-action-ispell)
-		 (const :tag "Zap to char" avy-action-zap-to-char)
-		 (function :tag "Custom function"))))
+                 (const :tag "Teleport" avy-action-teleport)
+                 (const :tag "Yank" avy-action-yank)
+                 (const :tag "Yank line" avy-action-yank-line)
+                 (const :tag "Ispell" avy-action-ispell)
+                 (const :tag "Zap to char" avy-action-zap-to-char)
+                 (function :tag "Custom function"))))
 
 (defcustom avy-background nil
   "When non-nil, a gray background will be added during the selection."
