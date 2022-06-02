@@ -1015,10 +1015,11 @@ COMPOSE-FN is a lambda that concatenates the old string at BEG with STR."
              (os-line-prefix (get-text-property 0 'line-prefix old-str))
              (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str))
              other-ol)
-        (when os-line-prefix
-          (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
-        (when os-wrap-prefix
-          (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
+        (unless (= (length str) 0)
+          (when os-line-prefix
+            (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
+          (when os-wrap-prefix
+            (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str)))
         (when (setq other-ol (cl-find-if
                               (lambda (o) (overlay-get o 'goto-address))
                               (overlays-at beg)))
@@ -1787,7 +1788,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
   (let* ((avy-all-windows nil)
          (r (avy--line nil (window-start)
                        (line-beginning-position (or offset 1))
-		       bottom-up)))
+                       bottom-up)))
     (unless (eq r t)
       (avy-action-goto r))))
 
@@ -1804,7 +1805,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
          (r (avy--line
              nil (line-beginning-position (or offset 2))
              (window-end (selected-window) t)
-	     bottom-up)))
+             bottom-up)))
     (unless (eq r t)
       (avy-action-goto r))))
 
