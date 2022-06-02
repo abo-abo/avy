@@ -1019,10 +1019,11 @@ COMPOSE-FN is a lambda that concatenates the old string at BEG with STR."
              (os-line-prefix (get-text-property 0 'line-prefix old-str))
              (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str))
              other-ol)
-        (when os-line-prefix
-          (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
-        (when os-wrap-prefix
-          (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
+        (unless (= (length str) 0)
+          (when os-line-prefix
+            (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
+          (when os-wrap-prefix
+            (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str)))
         (when (setq other-ol (cl-find-if
                               (lambda (o) (overlay-get o 'goto-address))
                               (overlays-at beg)))
