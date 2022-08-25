@@ -455,6 +455,9 @@ KEYS is the path from the root of `avy-tree' to LEAF."
 (defvar avy-action nil
   "Function to call at the end of select.")
 
+(defvar avy-action-oneshot nil
+  "Function to call once at the end of select.")
+
 (defun avy-handler-default (char)
   "The default handler for a bad CHAR."
   (let (dispatch)
@@ -890,10 +893,12 @@ multiple OVERLAY-FN invocations."
       (t
        (funcall avy-pre-action res)
        (setq res (car res))
-       (funcall (or avy-action 'avy-action-goto)
-                (if (consp res)
-                    (car res)
-                  res))
+       (let ((action (or avy-action avy-action-oneshot 'avy-action-goto)))
+         (setq avy-action-oneshot nil)
+         (funcall action
+                  (if (consp res)
+                      (car res)
+                    res)))
        res))))
 
 (define-obsolete-function-alias 'avy--process 'avy-process
