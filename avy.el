@@ -894,7 +894,6 @@ multiple OVERLAY-FN invocations."
        (funcall avy-pre-action res)
        (setq res (car res))
        (let ((action (or avy-action avy-action-oneshot 'avy-action-goto)))
-         (setq avy-action-oneshot nil)
          (funcall action
                   (if (consp res)
                       (car res)
