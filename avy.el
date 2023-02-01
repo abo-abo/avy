@@ -913,7 +913,7 @@ multiple OVERLAY-FN invocations."
           (mapcar (lambda (w)
                     (let ((ol (make-overlay
                                (window-start w)
-                               (window-end w)
+                               (window-end w t)
                                (window-buffer w))))
                       (overlay-put ol 'face 'avy-background-face)
                       (overlay-put ol 'window w)
@@ -1335,9 +1335,11 @@ BEG and END narrow the scope where candidates are searched."
                               c2)))
                      current-prefix-arg
                      nil nil))
-  (when (eq char1 ?)
+  (when (eq char1 ?
+)
     (setq char1 ?\n))
-  (when (eq char2 ?)
+  (when (eq char2 ?
+)
     (setq char2 ?\n))
   (avy-with avy-goto-char-2
     (avy-jump
