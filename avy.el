@@ -395,7 +395,7 @@ SEQ-LEN is how many elements of KEYS it takes to identify a match."
 
 (defvar avy-command nil
   "Store the current command symbol.
-E.g. 'avy-goto-line or 'avy-goto-char.")
+E.g. `avy-goto-line' or `avy-goto-char'.")
 
 (defun avy-tree (lst keys)
   "Coerce LST into a balanced tree.
@@ -933,14 +933,14 @@ multiple OVERLAY-FN invocations."
         (null (assoc invisible buffer-invisibility-spec)))))
 
 (defun avy--next-visible-point ()
-  "Return the next closest point without 'invisible property."
+  "Return the next closest point without `invisible' property."
   (let ((s (point)))
     (while (and (not (= (point-max) (setq s (next-char-property-change s))))
                 (not (avy--visible-p s))))
     s))
 
 (defun avy--next-invisible-point ()
-  "Return the next closest point with 'invisible property."
+  "Return the next closest point with `invisible' property."
   (let ((s (point)))
     (while (and (not (= (point-max) (setq s (next-char-property-change s))))
                 (avy--visible-p s)))
