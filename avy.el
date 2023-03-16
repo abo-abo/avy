@@ -1664,6 +1664,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
 (defvar linum-overlays)
 (defvar linum-format)
 (declare-function linum--face-width "linum")
+(declare-function linum-mode "linum")
 
 (define-minor-mode avy-linum-mode
   "Minor mode that uses avy hints for `linum-mode'."
