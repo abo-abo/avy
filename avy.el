@@ -838,11 +838,11 @@ Set `avy-style' according to COMMAND as well."
            avy-last-candidates))
          (min-dist
           (apply #'min
-                 (mapcar (lambda (x) (abs (- (caar x) (point)))) avy-last-candidates)))
+                 (mapcar (lambda (x) (abs (- (if (listp (car x)) (caar x) (car x)) (point)))) avy-last-candidates)))
          (pos
           (cl-position-if
            (lambda (x)
-             (= (- (caar x) (point)) min-dist))
+             (= (- (if (listp (car x)) (caar x) (car x)) (point)) min-dist))
            avy-last-candidates)))
     (funcall advancer pos avy-last-candidates)))
 
@@ -852,7 +852,8 @@ Set `avy-style' according to COMMAND as well."
   (avy--last-candidates-cycle
    (lambda (pos lst)
      (when (> pos 0)
-       (goto-char (caar (nth (1- pos) lst)))))))
+       (let ((candidate (nth (1- pos) lst)))
+         (goto-char (if (listp (car candidate)) (caar candidate) (car candidate))))))))
 
 (defun avy-next ()
   "Go to the next candidate of the last `avy-read'."
@@ -860,7 +861,8 @@ Set `avy-style' according to COMMAND as well."
   (avy--last-candidates-cycle
    (lambda (pos lst)
      (when (< pos (1- (length lst)))
-       (goto-char (caar (nth (1+ pos) lst)))))))
+       (let ((candidate (nth (1+ pos) lst)))
+         (goto-char (if (listp (car candidate)) (caar candidate) (car candidate))))))))
 
 ;;;###autoload
 (defun avy-process (candidates &optional overlay-fn cleanup-fn)
