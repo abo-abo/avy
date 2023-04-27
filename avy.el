@@ -1105,9 +1105,10 @@ LEAF is normally ((BEG . END) . WND)."
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
   (let* ((path (mapcar #'avy--key-to-char path))
+         (face-index (- (length path) 1))
          (str (propertize
                (string (car (last path)))
-               'face 'avy-lead-face)))
+               'face (nth face-index avy-lead-faces))))
     (avy--overlay
      str
      (avy-candidate-beg leaf) nil
