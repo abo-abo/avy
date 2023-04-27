@@ -2109,8 +2109,10 @@ Otherwise, the whole regex is highlighted."
                ;; Handle ESC
                ((= char 27)
                 (keyboard-quit))
+               ((characterp char)
+                (setq avy-text (concat avy-text (list char))))
                (t
-                (setq avy-text (concat avy-text (list char)))))
+                (message "Not a valid character.")))
              ;; Highlight
              (when (>= (length avy-text) 1)
                (let ((case-fold-search
