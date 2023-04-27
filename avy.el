@@ -1337,9 +1337,11 @@ BEG and END narrow the scope where candidates are searched."
                               c2)))
                      current-prefix-arg
                      nil nil))
-  (when (eq char1 ?)
+  (when (eq char1 ?
+)
     (setq char1 ?\n))
-  (when (eq char2 ?)
+  (when (eq char2 ?
+)
     (setq char2 ?\n))
   (avy-with avy-goto-char-2
     (avy-jump
@@ -1796,7 +1798,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
          (r (avy--line nil (window-start)
                        (line-beginning-position (or offset 1))
 		       bottom-up)))
-    (unless (eq r t)
+    (unless (memq r '(t nil))
       (avy-action-goto r))))
 
 ;;;###autoload
@@ -1813,7 +1815,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
              nil (line-beginning-position (or offset 2))
              (window-end (selected-window) t)
 	     bottom-up)))
-    (unless (eq r t)
+    (unless (memq r '(t nil))
       (avy-action-goto r))))
 
 (defcustom avy-line-insert-style 'above
