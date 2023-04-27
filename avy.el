@@ -149,6 +149,7 @@ They do not have to be sorted but no word should be a prefix of another one."
 Use `avy-styles-alist' to customize this per-command."
   :type '(choice
           (const :tag "Pre" pre)
+          (const :tag "Pre At" pre-at)
           (const :tag "At" at)
           (const :tag "At Full" at-full)
           (const :tag "Post" post)
@@ -179,6 +180,7 @@ If the commands isn't on the list, `avy-style' is used."
                      (function :tag "Other command"))
           :value-type (choice
                        (const :tag "Pre" pre)
+                       (const :tag "Pre At" pre-at)
                        (const :tag "At" at)
                        (const :tag "At Full" at-full)
                        (const :tag "Post" post)
@@ -1100,6 +1102,19 @@ LEAF is normally ((BEG . END) . WND)."
        (avy-candidate-beg leaf) nil
        (avy-candidate-wnd leaf)))))
 
+(defun avy--overlay-pre-at (path leaf)
+  "Create an overlay with PATH at LEAF.
+PATH is a list of keys from tree root to LEAF.
+LEAF is normally ((BEG . END) . WND)."
+  (let* ((path (mapcar #'avy--key-to-char path))
+         (str (propertize
+               (string (car (last path)))
+               'face 'avy-lead-face)))
+    (avy--overlay
+     str
+     (avy-candidate-beg leaf) nil
+     (avy-candidate-wnd leaf))))
+
 (defun avy--overlay-at (path leaf)
   "Create an overlay with PATH at LEAF.
 PATH is a list of keys from tree root to LEAF.
@@ -1255,6 +1270,7 @@ exist."
   "Transform STYLE symbol to a style function."
   (cl-case style
     (pre #'avy--overlay-pre)
+    (pre-at #'avy--overlay-pre-at)
     (at #'avy--overlay-at)
     (at-full 'avy--overlay-at-full)
     (post #'avy--overlay-post)
