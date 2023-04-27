@@ -1613,7 +1613,14 @@ Which one depends on variable `subword-mode'."
 
 (defcustom avy-indent-line-overlay nil
   "When non-nil, display line overlay next to the first non-whitespace character.
-This affects `avy-goto-line'."
+This affects `avy-goto-line' and overrides `avy-column-line-overlay'."
+  :type 'boolean)
+
+(defcustom avy-column-line-overlay nil
+  "When non-nil, display line overlay in same column as cursor.
+Overlay displays at end-of-line on lines that don't reach column.
+This affects `avy-goto-line' but has no effect if `avy-indent-line-overlay' is
+non-nil."
   :type 'boolean)
 
 (defun avy--line-cands (&optional arg beg end bottom-up)
@@ -1624,7 +1631,8 @@ BEG and END narrow the scope where candidates are searched.
 When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
   (let (candidates)
     (avy-dowindows arg
-      (let ((ws (or beg (window-start))))
+      (let ((ws (or beg (window-start)))
+            (col (current-column)))
         (save-excursion
           (save-restriction
             (narrow-to-region ws (or end (window-end (selected-window) t)))
@@ -1636,8 +1644,12 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
                        (if (eq avy-style 'post)
                            (line-end-position)
                          (save-excursion
-                           (when avy-indent-line-overlay
+                           (cond
+                            (avy-indent-line-overlay
                              (skip-chars-forward " \t"))
+                            (avy-column-line-overlay
+                             (move-to-column col))
+                            (t (ignore)))
                            (point)))
                        (selected-window)) candidates))
               (if visual-line-mode
