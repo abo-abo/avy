@@ -1308,6 +1308,28 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
      :window-flip arg)))
 
 ;;;###autoload
+(defun avy-goto-char-above (char &optional arg)
+  "Jump to the currently visible CHAR in above.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
+  (interactive (list (read-char "char: " t)))
+  (avy-with avy-goto-char
+    (avy-jump
+     (regexp-quote (string char))
+     :beg (window-start)
+     :end (point))))
+
+;;;###autoload
+(defun avy-goto-char-below (char &optional arg)
+  "Jump to the currently visible CHAR in below.
+The window scope is determined by `avy-all-windows' (ARG negates it)."
+  (interactive (list (read-char "char: " t)))
+  (avy-with avy-goto-char
+    (avy-jump
+     (regexp-quote (string char))
+     :beg (point)
+     :end (window-end (selected-window) t))))
+
+;;;###autoload
 (defun avy-goto-char-in-line (char)
   "Jump to the currently visible CHAR in the current line."
   (interactive (list (read-char "char: " t)))
