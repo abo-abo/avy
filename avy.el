@@ -221,6 +221,11 @@ pressed during the dispatch, ACTION is set to replace the default
     (const :tag "This Frame" t)
     (const :tag "This Window" nil)))
 
+(defvar avy-frame-list-function #'frame-list
+  "Function to get the list of current frames.
+This is used when `avy-all-windows' is set to `all-frames'.
+Sensible options include `frame-list' and `visible-frame-list'")
+
 (defcustom avy-case-fold-search t
   "Non-nil if searches should ignore case."
   :type 'boolean)
@@ -629,7 +634,7 @@ multiple DISPLAY-FN invocations."
 (defun avy-window-list ()
   "Return a list of windows depending on `avy-all-windows'."
   (cond ((eq avy-all-windows 'all-frames)
-         (cl-mapcan #'window-list (frame-list)))
+         (cl-mapcan #'window-list (funcall avy-frame-list-function)))
 
         ((eq avy-all-windows t)
          (window-list))
