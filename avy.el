@@ -1084,7 +1084,7 @@ Do this even when the char is terminating."
 PATH is a list of keys from tree root to LEAF.
 LEAF is normally ((BEG . END) . WND)."
   (if (with-selected-window (cdr leaf)
-        (bound-and-true-p visual-line-mode))
+        (and (bound-and-true-p visual-line-mode) (not (bound-and-true-p avy-linum-mode))))
       (avy--overlay-at-full path leaf)
     (let* ((path (mapcar #'avy--key-to-char path))
            (str (propertize (apply #'string (reverse path))
@@ -1146,7 +1146,7 @@ LEAF is normally ((BEG . END) . WND)."
     (with-selected-window wnd
       (save-excursion
         (goto-char beg)
-        (let* ((lep (if (bound-and-true-p visual-line-mode)
+        (let* ((lep (if (and (bound-and-true-p visual-line-mode) (not (bound-and-true-p avy-linum-mode)))
                         (save-excursion
                           (end-of-visual-line)
                           (point))
@@ -1166,6 +1166,7 @@ LEAF is normally ((BEG . END) . WND)."
                                 len))
                            lep)))
           (when (and (bound-and-true-p visual-line-mode)
+                     (not (bound-and-true-p avy-linum-mode))
                      (> len (- end beg))
                      (not (eq lep beg)))
             (setq len (- end beg))
@@ -1640,7 +1641,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
                              (skip-chars-forward " \t"))
                            (point)))
                        (selected-window)) candidates))
-              (if visual-line-mode
+              (if (and (bound-and-true-p visual-line-mode) (not (bound-and-true-p avy-linum-mode)))
                   (line-move-visual 1 t)
                 (forward-line 1)))))))
     (if bottom-up
