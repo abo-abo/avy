@@ -928,11 +928,13 @@ multiple OVERLAY-FN invocations."
   (setq avy--overlays-back nil)
   (avy--remove-leading-chars))
 
+;; check for invisibility was taken from the Emacs function count-lines
 (defun avy--visible-p (s)
-  (let ((invisible (get-char-property s 'invisible)))
-    (or (null invisible)
-        (eq t buffer-invisibility-spec)
-        (null (assoc invisible buffer-invisibility-spec)))))
+  (let ((prop (get-char-property s 'invisible)))
+    (not (if (eq buffer-invisibility-spec t)
+             prop
+           (or (memq prop buffer-invisibility-spec)
+               (assq prop buffer-invisibility-spec))))))
 
 (defun avy--next-visible-point ()
   "Return the next closest point without `invisible' property."
