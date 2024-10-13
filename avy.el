@@ -2004,7 +2004,7 @@ selected line.  If ARG is negative, kill backward.
 If ARG is zero, kill the selected line but exclude the trailing
 newline.
 
-\\[universal-argument] 3 \\[avy-kil-whole-line] kill three lines
+\\[universal-argument] 3 \\[avy-kill-whole-line] kill three lines
 starting from the selected line.  \\[universal-argument] -3
 
 \\[avy-kill-whole-line] kill three lines backward including the
